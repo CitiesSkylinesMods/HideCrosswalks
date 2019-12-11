@@ -26,7 +26,7 @@ namespace HideTMPECrosswalks.Utils {
         public static bool HasCrossingBan(ushort segmentID, ushort nodeID) {
             if (!tmpeDetected)
                 return true;
-            bool bStartNode = nodeID == Segment(segmentID).m_startNode;
+            bool bStartNode = nodeID == segmentID.ToSegment().m_startNode;
             CSUtil.Commons.TernaryBool b = TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.GetPedestrianCrossingAllowed(segmentID, bStartNode);
             return b == CSUtil.Commons.TernaryBool.False;
         }

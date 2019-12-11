@@ -6,7 +6,6 @@ using HideTMPECrosswalks.Utils;
 using System.Reflection;
 
 namespace HideTMPECrosswalks.Patch {
-    using static Extensions;
 
     public class NetNodeDetours {
         public static Hashtable NodeMaterialTable = new Hashtable(100);
@@ -25,7 +24,7 @@ namespace HideTMPECrosswalks.Patch {
         }
 
         private static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
-            return Node(nodeID).Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
+            return nodeID.ToNode().Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
         }
 
         // extra arguments passed for flexibality of future use.
@@ -39,7 +38,7 @@ namespace HideTMPECrosswalks.Patch {
 
         // Token: 0x06003336 RID: 13110 RVA: 0x0022825C File Offset: 0x0022665C
         public void RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, NetNode.Flags flags, ref uint instanceIndex, ref RenderManager.Instance data) {
-            ref NetNode thisNode = ref Node(nodeID);
+            ref NetNode thisNode = ref nodeID.ToNode();
             if (data.m_dirty) {
                 data.m_dirty = false;
                 if (iter == 0) {
@@ -168,11 +167,12 @@ namespace HideTMPECrosswalks.Patch {
                                         }
                                         NetManager netManager2 = instance2;
                                         netManager2.m_drawCallData.m_defaultCalls = netManager2.m_drawCallData.m_defaultCalls + 1;
-
+                                        // MODIFICATION
                                         Material material= node.m_nodeMaterial;
                                         if (bHideCrossing) {
                                             material = HideCrossing(material);
                                         }
+                                        //END MODIFICATION
                                         Graphics.DrawMesh(node.m_nodeMesh, data.m_position, data.m_rotation, material, node.m_layer, null, 0, instance2.m_materialBlock);
                                     } else {
                                         NetInfo.LodValue combinedLod2 = node.m_combinedLod;
@@ -432,14 +432,14 @@ namespace HideTMPECrosswalks.Patch {
         }
 
         private void RefreshJunctionData(ushort nodeID, NetInfo info, uint instanceIndex) {
-            NetNode thisNode = Node(nodeID);
+            NetNode thisNode = nodeID.ToNode();
             object[] args = new object[] { nodeID, info, instanceIndex };
             //Debug.Log("invoking NetNode :: " + method_RefreshJunctionData);
             method_RefreshJunctionData.Invoke(thisNode, args);
         }
 
         private void RefreshBendData(ushort nodeID, NetInfo info, uint instanceIndex, ref RenderManager.Instance data) {
-            NetNode thisNode = Node(nodeID);
+            NetNode thisNode = nodeID.ToNode();
             object[] args = new object[] { nodeID, info, instanceIndex, data };
             //Debug.Log("invoking NetNode :: " + method_RefreshBendData);
             method_RefreshBendData.Invoke(thisNode, args);
@@ -447,7 +447,7 @@ namespace HideTMPECrosswalks.Patch {
         }
 
         private void RefreshEndData(ushort nodeID, NetInfo info, uint instanceIndex, ref RenderManager.Instance data) {
-            NetNode thisNode = Node(nodeID);
+            NetNode thisNode = nodeID.ToNode();
             object[] args = new object[] { nodeID, info, instanceIndex, data };
             //Debug.Log("invoking NetNode :: " + method_RefreshEndData);
             method_RefreshEndData.Invoke(thisNode, args);
