@@ -12,7 +12,6 @@ namespace HideTMPECrosswalks.Patch {
         public Hook() {
             NetNodeDetours.Init();
             hooks.Add(new RenderInstance());
-            //hooks.Add(new RenderLod());
         }
 
         public static void Create() => instance = new Hook();
@@ -42,13 +41,5 @@ namespace HideTMPECrosswalks.Patch {
             public override MethodInfo From => typeof(NetNode).GetMethod("RenderInstance", flags);
             public override MethodInfo To => typeof(NetNodeDetours).GetMethod("RenderInstance");
         }
-
-        public class RenderLod : HookBase {
-            public override MethodInfo From => typeof(NetNode).GetMethod("RenderLod");
-            public override MethodInfo To => typeof(NetNodeDetours).GetMethod("RenderLod");
-        }
-
-
-
     } // end class Hook
 }

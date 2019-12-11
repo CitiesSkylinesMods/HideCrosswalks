@@ -2,11 +2,12 @@ using System;
 using ColossalFramework;
 using System.Collections;
 using UnityEngine;
-using static HideTMPECrosswalks.Utils.ShortCuts;
 using HideTMPECrosswalks.Utils;
 using System.Reflection;
 
 namespace HideTMPECrosswalks.Patch {
+    using static Extensions;
+
     public class NetNodeDetours {
         public static Hashtable NodeMaterialTable = new Hashtable(100);
 
