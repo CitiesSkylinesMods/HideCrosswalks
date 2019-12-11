@@ -69,6 +69,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LoadingExtension.cs" />
     <Compile Include="Patches\Hook.cs" />
     <Compile Include="Patches\HookBase.cs" />
     <Compile Include="KianMod.cs" />

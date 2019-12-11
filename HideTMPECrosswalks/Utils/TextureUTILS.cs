@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 namespace HideTMPECrosswalks.Utils {
     public static class TextureUtils {
         public static void Flip(Material material, string name) {
