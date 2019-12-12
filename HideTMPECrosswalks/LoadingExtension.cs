@@ -9,8 +9,7 @@ namespace HideTMPECrosswalks {
         }
         public override void OnCreated(ILoading loading) {
             base.OnCreated(loading);
-            Utils.TMPEUTILS.Init();
-            if (Utils.TMPEUTILS.tmpeDetected) {
+            if (Utils.TMPEUTILS.Init()) {
                 Hook.Create();
                 Hook.HookAll();
             }

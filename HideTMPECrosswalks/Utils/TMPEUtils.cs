@@ -13,7 +13,7 @@ namespace HideTMPECrosswalks.Utils {
         public static bool tmpeDetected = false;
         public static readonly UInt64[] TMPE_IDs = { 583429740, 1637663252, 1806963141 };
 
-        public static void Init() {
+        public static bool Init() {
             tmpeDetected = false;
             foreach (PluginManager.PluginInfo current in PluginManager.instance.GetPluginsInfo()) {
                 if (!tmpeDetected && current.isEnabled && (current.name.Contains("TrafficManager") || TMPE_IDs.Contains(current.publishedFileID.AsUInt64))) {
@@ -24,6 +24,7 @@ namespace HideTMPECrosswalks.Utils {
                 Debug.Log("Found TMPE!");
             else
                 Debug.LogError("TMPE  not found!");
+            return tmpeDetected;
         }
 
         public static bool HasCrossingBan(ushort segmentID, ushort nodeID) {
