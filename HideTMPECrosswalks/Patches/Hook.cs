@@ -18,7 +18,6 @@ namespace HideTMPECrosswalks.Patch {
 
         public static void Release() {
             UnHookAll();
-            hooks.Clear();
             instance = null;
         }
 
@@ -33,6 +32,7 @@ namespace HideTMPECrosswalks.Patch {
             foreach (var h in hooks) {
                 h.UnHook();
             }
+            hooks.Clear();
             Debug.Log("unhooked everything");
         }
 
