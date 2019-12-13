@@ -1,6 +1,8 @@
+using Harmony;
 using ICities;
-using HideTMPECrosswalks.Patch;
-using ColossalFramework;
+using System;
+using System.Reflection;
+using UnityEngine;
 
 namespace HideTMPECrosswalks
 {
@@ -8,20 +10,29 @@ namespace HideTMPECrosswalks
         #region IUserMod
         public string Name => "Hide TMPE crosswalks";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
-        public void OnDisabled() => OnReleased();
+        public void OnEnabled() {
+        }
+        public void OnDisabled() {
+            OnReleased();
+        }
         #endregion
 
         #region LoadingExtension
+
+        HarmonyInstance Harmony = null;
         public override void OnCreated(ILoading loading) {
+            Debug.Log("OnCreate");
             base.OnCreated(loading);
             if (Utils.TMPEUTILS.Init()) {
-                Hook.Create();
-                Hook.HookAll();
+                Harmony = HarmonyInstance.Create("com.github.harmony.cities-skylines.kian.HideTMPECrosswalks"); // would creating 2 times cause an issue?
+                Debug.Log("Harmony="+ Harmony);
+                Harmony?.PatchAll(Assembly.GetExecutingAssembly());
             }
         }
 
         public override void OnReleased() {
-            Hook.Release();
+            Harmony?.UnpatchAll(); // TODO Test: Disableing a mod will call this. Does it cause an issue?
+            Harmony = null;
         }
         #endregion
     }

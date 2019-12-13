@@ -4,10 +4,12 @@ using System.Collections;
 using UnityEngine;
 using HideTMPECrosswalks.Utils;
 using System.Reflection;
+using Harmony;
 
 namespace HideTMPECrosswalks.Patch {
 
-    public class NetNodeDetours {
+    [HarmonyPatch]
+    public class NetNode_RenderInstance {
         public static Hashtable NodeMaterialTable = new Hashtable(100);
 
         public static Material HideCrossing(Material material) {
@@ -36,26 +38,36 @@ namespace HideTMPECrosswalks.Patch {
             return material;
         }
 
-        // Token: 0x06003336 RID: 13110 RVA: 0x0022825C File Offset: 0x0022665C
-        public void RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, NetNode.Flags flags, ref uint instanceIndex, ref RenderManager.Instance data) {
-            ref NetNode thisNode = ref nodeID.ToNode();
+
+        static MethodBase TargetMethod() {
+            Debug.Log("TargetMethod");
+            // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
+            var ret = typeof(global::NetNode).GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (ret == null)
+                throw new Exception("did not manage to find original function to patch" + Environment.StackTrace);
+            return ret;
+        }
+
+
+        static bool Prefix(NetNode __instance,
+            RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, NetNode.Flags flags, ref uint instanceIndex, ref RenderManager.Instance data) {
             if (data.m_dirty) {
                 data.m_dirty = false;
                 if (iter == 0) {
                     if ((flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
-                        this.RefreshJunctionData(nodeID, info, instanceIndex);
+                        RefreshJunctionData(nodeID, info, instanceIndex);
                     } else if ((flags & NetNode.Flags.Bend) != NetNode.Flags.None) {
-                        this.RefreshBendData(nodeID, info, instanceIndex, ref data);
+                        RefreshBendData(nodeID, info, instanceIndex, ref data);
                     } else if ((flags & NetNode.Flags.End) != NetNode.Flags.None) {
-                        this.RefreshEndData(nodeID, info, instanceIndex, ref data);
+                        RefreshEndData(nodeID, info, instanceIndex, ref data);
                     }
                 }
             }
             if (data.m_initialized) {
                 if ((flags & NetNode.Flags.Junction) != NetNode.Flags.None) {
                     if ((data.m_dataInt0 & 8) != 0) {
-                        ushort segment = thisNode.GetSegment(data.m_dataInt0 & 7);
-                        ushort segment2 = thisNode.GetSegment(data.m_dataInt0 >> 4);
+                        ushort segment = __instance.GetSegment(data.m_dataInt0 & 7);
+                        ushort segment2 = __instance.GetSegment(data.m_dataInt0 >> 4);
                         if (segment != 0 && segment2 != 0) {
                             NetManager instance = Singleton<NetManager>.instance;
                             info = instance.m_segments.m_buffer[(int)segment].Info;
@@ -135,7 +147,7 @@ namespace HideTMPECrosswalks.Patch {
                             }
                         }
                     } else {
-                        ushort segmentID = thisNode.GetSegment(data.m_dataInt0 & 7);
+                        ushort segmentID = __instance.GetSegment(data.m_dataInt0 & 7);
                         if (segmentID != 0) {
                             NetManager instance2 = Singleton<NetManager>.instance;
                             info = instance2.m_segments.m_buffer[(int)segmentID].Info;
@@ -267,7 +279,7 @@ namespace HideTMPECrosswalks.Patch {
                     for (int l = 0; l < info.m_segments.Length; l++) {
                         NetInfo.Segment segment4 = info.m_segments[l];
                         bool flag3;
-                        if (segment4.CheckFlags(info.m_netAI.GetBendFlags(nodeID, ref thisNode), out flag3) && !segment4.m_disableBendNodes) {
+                        if (segment4.CheckFlags(info.m_netAI.GetBendFlags(nodeID, ref __instance), out flag3) && !segment4.m_disableBendNodes) {
                             Vector4 dataVector5 = data.m_dataVector3;
                             Vector4 dataVector6 = data.m_dataVector0;
                             if (segment4.m_requireWindSpeed) {
@@ -318,8 +330,8 @@ namespace HideTMPECrosswalks.Patch {
                         }
                     }
                     for (int m = 0; m < info.m_nodes.Length; m++) {
-                        ushort segment5 = thisNode.GetSegment(data.m_dataInt0 & 7);
-                        ushort segment6 = thisNode.GetSegment(data.m_dataInt0 >> 4);
+                        ushort segment5 = __instance.GetSegment(data.m_dataInt0 & 7);
+                        ushort segment6 = __instance.GetSegment(data.m_dataInt0 >> 4);
                         if (((instance4.m_segments.m_buffer[(int)segment5].m_flags | instance4.m_segments.m_buffer[(int)segment6].m_flags) & NetSegment.Flags.Collapsed) != NetSegment.Flags.None) {
                             NetNode.Flags flags3 = flags | NetNode.Flags.Collapsed;
                         }
@@ -392,19 +404,20 @@ namespace HideTMPECrosswalks.Patch {
                 }
             }
             instanceIndex = (uint)data.m_nextInstance;
+            return false; // replace original
         }
 
         private static MethodInfo method_RefreshJunctionData;
         private static MethodInfo method_RefreshBendData;
         private static MethodInfo method_RefreshEndData;
-        public static void Init() {
+        static bool Prepare() {
             {
                 Type[] parameters = new Type[] { typeof(ushort), typeof(NetInfo), typeof(uint) };
                 BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
                 method_RefreshJunctionData = typeof(NetNode).GetMethod("RefreshJunctionData", flags, null, parameters, null);
                 if (method_RefreshJunctionData == null) {
                     Debug.LogError("NetNodeDetours: RefreshJunctionData() failed.");
-                    return;
+                    return false;
                 } else {
                     Debug.Log("NetNodeDetours: aquired private method " + method_RefreshJunctionData);
                 }
@@ -414,7 +427,7 @@ namespace HideTMPECrosswalks.Patch {
                 method_RefreshBendData = typeof(NetNode).GetMethod("RefreshBendData", flags);
                 if (method_RefreshBendData == null) {
                     Debug.LogError("NetNodeDetours: RefreshBendData() failed.");
-                    return;
+                    return false;
                 } else {
                     Debug.Log("NetNodeDetours: aquired private method " + method_RefreshBendData);
                 }
@@ -424,21 +437,22 @@ namespace HideTMPECrosswalks.Patch {
                 method_RefreshEndData = typeof(NetNode).GetMethod("RefreshEndData", flags);
                 if (method_RefreshEndData == null) {
                     Debug.LogError("NetNodeDetours: RefreshEndData() invocation failed.");
-                    return;
+                    return false;
                 } else {
                     Debug.Log("NetNodeDetours: aquired private method " + method_RefreshEndData);
                 }
             }
+            return true;
         }
 
-        private void RefreshJunctionData(ushort nodeID, NetInfo info, uint instanceIndex) {
+        private static void RefreshJunctionData(ushort nodeID, NetInfo info, uint instanceIndex) {
             NetNode thisNode = nodeID.ToNode();
             object[] args = new object[] { nodeID, info, instanceIndex };
             //Debug.Log("invoking NetNode :: " + method_RefreshJunctionData);
             method_RefreshJunctionData.Invoke(thisNode, args);
         }
 
-        private void RefreshBendData(ushort nodeID, NetInfo info, uint instanceIndex, ref RenderManager.Instance data) {
+        private static  void RefreshBendData(ushort nodeID, NetInfo info, uint instanceIndex, ref RenderManager.Instance data) {
             NetNode thisNode = nodeID.ToNode();
             object[] args = new object[] { nodeID, info, instanceIndex, data };
             //Debug.Log("invoking NetNode :: " + method_RefreshBendData);
@@ -446,7 +460,7 @@ namespace HideTMPECrosswalks.Patch {
             data = (RenderManager.Instance)args[3];
         }
 
-        private void RefreshEndData(ushort nodeID, NetInfo info, uint instanceIndex, ref RenderManager.Instance data) {
+        private static void RefreshEndData(ushort nodeID, NetInfo info, uint instanceIndex, ref RenderManager.Instance data) {
             NetNode thisNode = nodeID.ToNode();
             object[] args = new object[] { nodeID, info, instanceIndex, data };
             //Debug.Log("invoking NetNode :: " + method_RefreshEndData);
