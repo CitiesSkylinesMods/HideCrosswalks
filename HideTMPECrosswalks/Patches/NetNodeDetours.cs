@@ -43,14 +43,19 @@ namespace HideTMPECrosswalks.Patch {
             Debug.Log("TargetMethod");
             // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
             var ret = typeof(global::NetNode).GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (ret == null)
-                throw new Exception("did not manage to find original function to patch" + Environment.StackTrace);
+            if (ret == null) {
+                var m = "ERRRRRRORRRRRR!!!!: did not manage to find original function to patch" + Environment.StackTrace;
+                Debug.Log(m);
+                throw new Exception(m);
+            }
+            Debug.Log("NetNode: aquired private method " + ret);
             return ret;
         }
 
-
-        static bool Prefix(NetNode __instance,
+        //static bool Prefix() { return true; }
+        public static bool Prefix(//NetNode __instance,
             RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, NetNode.Flags flags, ref uint instanceIndex, ref RenderManager.Instance data) {
+            NetNode __instance = nodeID.ToNode();
             if (data.m_dirty) {
                 data.m_dirty = false;
                 if (iter == 0) {
@@ -410,7 +415,7 @@ namespace HideTMPECrosswalks.Patch {
         private static MethodInfo method_RefreshJunctionData;
         private static MethodInfo method_RefreshBendData;
         private static MethodInfo method_RefreshEndData;
-        static bool Prepare() {
+        public static bool Init() {
             {
                 Type[] parameters = new Type[] { typeof(ushort), typeof(NetInfo), typeof(uint) };
                 BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;

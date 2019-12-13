@@ -24,7 +24,8 @@ namespace HideTMPECrosswalks
             Debug.Log("OnCreate");
             base.OnCreated(loading);
             if (Utils.TMPEUTILS.Init()) {
-                Harmony = HarmonyInstance.Create("com.github.harmony.cities-skylines.kian.HideTMPECrosswalks"); // would creating 2 times cause an issue?
+                Patch.NetNode_RenderInstance.Init();
+                Harmony = HarmonyInstance.Create("CS.kian.HideTMPECrosswalks"); // would creating 2 times cause an issue?
                 Debug.Log("Harmony="+ Harmony);
                 Harmony?.PatchAll(Assembly.GetExecutingAssembly());
             }

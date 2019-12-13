@@ -47,9 +47,9 @@
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="CSUtil.Commons, Version=1.0.7277.11467, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="CSUtil.Commons, Version=1.0.7284.31726, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Cities-Skylines-Traffic-Manager-President-Edition\TLM\TLM\bin\Debug\CSUtil.Commons.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740\CSUtil.Commons.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -63,9 +63,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TrafficManager, Version=1.0.7277.11484, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="TrafficManager, Version=1.0.7284.31727, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Cities-Skylines-Traffic-Manager-President-Edition\TLM\TLM\bin\Debug\TrafficManager.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740\TrafficManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
