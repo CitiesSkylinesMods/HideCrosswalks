@@ -8,10 +8,13 @@ using ColossalFramework;
 namespace HideTMPECrosswalks {
     public class KianModInfo : LoadingExtensionBase, IUserMod {
         public string Name => "Test harmony";
-        public string Description => "simplest CS harmony program 2";
+        public string Description => "simplest harmony program Detour";
 
         public void OnEnabled() {
-
+            //Debug.Log("OnCreate CALLED *******************");
+            //var Harmony = HarmonyInstance.Create("CS.kian.HideTMPECrosswalks"); // would creating 2 times cause an issue?
+            //Debug.Log("Harmony=" + Harmony);
+            //Harmony?.PatchAll(Assembly.GetExecutingAssembly());
         }
         public void OnDisabled() {
 
