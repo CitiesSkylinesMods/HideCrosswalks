@@ -34,7 +34,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -49,7 +48,7 @@
     </Reference>
     <Reference Include="CSUtil.Commons, Version=1.0.7284.31726, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740\CSUtil.Commons.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740\CSUtil.Commons.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -65,17 +64,12 @@
     <Reference Include="System.Xml" />
     <Reference Include="TrafficManager, Version=1.0.7284.31727, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740\TrafficManager.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\workshop\content\255710\583429740\TrafficManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.Networking, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.Networking.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

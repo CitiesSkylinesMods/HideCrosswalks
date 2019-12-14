@@ -1,40 +1,54 @@
 using Harmony;
 using ICities;
-using System;
 using System.Reflection;
 using UnityEngine;
 
-namespace HideTMPECrosswalks
-{
-    public class KianModInfo : LoadingExtensionBase, IUserMod {
-        #region IUserMod
+namespace HideTMPECrosswalks {
+    public class KianModInfo : IUserMod {
         public string Name => "Hide TMPE crosswalks";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
+
+        static HarmonyInstance Harmony = null;
+
         public void OnEnabled() {
+            Debug.Log("Installing Harmony *******************");
+            Harmony = HarmonyInstance.Create("CS.kian.HideTMPECrosswalks"); // if created 2 times would it cause an issue?
+            Debug.Log("Harmony=" + Harmony);
+            Harmony?.PatchAll(Assembly.GetExecutingAssembly());
         }
         public void OnDisabled() {
-            OnReleased();
+            Harmony?.UnpatchAll();
+            Harmony = null;
+            //OnReleased();
         }
-        #endregion
+    }
 
-        #region LoadingExtension
+    public class LoadingExtension : LoadingExtensionBase {
 
-        HarmonyInstance Harmony = null;
         public override void OnCreated(ILoading loading) {
-            Debug.Log("OnCreate");
-            base.OnCreated(loading);
-            if (Utils.TMPEUTILS.Init()) {
-                Patch.NetNode_RenderInstance.Init();
-                Harmony = HarmonyInstance.Create("CS.kian.HideTMPECrosswalks"); // would creating 2 times cause an issue?
-                Debug.Log("Harmony="+ Harmony);
-                Harmony?.PatchAll(Assembly.GetExecutingAssembly());
-            }
+
         }
 
         public override void OnReleased() {
-            Harmony?.UnpatchAll(); // TODO Test: Disableing a mod will call this. Does it cause an issue?
-            Harmony = null;
+
         }
-        #endregion
     }
+
+    [HarmonyPatch()]
+    class harmoney_test {
+        static MethodBase TargetMethod() {
+            //	private void RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, NetNode.Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
+            Debug.Log("TargetMethod called ");
+            BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            var ret = typeof(NetNode).GetMethod("RenderInstance", flags);
+            Debug.Log("**** TargetMethod : " + ret);
+            return ret;
+        }
+
+        static bool Prefix() {
+            // do not render!
+            return false;
+        }
+    }
+
 }

@@ -8,7 +8,7 @@ using Harmony;
 
 namespace HideTMPECrosswalks.Patch {
 
-    [HarmonyPatch]
+    //[HarmonyPatch()]
     public class NetNode_RenderInstance {
         public static Hashtable NodeMaterialTable = new Hashtable(100);
 
