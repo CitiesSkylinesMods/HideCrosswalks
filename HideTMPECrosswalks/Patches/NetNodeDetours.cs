@@ -12,6 +12,8 @@ using System.Reflection.Emit;
 namespace HideTMPECrosswalks.Patch {
 
     [HarmonyPatch()]
+    //[HarmonyPriority(Priority.LowerThanNormal)]
+    //[HarmonyAfter( new string[] {"boformer.NetworkSkins"} )]
     public class NetNode_RenderInstance {
         public static Hashtable NodeMaterialTable = new Hashtable(100);
 
@@ -42,7 +44,7 @@ namespace HideTMPECrosswalks.Patch {
 
 
         // extra arguments passed for flexibality of future use.
-        //private static Material GetMaterial(ushort nodeID, ushort segmentID, ushort prefabNodeIDX, NetInfo info, bool hideCrossing ) {
+        //private static Material GetMaterial(ushort nodeID, ushort segmentID, ushort prefabNodeIDX ) {
         //    Material material = info.m_nodes[prefabNodeIDX].m_material;
         //    if (hideCrossing) {
         //        material= HideCrossing(material);
@@ -86,13 +88,13 @@ namespace HideTMPECrosswalks.Patch {
                 typeof(int),
                 typeof(MaterialPropertyBlock) };
             var mDrawMesh = typeof(Graphics).GetMethod("DrawMesh", args);
-            var fMaterial = typeof(NetInfo.Node).GetField("m_material");
+            var fNodeMaterial = typeof(NetInfo.Node).GetField("m_nodeMaterial");
             var mCalculateMaterial = typeof(NetNode_RenderInstance).GetMethod("CalculateMaterial");
             var mGetSegment = typeof(global::NetNode).GetMethod("GetSegment");
 
-            if (mCalculateMaterial == null || mDrawMesh == null || fMaterial == null || mGetSegment == null) {
+            if (mCalculateMaterial == null || mDrawMesh == null || fNodeMaterial == null || mGetSegment == null) {
                 Debug.LogError("NetNode_RenderInstance Transpiler: Necessary methods and field not found. Cancelling transpiler!");
-                Debug.LogError($"mCalculateMaterial={mCalculateMaterial} \n mDrawMesh={mDrawMesh} \n fMaterial={fMaterial} \n mGetSegment={mGetSegment}");
+                Debug.LogError($"mCalculateMaterial={mCalculateMaterial} \n mDrawMesh={mDrawMesh} \n fMaterial={fNodeMaterial} \n mGetSegment={mGetSegment}");
                 return instructions;
             }
 
@@ -114,45 +116,66 @@ namespace HideTMPECrosswalks.Patch {
                     Debug.LogError("NetNode_RenderInstance Transpiler: Did not found second call to DrawMesh()!");
                     return instructions;
                 }
+                Debug.Log("NetNode_RenderInstance Transpiler: Found DrawMesh : " + codes[index]);
             }
 
             // find ldfld node.m_material
             while (--index > 0) {
                 var code = codes[index];
-                if (code.opcode == OpCodes.Ldfld && code.operand == fMaterial)
+                if (code.opcode == OpCodes.Ldfld && code.operand == fNodeMaterial)
                     break;
             }
+            if (index == 0) {
+                Debug.Log("NetNode_RenderInstance Transpiler: Failed to find ldfld node.m_material " + codes[index]);
+            }
             var insertIndex = index + 1; // at this point material is in stack
+            Debug.Log("NetNode_RenderInstance Transpiler: Insert point after " + codes[index]);
 
-            CodeInstruction segmentLocalVarLdloc = null;
+
             // find segmentID = GetSegment(...) and build ldloc.s segmentID
+            /* IL_0594: call instance unsigned int16 NetNode::GetSegment(int32)
+             * IL_0599: stloc.s segment */
+            CodeInstruction segmentLocalVarLdloc = null;
             while (--index > 0) {
                 var code = codes[index];
                 // call instance uint16 NetNode::GetSegment(int32)
-                if (code.opcode == OpCodes.Call && code.operand == mGetSegment && TranspilerUtils.IsStLoc(codes[index + 1])) {
-                    // stloc.s segment
-                    Debug.Log("Found GetSegment");
-                    segmentLocalVarLdloc = TranspilerUtils.BuildLdLocFromStLoc(codes[index + 1]);
-                    break;
+                if (code.opcode == OpCodes.Call && code.operand == mGetSegment) {
+                    bool b = TranspilerUtils.IsStLoc(codes[index + 1]);
+                    Debug.Log($"Found GetSegment:\n{code}\n{codes[index + 1]}\nb={b}");
+                    if (b) {
+                        // stloc.s segment
+                        Debug.Log("Found GetSegment");
+                        segmentLocalVarLdloc = TranspilerUtils.BuildLdLocFromStLoc(codes[index + 1]);
+                        break;
+                    }
                 }
             }
 
-            // material = CalculateMaterial(material, nodeID, segmentID)
-            var i1 = new CodeInstruction(OpCodes.Ldarg_2); // ldarg.2 | push nodeID into the stack
-            var i2 = new CodeInstruction(OpCodes.Call, mCalculateMaterial); // call Material CalculateMaterial(material, nodeID, segmentID).
-            if (i1 == null || i2 == null || segmentLocalVarLdloc == null) {
-                Debug.LogError("NetNode_RenderInstance Transpiler: Did not manage to generate valid code!");
-                Debug.Log($"i1 {i1} \n segmentLocalVarLdloc {segmentLocalVarLdloc} \n i2 {i2} ");
-                return instructions;
-            }
+            { // Insert material = CalculateMaterial(material, nodeID, segmentID)
+                //
+                var i1 = new CodeInstruction(OpCodes.Ldarg_2); // ldarg.2 | push nodeID into the stack
+                var i2 = new CodeInstruction(OpCodes.Call, mCalculateMaterial); // call Material CalculateMaterial(material, nodeID, segmentID).
+                if (i1 == null || i2 == null || segmentLocalVarLdloc == null) {
+                    Debug.LogError(
+                        "NetNode_RenderInstance Transpiler: Did not manage to generate valid code!\n" +
+                        $" i1 {i1} \n segmentLocalVarLdloc {segmentLocalVarLdloc} \n i2 {i2} ");
+                    return instructions;
+                }
 
-            var instructionsCalculateMaetrial = new[] {
+                var instructionsCalculateMaetrial = new[] {
                 i1,
                 segmentLocalVarLdloc, // ldloc.s segmentID | push segmentID into the stack
-                i2
-            };
+                i2};
 
-            codes.InsertRange(insertIndex, instructionsCalculateMaetrial);
+                codes.InsertRange(insertIndex, instructionsCalculateMaetrial);
+
+                Debug.Log("NetNode_RenderInstance Transpiler:\n" + instructionsCalculateMaetrial);
+                string m = "";
+                var range = 5;
+                for (index = insertIndex - range; index < insertIndex + instructionsCalculateMaetrial.Length + range; ++index)
+                    m += codes[index] + "\n";
+                Debug.Log("TRANSPILER PEEK:\n" + m);
+            }
 
             Debug.Log("transpiler successfully patched NetNode.RenderInstance !!!!!!!*******");
 

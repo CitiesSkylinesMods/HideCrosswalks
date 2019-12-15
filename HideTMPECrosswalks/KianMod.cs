@@ -5,40 +5,19 @@ using System.Reflection;
 using UnityEngine;
 
 namespace HideTMPECrosswalks {
-    public class KianModInfo : LoadingExtensionBase, IUserMod {
-        #region IUserMod
+    public class KianModInfo : IUserMod {
+        HarmonyInstance Harmony = null;
+        string HarmonyID = "CS.kian.HideTMPECrosswalks";
+
         public string Name => "Hide TMPE crosswalks";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
         public void OnEnabled() {
-            InstallHarmony();
-        }
-        public void OnDisabled() {
-            OnReleased();
-        }
-        #endregion
-
-        #region LoadingExtension
-
-        HarmonyInstance Harmony = null;
-        public override void OnCreated(ILoading loading) {
-            base.OnCreated(loading);
-            InstallHarmony();
-        }
-
-        public override void OnReleased() {
-            UninstallHarmony();
-        }
-
-        private void InstallHarmony() {
-            Harmony = HarmonyInstance.Create("CS.kian.HideTMPECrosswalks"); // would creating 2 times cause an issue?
+            Harmony = HarmonyInstance.Create(HarmonyID); // would creating 2 times cause an issue?
             Harmony?.PatchAll(Assembly.GetExecutingAssembly());
         }
-
-        private void UninstallHarmony() {
-            Harmony?.UnpatchAll();
+        public void OnDisabled() {
+            Harmony?.UnpatchAll(HarmonyID);
             Harmony = null;
         }
-
-        #endregion
     }
 }

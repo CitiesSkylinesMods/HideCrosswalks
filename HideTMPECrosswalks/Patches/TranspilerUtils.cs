@@ -36,6 +36,9 @@ namespace HideTMPECrosswalks.Patch {
                 );
         }
 
+        /// <summary>
+        /// Get the instruction to load the variable which is stored here.
+        /// </summary>
         public static CodeInstruction BuildLdLocFromStLoc(CodeInstruction instruction) {
             if (instruction.opcode == OpCodes.Stloc_0) {
                 return new CodeInstruction(OpCodes.Ldloc_0);
