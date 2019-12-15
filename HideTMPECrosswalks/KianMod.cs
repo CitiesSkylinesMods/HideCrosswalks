@@ -10,6 +10,7 @@ namespace HideTMPECrosswalks {
         public string Name => "Hide TMPE crosswalks";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
         public void OnEnabled() {
+            InstallHarmony();
         }
         public void OnDisabled() {
             OnReleased();
