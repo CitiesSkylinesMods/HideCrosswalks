@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using System;
 using System.Reflection;
 using UnityEngine;
-using HideTMPECrosswalks.Settiongs;
 
 namespace HideTMPECrosswalks {
 
