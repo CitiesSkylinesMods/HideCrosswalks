@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using Harmony;
 
-namespace HideTMPECrosswalks.Patch {
+namespace HideTMPECrosswalks.Patches {
     public static class TranspilerUtils {
         public static void LogDebug(object message) {
 #if DEBUG

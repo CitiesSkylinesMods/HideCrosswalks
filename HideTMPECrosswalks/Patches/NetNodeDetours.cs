@@ -9,10 +9,10 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 
 
-namespace HideTMPECrosswalks.Patch {
+namespace HideTMPECrosswalks.Patches {
 
     [HarmonyPatch()]
-    public class NetNode_RenderInstance {
+    public static class NetNode_RenderInstance {
         public static Hashtable NodeMaterialTable = new Hashtable(100);
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
 
@@ -37,7 +37,7 @@ namespace HideTMPECrosswalks.Patch {
         }
 
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
-            bool ret = nodeID.ToNode().Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
+            bool ret = segmentID.ToSegment().Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
             // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
             // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
             ret &= segmentID.ToSegment().Info.m_hasPedestrianLanes;
@@ -53,6 +53,11 @@ namespace HideTMPECrosswalks.Patch {
 
         static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);
         //static void LogError(string m) => Debug.LogError("***ERROR! in NetNode_RenderInstance Transpiler:*** " + m + Environment.StackTrace);
+
+        //static bool Prefix(ushort nodeID) {
+        //    NetNode node = nodeID.ToNode();
+        //    return true;
+        //}
 
         static MethodBase TargetMethod() {
             Log("TargetMethod");
