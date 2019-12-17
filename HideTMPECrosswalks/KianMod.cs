@@ -26,8 +26,5 @@ namespace HideTMPECrosswalks {
             Harmony?.UnpatchAll(HarmonyID);
             Harmony = null;
         }
-
-        //[UsedImplicitly]
-        //public void OnSettingsUI(UIHelperBase container) => Options.MakeSettings(container);
     }
 }
