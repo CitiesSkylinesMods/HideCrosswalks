@@ -25,12 +25,8 @@ namespace HideTMPECrosswalks.Patches {
             TextureUtils.TProcessor func = TextureUtils.Crop;
             TextureUtils.Process(ret, "_MainTex", TextureUtils.Crop);
 
-            Log($"Road info: {info.GetClassLevel()} {info.m_isCustomContent}");
-            // TODO does m_isCustomContent actually work? it does not work for NExt2.
             if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
                 TextureUtils.Process(ret, "_APRMap", TextureUtils.Crop);
-                Log("_ARMMap is cropped");
-
             }
             NodeMaterialTable[material] = ret;
             return ret;
@@ -52,7 +48,6 @@ namespace HideTMPECrosswalks.Patches {
         }
 
         static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);
-        //static void LogError(string m) => Debug.LogError("***ERROR! in NetNode_RenderInstance Transpiler:*** " + m + Environment.StackTrace);
 
         //static bool Prefix(ushort nodeID) {
         //    NetNode node = nodeID.ToNode();

@@ -11,7 +11,7 @@ namespace HideTMPECrosswalks {
         HarmonyInstance Harmony = null;
         string HarmonyID = "CS.kian.HideTMPECrosswalks";
 
-        public string Name => "Hide TMPE crosswalks";
+        public string Name => "Hide TMPE crosswalks V2.0 [ALPHA]";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.

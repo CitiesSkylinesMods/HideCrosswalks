@@ -37,8 +37,8 @@ namespace HideTMPECrosswalks.Utils {
             int xN = original.width;
             int yN = original.height;
 
-            float cropPortion = 0.20f;
-            float stretchPortion = 0.30f;
+            float cropPortion = 0.30f;
+            float stretchPortion = 0.40f;
             int yN0 = (int)(yN * stretchPortion);
 
             for (int i = 0; i < xN; i++) {
