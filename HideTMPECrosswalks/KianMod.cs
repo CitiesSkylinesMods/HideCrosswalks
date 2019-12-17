@@ -27,9 +27,7 @@ namespace HideTMPECrosswalks {
             Harmony = null;
         }
 
-        [UsedImplicitly]
-        public void OnSettingsUI(UIHelperBase container) => Options.MakeSettings(container);
-
-
+        //[UsedImplicitly]
+        //public void OnSettingsUI(UIHelperBase container) => Options.MakeSettings(container);
     }
 }
