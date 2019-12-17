@@ -12,6 +12,8 @@ namespace HideTMPECrosswalks {
         public string Name => "Hide TMPE crosswalks";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
         public void OnEnabled() {
+            System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
+            HarmonyInstance.DEBUG = true;
             Harmony = HarmonyInstance.Create(HarmonyID); // would creating 2 times cause an issue?
             Harmony?.PatchAll(Assembly.GetExecutingAssembly());
         }

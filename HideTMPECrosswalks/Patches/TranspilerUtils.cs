@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection.Emit;
 using Harmony;
 
@@ -91,6 +92,14 @@ namespace HideTMPECrosswalks.Patch {
             } else {
                 throw new Exception("Statement is not ldloc!");
             }
+        }
+
+        internal static string IL2STR(this IEnumerable<CodeInstruction> instructions) {
+            string ret = "";
+            foreach (var code in instructions) {
+                ret += code + "\n";
+            }
+            return ret;
         }
     }
 }

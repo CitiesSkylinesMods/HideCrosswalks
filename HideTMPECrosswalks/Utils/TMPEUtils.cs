@@ -7,7 +7,6 @@ namespace HideTMPECrosswalks.Utils {
 
     // Code from roundabout builder: https://github.com/Strdate/AutomaticRoundaboutBuilder/blob/master/RoundaboutBuilder/ModLoadingExtension.cs
     public static class TMPEUTILS {
-        public static readonly UInt64[] TMPE_IDs = { 583429740, 1637663252, 1806963141 };
         private static bool warned=false;
 
         public static bool HasCrossingBan(ushort segmentID, ushort nodeID) {

@@ -12,73 +12,71 @@ using System.Reflection.Emit;
 namespace HideTMPECrosswalks.Patch {
 
     [HarmonyPatch()]
-    //[HarmonyPriority(Priority.LowerThanNormal)]
-    //[HarmonyAfter( new string[] {"boformer.NetworkSkins"} )]
     public class NetNode_RenderInstance {
         public static Hashtable NodeMaterialTable = new Hashtable(100);
+        public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
 
-        public static Material HideCrossing(Material material) {
+        public static Material HideCrossing(Material material, NetInfo info) {
             if (NodeMaterialTable.Contains(material)) {
                 return (Material)NodeMaterialTable[material];
             }
 
             Material ret = new Material(material);
-            TextureUtils.Flip(ret, "_MainTex");
-            TextureUtils.Flip(ret, "_APRMap");
-            try { TextureUtils.Flip(ret, "_XYSMap"); } catch (Exception) { }
-            //TextureUtils.Clean(ret);
+            TextureUtils.TProcessor func = TextureUtils.Crop;
+            TextureUtils.Process(ret, "_MainTex", TextureUtils.Crop);
+
+            Log($"Road info: {info.GetClassLevel()} {info.m_isCustomContent}");
+            // TODO does m_isCustomContent actually work? it does not work for NExt2.
+            if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
+                TextureUtils.Process(ret, "_APRMap", TextureUtils.Crop);
+                Log("_ARMMap is cropped");
+
+            }
             NodeMaterialTable[material] = ret;
             return ret;
         }
 
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
-            return nodeID.ToNode().Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
+            bool ret = nodeID.ToNode().Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
+            // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
+            // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
+            ret &= segmentID.ToSegment().Info.m_hasPedestrianLanes;
+            return ret;
         }
 
         public static Material CalculateMaterial(Material material, ushort nodeID, ushort segmentID) {
             if (ShouldHideCrossing(nodeID, segmentID)) {
-                material = HideCrossing(material);
+                material = HideCrossing(material, segmentID.ToSegment().Info);
             }
             return material;
         }
 
-
-        // extra arguments passed for flexibality of future use.
-        //private static Material GetMaterial(ushort nodeID, ushort segmentID, ushort prefabNodeIDX ) {
-        //    Material material = info.m_nodes[prefabNodeIDX].m_material;
-        //    if (hideCrossing) {
-        //        material= HideCrossing(material);
-        //    }
-        //    return material;
-        //}
-
+        static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);
+        //static void LogError(string m) => Debug.LogError("***ERROR! in NetNode_RenderInstance Transpiler:*** " + m + Environment.StackTrace);
 
         static MethodBase TargetMethod() {
-            Debug.Log("TargetMethod");
+            Log("TargetMethod");
             // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
             var ret = typeof(global::NetNode).GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
             if (ret == null) {
-                var m = "ERRRRRRORRRRRR!!!!: did not manage to find original function to patch" + Environment.StackTrace;
-                Debug.Log(m);
-                throw new Exception(m);
+                throw new Exception("did not manage to find original function to patch");
             }
-            Debug.Log("NetNode: aquired private method " + ret);
+            Log("aquired method " + ret);
             return ret;
         }
 
-
-        public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
-            /* public static void DrawMesh(
-                      Mesh mesh,
-                      Vector3 position,
-                      Quaternion rotation,
-                      Material material,
-                      int layer,
-                      Camera camera,
-                      int submeshIndex,
-                      MaterialPropertyBlock properties);
-                      */
-            var args = new[] {
+        #region Transpiler
+        /* public static void DrawMesh(
+                  Mesh mesh,
+                  Vector3 position,
+                  Quaternion rotation,
+                  Material material,
+                  int layer,
+                  Camera camera,
+                  int submeshIndex,
+                  MaterialPropertyBlock properties);
+                  */
+        static Type[] args = new[] {
                 typeof(Mesh),
                 typeof(Vector3),
                 typeof(Quaternion),
@@ -87,158 +85,101 @@ namespace HideTMPECrosswalks.Patch {
                 typeof(Camera),
                 typeof(int),
                 typeof(MaterialPropertyBlock) };
-            var mDrawMesh = typeof(Graphics).GetMethod("DrawMesh", args);
-            var fNodeMaterial = typeof(NetInfo.Node).GetField("m_nodeMaterial");
-            var mCalculateMaterial = typeof(NetNode_RenderInstance).GetMethod("CalculateMaterial");
-            var mGetSegment = typeof(global::NetNode).GetMethod("GetSegment");
-            var mCheckRenderDistance = typeof(RenderManager.CameraInfo).GetMethod("CheckRenderDistance");
-            var mShouldHideCrossing = typeof(NetNode_RenderInstance).GetMethod("ShouldHideCrossing");
+        static MethodInfo mDrawMesh => typeof(Graphics).GetMethod("DrawMesh", args);
+        static FieldInfo fNodeMaterial => typeof(NetInfo.Node).GetField("m_nodeMaterial");
+        static MethodInfo mCalculateMaterial => typeof(NetNode_RenderInstance).GetMethod("CalculateMaterial");
+        static MethodInfo mGetSegment => typeof(NetNode).GetMethod("GetSegment");
+        static MethodInfo mCheckRenderDistance => typeof(RenderManager.CameraInfo).GetMethod("CheckRenderDistance");
+        static MethodInfo mShouldHideCrossing => typeof(NetNode_RenderInstance).GetMethod("ShouldHideCrossing");
 
-            if (mCalculateMaterial == null || mDrawMesh == null || fNodeMaterial == null || mGetSegment == null ||
-                mCheckRenderDistance == null || mShouldHideCrossing == null) {
-                string m = "NetNode_RenderInstance Transpiler:Necessary methods and fields were not found. Cancelling transpiler!\n";
-                m += $" mCalculateMaterial={mCalculateMaterial} \n mDrawMesh={mDrawMesh} \n fMaterial={fNodeMaterial} \n";
-                m += $" mGetSegment={mGetSegment}\n mCheckDistance={mCheckRenderDistance}\n mShouldHideCrossing={mShouldHideCrossing}";
-                Debug.LogError(m);
-                return instructions;
+        public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
+            try {
+                if (mCalculateMaterial == null || mDrawMesh == null || fNodeMaterial == null || mGetSegment == null ||
+                    mCheckRenderDistance == null || mShouldHideCrossing == null) {
+                    string m = "Necessary methods and fields were not found. Cancelling transpiler!\n";
+                    m += $" mCalculateMaterial={mCalculateMaterial} \n mDrawMesh={mDrawMesh} \n fMaterial={fNodeMaterial} \n";
+                    m += $" mGetSegment={mGetSegment}\n mCheckDistance={mCheckRenderDistance}\n mShouldHideCrossing={mShouldHideCrossing}";
+                    throw new Exception(m);
+                }
+
+                var originalCodes = new List<CodeInstruction>(instructions);
+                var codes = new List<CodeInstruction>(originalCodes);
+
+                patchDrawMesh(codes, 2, 13); // patch second draw mesh.
+
+                Log("successfully patched NetNode.RenderInstance");
+
+                return codes;
+            }catch(Exception e) {
+                Log(e + "\n" + Environment.StackTrace);
+                throw e;
             }
+        }
 
-            var originalCodes = new List<CodeInstruction>(instructions);
-            var codes = new List<CodeInstruction>(originalCodes);
-
+        // returns the position of First DrawMesh after index.
+        public static void patchDrawMesh(List<CodeInstruction> codes, int counter, byte segmentID_loc) {
             int index = 0;
-            {   //find the second draw mesh:
-                int count = 0;
-
-                for (; index < codes.Count; ++index) {
-                    var code = codes[index];
-                    if (code.opcode == OpCodes.Call && code.operand == mDrawMesh) {
-                        if (++count == 2)
-                            break;
-                    }
-                }
-                if (count != 2) {
-                    Debug.LogError("NetNode_RenderInstance Transpiler: Did not found second call to DrawMesh()!");
-                    return instructions;
-                }
-                Debug.Log("NetNode_RenderInstance Transpiler: Found DrawMesh : " + codes[index]);
-            }
+            index = SearchInstruction(codes, new CodeInstruction(OpCodes.Call, mDrawMesh), index, counter:counter );
 
             // find ldfld node.m_material
-            while (--index > 0) {
-                var code = codes[index];
-                if (code.opcode == OpCodes.Ldfld && code.operand == fNodeMaterial)
-                    break;
-            }
-            if (index == 0) {
-                Debug.Log("NetNode_RenderInstance Transpiler: Failed to find ldfld node.m_material " + codes[index]);
-                return instructions;
-            }
-            var insertIndex2 = index + 1; // at this point material is in stack
-            Debug.Log("NetNode_RenderInstance Transpiler: Insert point after " + codes[index]);
-
-
-            // find segmentID = GetSegment(...) and build ldloc.s segmentID
-            /* IL_0594: call instance unsigned int16 NetNode::GetSegment(int32)
-             * IL_0599: stloc.s segment */
-            CodeInstruction segmentLocalVarLdloc = null;
-            while (--index > 0) {
-                var code = codes[index];
-                // call instance uint16 NetNode::GetSegment(int32)
-                if (code.opcode == OpCodes.Call && code.operand == mGetSegment) {
-                    bool b = TranspilerUtils.IsStLoc(codes[index + 1]);
-                    Debug.Log($"Found GetSegment:\n{code}\n{codes[index + 1]}\nb={b}");
-                    if (b) {
-                        // stloc.s segment
-                        Debug.Log("Found GetSegment");
-                        segmentLocalVarLdloc = TranspilerUtils.BuildLdLocFromStLoc(codes[index + 1]);
-                        break;
-                    }
-                }
-            }
-
-
+            index = SearchInstruction(codes, new CodeInstruction(OpCodes.Ldfld, fNodeMaterial), index, dir:-1);
+            int insertIndex2 = index + 1;
 
             // find if (cameraInfo.CheckRenderDistance(data.m_position, node.m_lodRenderDistance))
             /* IL_0627: callvirt instance bool RenderManager CameraInfo::CheckRenderDistance(Vector3, float32)
              * IL_062c brfalse      IL_07e2 */
-            while (++index < codes.Count) {
-                var code = codes[index];
-                // call instance uint16 NetNode::GetSegment(int32)
-                if (code.opcode == OpCodes.Callvirt && code.operand == mCheckRenderDistance) {
-                    Debug.Log($"Found CheckRenderDistance():\n{code}\n{codes[index + 1]}");
-                    break;
-                }
-            }
-            if (index >= codes.Count) {
-                Debug.Log("NetNode_RenderInstance Transpiler: Failed to find CheckRenderDistance " + codes[index]);
-                return instructions;
-
-            }
-            var insertIndex1 = index + 1; // at this point boloean is in stack
-            Debug.Log($"NetNode_RenderInstance Transpiler: Insert point:\nafter: {codes[index]}\nbefore: {codes[insertIndex1]}");
+            index = SearchInstruction(codes, new CodeInstruction(OpCodes.Callvirt, mCheckRenderDistance), index, dir: -1);
+            int insertIndex1 = index + 1; // at this point boloean is in stack
 
             { // Insert material = CalculateMaterial(material, nodeID, segmentID)
-                //
-                var i1 = new CodeInstruction(OpCodes.Ldarg_2); // ldarg.2 | push nodeID into the stack
-                var i2 = new CodeInstruction(OpCodes.Call, mCalculateMaterial); // call Material CalculateMaterial(material, nodeID, segmentID).
-                if (i1 == null || i2 == null || segmentLocalVarLdloc == null) {
-                    Debug.LogError(
-                        "NetNode_RenderInstance Transpiler: Did not manage to generate valid code!\n" +
-                        $" i1 {i1} \n segmentLocalVarLdloc {segmentLocalVarLdloc} \n i2 {i2} ");
-                    return instructions;
-                }
-
-                var instructionsCalculateMaetrial = new[] {
-                i1,
-                segmentLocalVarLdloc, // ldloc.s segmentID | push segmentID into the stack
-                i2};
-
-                codes.InsertRange(insertIndex2, instructionsCalculateMaetrial);
-
-                Debug.Log("NetNode_RenderInstance Transpiler:\n" + instructionsCalculateMaetrial);
-                string m = "";
-                var range = 5;
-                for (index = insertIndex2 - range; index < insertIndex2 + instructionsCalculateMaetrial.Length + range; ++index)
-                    m += codes[index] + "\n";
-                Debug.Log("TRANSPILER PEEK:\n" + m);
+                var newInstructions = new[] {
+                    new CodeInstruction(OpCodes.Ldarg_2),// ldarg.2 | push nodeID into the stack,
+                    new CodeInstruction(OpCodes.Ldloc_S, segmentID_loc), // ldloc.s segmentID | push segmentID into the stack
+                    new CodeInstruction(OpCodes.Call, mCalculateMaterial), // call Material CalculateMaterial(material, nodeID, segmentID).
+                };
+                InsertInstructions(codes, newInstructions, insertIndex2);
             }
 
             { // Insert ShouldHideCrossing(nodeID, segmentID)
-                var i1 = new CodeInstruction(OpCodes.Ldarg_2); // ldarg.2 | push nodeID into the stack
-                var i2 = new CodeInstruction(OpCodes.Call, mShouldHideCrossing); // call Material CalculateMaterial(material, nodeID, segmentID).
-                var i3 = new CodeInstruction(OpCodes.Or);
-                if (i1 == null || i2 == null || segmentLocalVarLdloc == null) {
-                    Debug.LogError(
-                        "NetNode_RenderInstance Transpiler: Did not manage to generate valid code!\n" +
-                        $" i1 {i1} \n segmentLocalVarLdloc {segmentLocalVarLdloc} \n i2 {i2} ");
-                    return instructions;
+                var newInstructions = new[]{
+                    new CodeInstruction(OpCodes.Ldarg_2), // ldarg.2 | push nodeID into the stack
+                    new CodeInstruction(OpCodes.Ldloc_S, segmentID_loc), // ldloc.s segmentID | push segmentID into the stack
+                    new CodeInstruction(OpCodes.Call, mShouldHideCrossing), // call Material mShouldHideCrossing(nodeID, segmentID).
+                    new CodeInstruction(OpCodes.Or) };
+
+                InsertInstructions(codes, newInstructions, insertIndex1);
+            } // end block
+        } // end method
+
+
+        static int SearchInstruction(List<CodeInstruction> codes, CodeInstruction instruction, int index, int dir = +1, int counter = 1) {
+            int count = 0;
+            for (; index < codes.Count; index += dir) {
+                if (TranspilerUtils.IsSameInstruction(codes[index],instruction)) {
+                    if (++count == counter)
+                        break;
                 }
-
-                var instructionsCalculateMaetrial = new[] {
-                i1,
-                segmentLocalVarLdloc, // ldloc.s segmentID | push segmentID into the stack
-                i2,
-                i3};
-
-                codes.InsertRange(insertIndex1, instructionsCalculateMaetrial);
-
-                Debug.Log("NetNode_RenderInstance Transpiler:\n" + instructionsCalculateMaetrial);
-                string m = "";
-                var range = 5;
-                for (index = insertIndex1 - range; index < insertIndex1 + instructionsCalculateMaetrial.Length + range; ++index)
-                    m += codes[index] + "\n";
-                Debug.Log("TRANSPILER PEEK:\n" + m);
             }
-
-
-
-            Debug.Log("transpiler successfully patched NetNode.RenderInstance !!!!!!!*******");
-
-
-
-
-            return codes;
+            if (index >= codes.Count || count != counter) {
+                throw new Exception(" Did not found instruction: " + instruction);
+            }
+            Log(" Found : \n" + codes[index] + codes[index+1]);
+            return index;
         }
-    }
-}
+
+        static void InsertInstructions(List<CodeInstruction> codes, CodeInstruction[] insertion, int index) {
+            foreach(var code in insertion)
+                if (code == null)
+                    throw new Exception("Bad Instructions:\n" + insertion.IL2STR());
+
+            Log($"Insert point:\n between: <{codes[index]}>  and  <{codes[index+1]}>");
+            codes.InsertRange(index, insertion);
+
+            Log("\n" + insertion.IL2STR());
+
+            string m = codes.GetRange(index - 4, 14).IL2STR();
+            Log("TRANSPILER PEEK:\n" + m);
+        }
+        #endregion Transpiler
+    } // end class
+} // end name space
