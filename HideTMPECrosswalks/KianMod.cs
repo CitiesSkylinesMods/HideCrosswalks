@@ -8,7 +8,6 @@ using UnityEngine;
 using HideTMPECrosswalks.Utils;
 
 namespace HideTMPECrosswalks {
-
     public class KianModInfo : IUserMod {
         HarmonyInstance Harmony = null;
         string HarmonyID = "CS.kian.HideTMPECrosswalks";
@@ -26,27 +25,13 @@ namespace HideTMPECrosswalks {
         public void OnDisabled() {
             Harmony?.UnpatchAll(HarmonyID);
             Harmony = null;
-            Patches.NetNode_RenderInstance.NodeMaterialTable.Clear();
+            Patches.NetNode_RenderInstance.ClearCache();
         }
     }
 
     public class LoadingExtension : LoadingExtensionBase {
-        public override void OnLevelLoaded(LoadMode mode) {
-            Extensions.Log("OnLevelLoaded");
-            //TODO execute post TMPE
-            for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
-                foreach (bool bStartNode in new bool[] { false, true }) {
-                    if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)){
-                        NetSegment segment = segmentID.ToSegment();
-                        ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
-                        foreach( var node in segment.Info.m_nodes) {
-                            //cache:
-                            Extensions.Log("Caching " + segment.Info.name);
-                            Patches.NetNode_RenderInstance.CalculateMaterial(node.m_nodeMaterial, nodeID, segmentID);
-                        }
-                    }
-                }
-            }
+        public override void OnReleased() {
+            Patches.NetNode_RenderInstance.ClearCache();
         }
     }
 }

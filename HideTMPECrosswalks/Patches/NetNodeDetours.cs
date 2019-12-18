@@ -13,13 +13,38 @@ namespace HideTMPECrosswalks.Patches {
 
     [HarmonyPatch()]
     public static class NetNode_RenderInstance {
-        public static Hashtable NodeMaterialTable = new Hashtable(100);
+        public static Hashtable NodeMaterialTable = null;
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
+
+        public static void CacheAll() {
+            NodeMaterialTable = new Hashtable(100);
+            for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
+                foreach (bool bStartNode in new bool[] { false, true }) {
+                    if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
+                        NetSegment segment = segmentID.ToSegment();
+                        ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
+                        foreach (var node in segment.Info.m_nodes) {
+                            //cache:
+                            Extensions.Log("Caching " + segment.Info.name);
+                            NetNode_RenderInstance.CalculateMaterial(node.m_nodeMaterial, nodeID, segmentID);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void ClearCache() {
+            NodeMaterialTable.Clear();
+            NodeMaterialTable = null;
+            Extensions.Log("cache cleared");
+
+        }
 
         public static Material HideCrossing(Material material, NetInfo info) {
             if (NodeMaterialTable.Contains(material)) {
                 return (Material)NodeMaterialTable[material];
             }
+            var ticks = System.Diagnostics.Stopwatch.StartNew();
 
             Material ret = new Material(material);
             TextureUtils.TProcessor func = TextureUtils.Crop;
@@ -27,13 +52,16 @@ namespace HideTMPECrosswalks.Patches {
 
             if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
                 TextureUtils.Process(ret, "_APRMap", TextureUtils.Crop);
+                TextureUtils.DumpJob.Lunch(info);
             }
             NodeMaterialTable[material] = ret;
-            Log("Cahced new texture for " + info.name);
+
+            Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
             return ret;
         }
 
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
+            if(NodeMaterialTable==null)CacheAll();
             bool ret = segmentID.ToSegment().Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
             // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
             // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
