@@ -29,6 +29,7 @@ namespace HideTMPECrosswalks.Patches {
                 TextureUtils.Process(ret, "_APRMap", TextureUtils.Crop);
             }
             NodeMaterialTable[material] = ret;
+            Log("Cahced new texture for " + info.name);
             return ret;
         }
 

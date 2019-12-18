@@ -5,14 +5,14 @@ namespace HideTMPECrosswalks.Utils {
         public delegate Texture2D TProcessor(Texture2D tex);
 
         public static void Process(Material material, string name, TProcessor func) {
-            var nodeTextureMain = material.GetTexture(name) as Texture2D;
-            byte[] bytes = nodeTextureMain.MakeReadable().EncodeToPNG();
-            Texture2D newTexture = new Texture2D(1, 1);
-            newTexture.LoadImage(bytes);
-            newTexture.anisoLevel = 16;
-            newTexture = func(newTexture);
-            newTexture.Compress(true);
-            material.SetTexture(name, newTexture);
+var nodeTextureMain = material.GetTexture(name) as Texture2D;
+byte[] bytes = nodeTextureMain.MakeReadable().EncodeToPNG();
+Texture2D newTexture = new Texture2D(1, 1);
+newTexture.LoadImage(bytes);
+newTexture.anisoLevel = 16;
+newTexture = func(newTexture);
+newTexture.Compress(true);
+material.SetTexture(name, newTexture);
         }
 
         //Texture flipping script from https://stackoverflow.com/questions/35950660/unity-180-rotation-for-a-texture2d-or-maybe-flip-both
@@ -41,15 +41,11 @@ namespace HideTMPECrosswalks.Utils {
             float stretchPortion = 0.40f;
             int yN0 = (int)(yN * stretchPortion);
 
-            for (int i = 0; i < xN; i++) {
-                for (int j = 0; j < yN0; j++) {
-                    int j2 = (int)(j * (stretchPortion - cropPortion) + yN * cropPortion);
-                    ret.SetPixel(i,j, original.GetPixel( i, j2) );
-                }
-                for (int j = yN0; j < yN; j++) {
-                    ret.SetPixel(i, j, original.GetPixel(i, j));
-                }
+            for (int j = 0; j < yN0; j++) {
+                int j2 = (int)(j * (stretchPortion - cropPortion) + yN * cropPortion);
+                ret.SetPixels(0, j, xN, 1, original.GetPixels(0, j2, xN, 1));
             }
+            ret.SetPixels(0, yN0, xN, yN - yN0, original.GetPixels(0, yN0, xN, yN - yN0));
 
             ret.Apply();
             return ret;
@@ -66,15 +62,14 @@ namespace HideTMPECrosswalks.Utils {
             float stretchPortion = 0.30f;
             int yN0 = (int)(yN * (1- stretchPortion));
 
-            for (int i = 0; i < xN; i++) {
-                for (int j = 0; j < yN0; j++) {
-                    ret.SetPixel(i, j, original.GetPixel(i, j));
-                }
-                for (int j = 0; j < yN-yN0; j++) {
-                    int j2 = (int)(j * (stretchPortion - cropPortion)) + yN0;
-                    ret.SetPixel(i, j, original.GetPixel(i, j2));
-                }
+
+            ret.SetPixels(0, 0, xN, yN, original.GetPixels(0, 0, xN, yN));
+            for (int j = 0; j < yN-yN0; j++) {
+                int j2 = (int)(j * (stretchPortion - cropPortion)) + yN0;
+                ret.SetPixels(0, j, xN,1, original.GetPixels(0, j2,xN,1));
             }
+
+
 
             ret.Apply();
             return ret;
