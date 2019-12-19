@@ -59,7 +59,7 @@ namespace HideTMPECrosswalks.Patches {
         }
 
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
-            bool ret = segmentID.ToSegment().Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
+            bool ret = segmentID.ToSegment().Info.m_netAI is RoadBaseAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
             // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
             // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
             ret &= segmentID.ToSegment().Info.m_hasPedestrianLanes;
