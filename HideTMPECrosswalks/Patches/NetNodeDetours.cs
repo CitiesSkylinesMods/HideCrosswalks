@@ -13,11 +13,10 @@ namespace HideTMPECrosswalks.Patches {
 
     [HarmonyPatch()]
     public static class NetNode_RenderInstance {
-        public static Hashtable NodeMaterialTable = null;
+        public static Hashtable NodeMaterialTable = new Hashtable(100);
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
 
         public static void CacheAll() {
-            NodeMaterialTable = new Hashtable(100);
             for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
                 foreach (bool bStartNode in new bool[] { false, true }) {
                     if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
@@ -31,13 +30,12 @@ namespace HideTMPECrosswalks.Patches {
                     }
                 }
             }
+            Extensions.Log("all cached");
         }
 
         public static void ClearCache() {
             NodeMaterialTable.Clear();
-            NodeMaterialTable = null;
             Extensions.Log("cache cleared");
-
         }
 
         public static Material HideCrossing(Material material, NetInfo info) {
@@ -52,7 +50,7 @@ namespace HideTMPECrosswalks.Patches {
 
             if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
                 TextureUtils.Process(ret, "_APRMap", TextureUtils.Crop);
-                TextureUtils.DumpJob.Lunch(info);
+                //TextureUtils.DumpJob.Lunch(info);
             }
             NodeMaterialTable[material] = ret;
 
@@ -61,11 +59,13 @@ namespace HideTMPECrosswalks.Patches {
         }
 
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
-            if(NodeMaterialTable==null)CacheAll();
             bool ret = segmentID.ToSegment().Info.m_netAI is RoadAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
             // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
             // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
             ret &= segmentID.ToSegment().Info.m_hasPedestrianLanes;
+
+            //Texture cache is not broken.
+            ret &= NodeMaterialTable != null;
             return ret;
         }
 
@@ -200,14 +200,12 @@ namespace HideTMPECrosswalks.Patches {
             foreach(var code in insertion)
                 if (code == null)
                     throw new Exception("Bad Instructions:\n" + insertion.IL2STR());
-
             Log($"Insert point:\n between: <{codes[index]}>  and  <{codes[index+1]}>");
+
             codes.InsertRange(index, insertion);
 
-            Log("\n" + insertion.IL2STR());
-
-            string m = codes.GetRange(index - 4, 14).IL2STR();
-            Log("TRANSPILER PEEK:\n" + m);
+            //Log("\n" + insertion.IL2STR());
+            //Log("TRANSPILER PEEK:\n" + codes.GetRange(index - 4, 14).IL2STR(););
         }
         #endregion Transpiler
     } // end class
