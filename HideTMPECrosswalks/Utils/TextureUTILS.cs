@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System;
 
 namespace HideTMPECrosswalks.Utils {
     public static class TextureUtils {
@@ -53,7 +54,33 @@ namespace HideTMPECrosswalks.Utils {
             }
         }
 
+        public static Color MedianColor = new Color(0.106f, 0.098f, 0.106f, 1.000f);
+        public static Color GetMedianColor(Material material) {
+            Extensions.Log("GetMedianColor A");
+            Texture2D texture = material.GetTexture("_MainTex").MakeReadable() as Texture2D;
+            int xN = texture.width;
+            int yN = texture.height;
 
+            Extensions.Log("GetMedianColor B");
+            Color[] colors = texture.GetPixels(0, yN / 2, xN, 1);
+
+            Extensions.Log("GetMedianColor C");
+            // sort the colors.
+            int Compare(Color c1, Color c2) => Math.Sign(c1.grayscale - c2.grayscale);
+            Array.Sort(colors, Compare);
+            Extensions.Log("GetMedianColor Sorted");
+
+            Color ret = colors[xN / 2]; //median
+            Extensions.Log("GetMedianColor : ret = " + ret);
+
+            return ret;
+        }
+        public static void SetMedianColor(Material material) {
+            Texture2D tex = new Texture2D(1, 1);
+            tex.SetPixel(0, 0, MedianColor);
+            tex.Apply();
+            material.SetTexture("_MainTex", tex);
+        }
 
         public static void Process(Material material, string name, TProcessor func) {
             Texture2D texture = material.GetTexture(name).MakeReadable() as Texture2D;
@@ -153,8 +180,6 @@ namespace HideTMPECrosswalks.Utils {
                 int j2 = (int)(j * (stretchPortion - cropPortion)) + yN0;
                 ret.SetPixels(0, j, xN,1, original.GetPixels(0, j2,xN,1));
             }
-
-
 
             ret.Apply();
             return ret;

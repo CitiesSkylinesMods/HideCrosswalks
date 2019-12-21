@@ -19,7 +19,7 @@ namespace HideTMPECrosswalks.Utils {
             try {
                 return _HasCrossingBan(segmentID, bStartNode);
             }
-            catch (FileNotFoundException e) {
+            catch (FileNotFoundException _) {
                 if (!warned) {
                     Debug.Log("ERROR ****** TMPE not found! *****");
                     warned = true;

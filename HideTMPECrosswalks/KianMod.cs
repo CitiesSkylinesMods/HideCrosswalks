@@ -1,31 +1,40 @@
 using Harmony;
 using ICities;
 using JetBrains.Annotations;
-using System;
-using System.Reflection;
-using TrafficManager;
 using UnityEngine;
 using HideTMPECrosswalks.Utils;
 using HideTMPECrosswalks.Patches;
+using HideTMPECrosswalks.Settings;
+using System.Collections.Generic;
 
 namespace HideTMPECrosswalks {
     public class KianModInfo : IUserMod {
-        public string Name => "Hide TMPE crosswalks V2.2 [ALPHA]";
+        public string Name => "TLM Crossings V2.2";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
+
 
         [UsedImplicitly]
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
             InstallHarmony();
-            LoadingWrapperPatch.OnPostLevelLoaded += NetNode_RenderInstance.CacheAll;
-            LoadingManager.instance.m_levelUnloaded += NetNode_RenderInstance.ClearCache;
+
+            LoadingWrapperPatch.OnPostLevelLoaded += PrefabUtils.CachePrefabs;
+            LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearALLCache;
         }
 
         [UsedImplicitly]
         public void OnDisabled() {
             UninstallHarmony();
+            PrefabUtils.ClearALLCache();
+            LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.CachePrefabs;
+            LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.ClearALLCache;
+            Options.instance = null;
+        }
 
-            NetNode_RenderInstance.ClearCache();
+
+        [UsedImplicitly]
+        public void OnSettingsUI(UIHelperBase helperBasae) {
+            new Options(helperBasae);
         }
 
         #region Harmony
@@ -51,6 +60,5 @@ namespace HideTMPECrosswalks {
             }
         }
         #endregion
-
     }
 }
