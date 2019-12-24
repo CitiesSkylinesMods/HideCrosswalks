@@ -83,7 +83,12 @@ namespace HideTMPECrosswalks.Utils {
                     NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                     if (info?.m_netAI is RoadAI) {
                         string name = info.GetUncheckedLocalizedTitle().Trim();
-                        if (name.ToLower().Contains("12")) {
+                        bool b = name.ToLower().Contains("12");
+                        b |= name == R4L;
+                        b |= name == R6L;
+                        b |= info.name.ToLower().Contains("suburb");
+
+                        if (b) {
                             Extensions.Log("found " + name);
                             DumpDebugTextures(info);
                         }
@@ -106,9 +111,9 @@ namespace HideTMPECrosswalks.Utils {
                 TextureUtils.DumpJob.Dump(ret, TextureUtils.TextureNames.Defuse, baseName: "node cropped", dir: name);
 
                 //TODO try this on test on clus's asym road
-                Material ret2 = new Material(material);
-                TextureUtils.Process(ret2, TextureUtils.TextureNames.Defuse, TextureUtils.CropOld);
-                TextureUtils.DumpJob.Dump(ret2, TextureUtils.TextureNames.Defuse, baseName: "node cropped old", dir: name);
+                //Material ret2 = new Material(material);
+                //TextureUtils.Process(ret2, TextureUtils.TextureNames.Defuse, TextureUtils.CropOld);
+                //TextureUtils.DumpJob.Dump(ret2, TextureUtils.TextureNames.Defuse, baseName: "node cropped old", dir: name);
 
                 /////////////////////////////// Alpha processing
                 TextureUtils.Process(ret, TextureUtils.TextureNames.AlphaMAP, TextureUtils.Crop);

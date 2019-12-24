@@ -184,28 +184,16 @@ namespace HideTMPECrosswalks.Utils {
 
         public static Texture2D MeldDiff(Texture2D tex, Texture2D tex2) {
             Texture2D ret = new Texture2D(tex.width, tex.height);
-            int yM = (int)(tex.height * 0.4f);
+            int yM = (int)(tex.height * 0.3f);
             float ratio = (float)tex2.width / tex.width;
 
-            Color[] colors = tex.GetPixels(0, tex.height / 2, tex.width, 1);
+            Color[] colors = tex.GetPixels(0, 0, tex.width, 1);
             Color[] diff = tex2.GetPixels(0, tex2.height / 2, tex2.width, 1);
-            for (int i = 0; i < tex.width; ++i) {
-                int i2 = (int)(i * ratio);
-                diff[i2] -= colors[i];
-            }
+            diff.Subtract(colors);
 
             // TODO: which color values should I clamp or smoothen?
-            //smooth out diff
-            for (int i = 1; i < diff.Length; ++i) {
-                diff[i] = Smoothen(diff[i], diff[i - 1]);
-            }
-            for (int i = diff.Length - 2; i >= 0; --i) {
-                diff[i] = Smoothen(diff[i], diff[i + 1] );
-            }
-            // Clamp diff values.
-            for (int i = 0; i < diff.Length; ++i) {
-                diff[i] = Clamp(diff[i]);
-            }
+            diff.SmoothenAPR();
+            diff.Clamp();
 
             for (int j = 0; j < yM; j++) {
                 colors = tex.GetPixels(0, j, tex.width, 1);
@@ -242,6 +230,7 @@ namespace HideTMPECrosswalks.Utils {
             return ret;
         }
 
+#if OLD_CODE
         ///CropOld => Crop where stretch=1f
         // I chose to write repeated code for the sake of simplicity and ease debugging.
         public static Texture2D CropOld(Texture2D original) {
@@ -263,7 +252,6 @@ namespace HideTMPECrosswalks.Utils {
             return ret;
         }
 
-#if OLD_CODE
         //Texture flipping script from https://stackoverflow.com/questions/35950660/unity-180-rotation-for-a-texture2d-or-maybe-flip-both
         public static Texture2D Flip(Texture2D original) {
             Texture2D ret = new Texture2D(original.width, original.height);
