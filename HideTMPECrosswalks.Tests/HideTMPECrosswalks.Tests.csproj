@@ -4,16 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{17034566-78DF-4C3D-BD3F-3B833CB2D872}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HideTMPECrosswalks</RootNamespace>
-    <AssemblyName>HideTMPECrosswalks</AssemblyName>
+    <ProjectGuid>{F9DBDEF2-4186-4D64-9DA5-95D9F1FADE93}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>HideTMPECrosswalks.Tests</RootNamespace>
+    <AssemblyName>HideTMPECrosswalks.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>false</Deterministic>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,8 +32,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\libs\0Harmony.dll</HintPath>
+    <Reference Include="HideTMPECrosswalks">
+      <HintPath>..\HideTMPECrosswalks\bin\Debug\HideTMPECrosswalks.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -56,33 +57,10 @@
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="CSUtil.Commons">
-      <HintPath>..\libs\CSUtil.Commons.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="TrafficManager">
-      <HintPath>..\libs\TrafficManager.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="KianMod.cs" />
-    <Compile Include="Patches\LoadingWrapperPatch.cs" />
-    <Compile Include="Patches\NetNodeDetours.cs" />
-    <Compile Include="Patches\TranspilerUtils.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings\Options.cs" />
-    <Compile Include="Utils\ColorUtils.cs" />
-    <Compile Include="Utils\Extensions.cs" />
-    <Compile Include="Utils\PrefabUtils.cs" />
-    <Compile Include="Utils\TextureUTILS.cs" />
-    <Compile Include="Utils\TMPEUtils.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>if not exist "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)" mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
-del "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetFileName)"
-xcopy "$(TargetDir)*.*" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)" /y /e</PostBuildEvent>
-  </PropertyGroup>
 </Project>

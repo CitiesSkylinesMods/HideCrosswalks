@@ -19,7 +19,10 @@ namespace HideTMPECrosswalks {
             InstallHarmony();
 
             LoadingWrapperPatch.OnPostLevelLoaded += PrefabUtils.CachePrefabs;
+            LoadingWrapperPatch.OnPostLevelLoaded += DumpOnLoad.Test;
+
             LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearALLCache;
+
         }
 
         [UsedImplicitly]
@@ -27,15 +30,17 @@ namespace HideTMPECrosswalks {
             UninstallHarmony();
             PrefabUtils.ClearALLCache();
             LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.CachePrefabs;
-            LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.ClearALLCache;
+            LoadingWrapperPatch.OnPostLevelLoaded -= DumpOnLoad.Test;
+
+            LoadingManager.instance.m_levelUnloaded -= PrefabUtils.ClearALLCache;
             Options.instance = null;
         }
 
 
-        [UsedImplicitly]
-        public void OnSettingsUI(UIHelperBase helperBasae) {
-            new Options(helperBasae);
-        }
+        //[UsedImplicitly]
+        //public void OnSettingsUI(UIHelperBase helperBasae) {
+        //    new Options(helperBasae);
+        //}
 
         #region Harmony
         HarmonyInstance harmony = null;
@@ -60,5 +65,17 @@ namespace HideTMPECrosswalks {
             }
         }
         #endregion
+    }
+
+    public class DumpOnLoad : LoadingExtensionBase {
+        public override void OnCreated(ILoading loading) => Test();
+        public override void OnLevelLoaded(LoadMode mode) => Test();
+
+        public static void Test() {
+            Extensions.Log("Testing ...");
+            //PrefabUtils.DebugTests.NameTest();
+            PrefabUtils.DebugTests.Dumps();
+            Extensions.Log("Testing Done!");
+        }
     }
 }

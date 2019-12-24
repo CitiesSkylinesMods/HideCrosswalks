@@ -20,12 +20,13 @@ namespace HideTMPECrosswalks.Patches {
             ret &= info.m_hasPedestrianLanes;
 
             //Texture cache is not broken.
-            ret &= PrefabUtils.NodeMaterialTable != null;
+            ret &= PrefabUtils.MaterialCache != null;
 
-            bool never = PrefabUtils.NeverZebra(info);
-            bool always = PrefabUtils.AlwaysZebra(info);
-            ret |= always;
-            ret &= !never;
+            //TODO optimize
+            //bool never = PrefabUtils.NeverZebra(info);
+            //bool always = PrefabUtils.AlwaysZebra(info);
+            //ret |= always;
+            //ret &= !never;
 
             return ret;
         }

@@ -49,19 +49,26 @@ namespace HideTMPECrosswalks.Settings {
             instance = this;
         }
 
+        private List<string> Split(string s) {
+            List<string> ret = s.Split(delemiter).ToList();
+            ret.RemoveAll((a)=>a=="");
+            return ret;
+        }
+
         public void MakeSettings(UIHelperBase helperBase) {
             UIHelper helper = helperBase as UIHelper;
             UIComponent container = helper.self as UIComponent;
 
             _ui_always = container.AddUIComponent<UICheckboxDropDownExt>();
             _ui_always.Title = "Always";
-            _ui_always.selectedItems = loaded_always.Split(delemiter).ToList();
+            _ui_always.selectedItems = Split(loaded_always);
             _ui_always.eventAfterDropdownClose += (_) => PrefabUtils.CacheAlways(_ui_always.selectedItems);
             PrefabUtils.CacheAlways(_ui_always.selectedItems);
 
+
             _ui_never = container.AddUIComponent<UICheckboxDropDownExt>();
             _ui_never.Title = "Never";
-            _ui_never.selectedItems = loaded_never.Split(delemiter).ToList();
+            _ui_never.selectedItems = Split(loaded_never);
             _ui_never.eventAfterDropdownClose += (_) => PrefabUtils.CacheNever(_ui_never.selectedItems);
             PrefabUtils.CacheNever(_ui_never.selectedItems);
 

@@ -3,25 +3,29 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 namespace HideTMPECrosswalks.Utils {
     using Patches;
     using Settings;
-    using System.Text.RegularExpressions;
 
     public static class PrefabUtils {
 
 
         private static bool IsNormalGroundRoad(NetInfo info) {
             try {
-                if (info.m_netAI is RoadAI) {
+                if (info != null && info.m_netAI is RoadAI) {
                     var ai = info.m_netAI as RoadAI;
                     return ai.m_elevatedInfo != null && ai.m_slopeInfo != null;
                 }
                 return false;
             }
-            catch(Exception e) {
-                Extensions.Log($"Exception occured for info {info.name} " + e);
+            catch (Exception e) {
+                Extensions.Log(e.Message);
+                Extensions.Log("IsNormalGroundRoad catched exception");
+                Extensions.Log($"exception: info = {info}");
+                Extensions.Log($"exception: info is {info.GetType()}");
+                Extensions.Log($"Exception: name = {info?.name} ");
                 return false;
             }
         }
@@ -32,10 +36,10 @@ namespace HideTMPECrosswalks.Utils {
             //TODO: use Regular expressions instead of to lower.
             string name = info.GetUncheckedLocalizedTitle().ToLower();
 
-            List<string> postfixes = new List<string>(new[]{ "with",  "decorative", "grass", "trees", });
+            List<string> postfixes = new List<string>(new[] { "with", "decorative", "grass", "trees", });
             //postfixes.Add("one-way");
             if (info.m_isCustomContent) {
-                postfixes = new List<string>(new[]{ "_data" });
+                postfixes = new List<string>(new[] { "_data" });
             }
 
             foreach (var postfix in postfixes) {
@@ -46,13 +50,83 @@ namespace HideTMPECrosswalks.Utils {
             return name;
         }
 
+
+#if DEBUG
+
+        public static class DebugTests {
+            public static string R6L => "Six-Lane Road";
+            public static string R4L => "Four-Lane Road";
+
+            public static void NameTest() {
+                for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
+                    NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                    if (info?.m_netAI is RoadAI) {
+                        string name = info.GetUncheckedLocalizedTitle();
+                        bool b = name.ToLower().Contains("suburban");
+                        if (b) {
+                            string m = name;
+                            RoadAI ai = info.m_netAI as RoadAI;
+                            m += "|" + ai?.m_elevatedInfo?.name;
+                            m += "|" + ai?.m_bridgeInfo?.name;
+                            m += "|" + ai?.m_slopeInfo?.name;
+                            m += "|" + ai?.m_tunnelInfo?.name;
+                            Extensions.Log(m);
+                        }
+
+                    }
+                }
+            }
+            public static bool RoadNameEqual(string n1, string n2) => n1.Trim().ToLower() == n2.Trim().ToLower();
+
+            public static void Dumps() {
+                for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
+                    NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                    if (info?.m_netAI is RoadAI) {
+                        string name = info.GetUncheckedLocalizedTitle().Trim();
+                        if (name.ToLower().Contains("12")) {
+                            Extensions.Log("found " + name);
+                            DumpDebugTextures(info);
+                        }
+                    }
+                }
+            }
+
+            public static void DumpDebugTextures(NetInfo info) {
+                string name = info.GetUncheckedLocalizedTitle();
+                Material material = info.m_nodes[0].m_nodeMaterial;
+                TextureUtils.DumpJob.Dump(material,  baseName: "node original ", dir: name);
+
+                Material material2 = info.m_segments[0].m_segmentMaterial;
+                TextureUtils.DumpJob.Dump(material2, TextureUtils.TextureNames.AlphaMAP, baseName: "segment original", dir: name);
+
+                ///////////////////////////// Defuse processing
+
+                Material ret = new Material(material);
+                TextureUtils.Process(ret, TextureUtils.TextureNames.Defuse, TextureUtils.Crop);
+                TextureUtils.DumpJob.Dump(ret, TextureUtils.TextureNames.Defuse, baseName: "node cropped", dir: name);
+
+                //TODO try this on test on clus's asym road
+                Material ret2 = new Material(material);
+                TextureUtils.Process(ret2, TextureUtils.TextureNames.Defuse, TextureUtils.CropOld);
+                TextureUtils.DumpJob.Dump(ret2, TextureUtils.TextureNames.Defuse, baseName: "node cropped old", dir: name);
+
+                /////////////////////////////// Alpha processing
+                TextureUtils.Process(ret, TextureUtils.TextureNames.AlphaMAP, TextureUtils.Crop);
+                TextureUtils.Process(ret, material2, "_APRMap", TextureUtils.MeldDiff);
+                TextureUtils.DumpJob.Dump(ret, TextureUtils.TextureNames.AlphaMAP, baseName: "node melt", dir: name);
+
+
+            }
+        }
+#endif
+
         public static string[] GetRoadNames() {
             List<string> ret = new List<string>();
-            for(uint i=0; i< PrefabCollection<NetInfo>.LoadedCount(); ++i) {
+            for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if(IsNormalGroundRoad(info)) {
+                if (IsNormalGroundRoad(info)) {
                     string name = GetRoadTitle(info);
-                    if( name!=null && !ret.Contains(name) )
+                    if (name != null && !ret.Contains(name))
                         ret.Add(name);
                 }
             }
@@ -61,56 +135,69 @@ namespace HideTMPECrosswalks.Utils {
             return ret2;
         }
 
-        private static bool[] Always_array;
-        private static bool[] Never_array;
+        // TODO make array.
+        private static Hashtable Always_Table;
+        private static Hashtable Never_Table;
+        //private static bool[] Always_array;
+        //private static bool[] Never_array;
 
         public static void CacheAlways(IEnumerable<string> roads) {
             int count = PrefabCollection<NetInfo>.LoadedCount();
-            Always_array = new bool[count];
+            //Always_array = new bool[count];
+            Always_Table = new Hashtable(count * 10);
             for (uint i = 0; i < count; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                 if (IsNormalGroundRoad(info)) {
                     string name = GetRoadTitle(info);
                     bool b = (bool)roads.Contains(name);
                     RoadAI ai = info.m_netAI as RoadAI;
-                    Always_array[i] = b;
+                    Always_Table[i] = b;
                     //Extensions.Log($"naem converted to {name} | from {info.name}");
-                    Always_array[ai.m_elevatedInfo.m_prefabDataIndex] = b;
-                    Always_array[ai.m_slopeInfo.m_prefabDataIndex] = b;
-                    Always_array[ai.m_bridgeInfo.m_prefabDataIndex] = b;
-                    Always_array[ai.m_tunnelInfo.m_prefabDataIndex] = b;
+                    Always_Table[ai.m_elevatedInfo.m_prefabDataIndex] = b;
+                    Always_Table[ai.m_slopeInfo.m_prefabDataIndex] = b;
+                    Always_Table[ai.m_bridgeInfo.m_prefabDataIndex] = b;
+                    Always_Table[ai.m_tunnelInfo.m_prefabDataIndex] = b;
                 }
             }
         }
 
         public static void CacheNever(IEnumerable<string> roads) {
             int count = PrefabCollection<NetInfo>.LoadedCount();
-            Never_array = new bool[count];
+            Never_Table = new Hashtable(count * 10);
             for (uint i = 0; i < count; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                 if (IsNormalGroundRoad(info)) {
                     string name = GetRoadTitle(info);
                     bool b = (bool)roads.Contains(name);
                     RoadAI ai = info.m_netAI as RoadAI;
-                    Never_array[i] = b;
-                    Never_array[ai.m_slopeInfo.m_prefabDataIndex] = b;
-                    Never_array[ai.m_elevatedInfo.m_prefabDataIndex] = b;
-                    Never_array[ai.m_bridgeInfo.m_prefabDataIndex] = b;
-                    Never_array[ai.m_tunnelInfo.m_prefabDataIndex] = b;
+                    Never_Table[i] = b;
+                    Never_Table[ai.m_slopeInfo.m_prefabDataIndex] = b;
+                    Never_Table[ai.m_elevatedInfo.m_prefabDataIndex] = b;
+                    Never_Table[ai.m_bridgeInfo.m_prefabDataIndex] = b;
+                    Never_Table[ai.m_tunnelInfo.m_prefabDataIndex] = b;
                 }
             }
         }
 
         public static bool AlwaysZebra(NetInfo info) {
-            return Always_array[info.m_prefabDataIndex];//' Options.instance.Always.Contains(roadName);
+            try { return (bool)Always_Table[info.m_prefabDataIndex]; }
+            catch {
+                Extensions.Log($"AlwaysZebra:Always_array[{info.m_prefabDataIndex}] index out of range. info:{info.name}");
+                return false;
+            }
         }
 
         public static bool NeverZebra(NetInfo info) {
-            return Never_array[info.m_prefabDataIndex];
+            try { return (bool)Never_Table[info.m_prefabDataIndex]; }
+            catch {
+                Extensions.Log($"NeverZebra:Never_array[{info.m_prefabDataIndex}] index out of range. info:{info.name}");
+                return false;
+            }
         }
 
 
-        public static Hashtable NodeMaterialTable = new Hashtable(100);
+        public static Hashtable MaterialCache = new Hashtable(100);
+        public static Hashtable TextureCache = new Hashtable(100);
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
 
         public static void CachePrefabs() {
@@ -131,29 +218,47 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static void ClearALLCache() {
-            NodeMaterialTable.Clear();
-            Always_array = Never_array = null;
+            MaterialCache.Clear();
+            Always_Table = Never_Table = null;
             Extensions.Log("cache cleared");
         }
 
         public static Material HideCrossing(Material material, NetInfo info) {
-            if (NodeMaterialTable.Contains(material)) {
-                return (Material)NodeMaterialTable[material];
+            if (MaterialCache.Contains(material)) {
+                return (Material)MaterialCache[material];
             }
+
             var ticks = System.Diagnostics.Stopwatch.StartNew();
+            string defuse = TextureUtils.TextureNames.Defuse;
+            string alpha = TextureUtils.TextureNames.AlphaMAP;
             Material ret = new Material(material);
-            //TextureUtils.GetMedianColor(ret);
-            TextureUtils.SetMedianColor(ret);
 
-            //TextureUtils.TProcessor func = TextureUtils.Crop;
-            //TextureUtils.Process(ret, "_MainTex", TextureUtils.Crop);
-
-
-            if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
-                TextureUtils.Process(ret, "_APRMap", TextureUtils.Crop);
-                //TextureUtils.DumpJob.Lunch(info);
+            Texture tex = material.GetTexture(defuse);
+            if (TextureCache.Contains(tex)) {
+                tex = TextureCache[tex] as Texture;
+                Extensions.Log("Texture cache hit: " + tex.name);
+            } else {
+                tex = TextureUtils.Process(tex, TextureUtils.Crop);
+                TextureCache[tex] = tex;
             }
-            NodeMaterialTable[material] = ret;
+            ret.SetTexture(defuse, tex);
+
+            if (info.GetClassLevel() > ItemClass.Level.Level2 || info.m_isCustomContent) {
+                tex = material.GetTexture(alpha);
+                if (TextureCache.Contains(tex)) {
+                    tex = TextureCache[tex] as Texture;
+                    Extensions.Log("Texture cache hit: " + tex.name);
+                } else {
+                    tex = TextureUtils.Process(tex, TextureUtils.Crop);
+                    Material material2 = info.m_segments[0].m_segmentMaterial;
+                    Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
+                    Texture tex2 = material2.GetTexture(alpha);
+                    tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
+                    TextureCache[tex] = tex;
+                }
+                ret.SetTexture(alpha, tex);
+            }
+             MaterialCache[material] = ret;
 
             Extensions.Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
             return ret;
