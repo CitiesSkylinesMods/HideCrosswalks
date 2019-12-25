@@ -84,9 +84,13 @@ namespace HideTMPECrosswalks.Utils {
                     if (info?.m_netAI is RoadAI) {
                         string name = info.GetUncheckedLocalizedTitle().Trim();
                         bool b = name.ToLower().Contains("12");
-                        b |= name == R4L;
-                        b |= name == R6L;
-                        b |= info.name.ToLower().Contains("suburb");
+                        b |= name == "Six-Lane Road";
+                        b |= name == "Six-Lane Road with Median";
+                        b |= name == "Eight-Lane Road";
+                        b |= name == "Four-Lane Road";
+                        b |= name == "Four-Lane Road with Median";
+                        b |= name.ToLower().Contains("suburb");
+                        b |= name.ToLower().Contains("2+3");
 
                         if (b) {
                             Extensions.Log("found " + name);
@@ -248,7 +252,7 @@ namespace HideTMPECrosswalks.Utils {
             }
             ret.SetTexture(defuse, tex);
 
-            if (info.GetClassLevel() > ItemClass.Level.Level2 || info.m_isCustomContent) {
+            if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
                 tex = material.GetTexture(alpha);
                 if (TextureCache.Contains(tex)) {
                     tex = TextureCache[tex] as Texture;

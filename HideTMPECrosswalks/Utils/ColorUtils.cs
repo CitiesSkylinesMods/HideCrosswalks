@@ -12,7 +12,7 @@ namespace HideTMPECrosswalks.Utils {
 
         #region smoothen
         public const float gradient = 0.01f;
-        public const float edge = 0.1f;
+        public const float edge = 0.075f;
 
         public static float Smoothen(float c, float c_prev, float gradient = gradient) {
             if (c_prev - c > edge) c = c_prev - gradient;
@@ -31,8 +31,8 @@ namespace HideTMPECrosswalks.Utils {
 
         public static Color SmoothenAPR(Color c, Color c_prev, float gradient = gradient) {
             c.r = SmoothenUp(c.r, c_prev.r, gradient);
+            c.g = SmoothenDown(c.g, c_prev.g, gradient);
             c.b = SmoothenDown(c.b, c_prev.b, gradient);
-            // TODO what about green?
             return c;
         }
 
@@ -65,7 +65,7 @@ namespace HideTMPECrosswalks.Utils {
         #endregion smoothen
 
         #region clamp
-        public const float max = 0.3f;
+        public const float max = 0.25f;
 
         public static float Clamp(float c, float max = max) {
             return Mathf.Clamp(c, -max, max);

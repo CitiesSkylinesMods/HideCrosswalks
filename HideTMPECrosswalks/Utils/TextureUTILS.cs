@@ -58,9 +58,19 @@ namespace HideTMPECrosswalks.Utils {
                 Extensions.Log($"Dumping texture " + texture.name);
                 byte[] bytes = texture.EncodeToPNG();
 
-                string path = @"mod debug dumps\" + dir;
+                string filename = baseName + texName + ".png";
+                foreach (char c in @"\/:<>|"  +"\"") {
+                    filename = filename.Replace(c.ToString(), "");
+                }
+                foreach (char c in @":<>|" + "\"") {
+                    dir = dir.Replace(c.ToString(), "");
+                }
+
+                string path = Path.Combine("mod debug dumps", dir);
+                Extensions.Log("Dumping to " + path);
                 Directory.CreateDirectory(path);
-                path += @"\" + baseName + texName + ".png";
+
+                path = Path.Combine(path, filename);
                 File.WriteAllBytes(path, bytes);
                 Extensions.Log($"END: {texName} {baseName} {dir}");
             }
@@ -75,13 +85,15 @@ namespace HideTMPECrosswalks.Utils {
 
         }
 
-        public static Texture2D GetReadableTexture(this Material material, string name = "_MainTex") {
-            if (!TextureNames.Names.Contains(name))
-                throw new Exception($"{name} bad texture name. valid texture names are" + String.Join(" ", TextureNames.Names));
-            Texture2D texture = material.GetTexture(name) as Texture2D;
-            Texture2D texture2 = texture.MakeReadable();
-            Extensions.Log($"GetReadableTexture: Material={material.name} texture={texture.name}");
-            return texture2;
+        public static Texture2D GetReadableTexture(this Material material, string type = "_MainTex") {
+            if (!TextureNames.Names.Contains(type))
+                throw new Exception($"{type} bad texture name. valid texture names are" + String.Join(" ", TextureNames.Names));
+            Texture2D texture = material.GetTexture(type) as Texture2D;
+            string name = texture.name;
+            texture = texture.MakeReadable();
+            texture.name = name + " "; // add space to avoid potential hash problems
+            Extensions.Log($"GetReadableTexture: Material={material.name} texture={name}");
+            return texture;
         }
 
         public static Texture2D TryMakeReadable(this Texture tex) {
@@ -130,68 +142,18 @@ namespace HideTMPECrosswalks.Utils {
             return newTexture;
         }
 
-        //blend tex2 into tex
-        public static Texture2D MeldBlue(Texture2D tex, Texture2D tex2) {
-            Texture2D ret = new Texture2D(tex.width, tex.height);
-            int yM = (int)(tex.height * 0.4f);
-            int yM2 = tex2.height / 2;
-
-            Color[] colors2 = tex2.GetPixels(0, yM2, tex2.width, 1);
-            {
-                Color barrier = new Color(0, 1, 0, 1);
-                Color noBarrier = new Color(0, 1, .8f, 1);
-                float  blue_prev = 0; ;
-                for (int i = 0; i < colors2.Length; ++i) {
-                    float blue = colors2[i].b;
-                    if (blue_prev - blue > 0.05f) {
-                        blue = blue_prev - 0.005f;
-                        if (blue < 0.9f) blue = 0.9f;
-                    }
-                    colors2[i].b = blue;
-                    blue_prev = blue;
-
-                }
-                for (int i = colors2.Length - 1; i >= 0; --i) {
-                    float blue = colors2[i].b;
-                    if (blue_prev - blue > 0.05f) {
-                        blue = blue_prev - 0.005f;
-                        if (blue < 0.9f) blue = 0.9f;
-                    }
-                    colors2[i].b = blue;
-                    blue_prev = blue;
-                }
-            }
-
-            float ratio = (float)tex2.width / tex.width;
-            for (int j = 0; j < yM; j++) {
-                Color []colors  = tex .GetPixels(0, j, tex.width, 1);
-                float w = (float)j / (float)yM;
-                for (int i = 0; i < colors.Length; ++i) {
-                    int i2 = (int)(i * ratio);
-                    float blue = colors[i].b;
-                    float blue2 = colors2[i2].b;
-                    blue = blue * w + blue2 * (1f - w);
-                    colors[i].b = blue;
-                }
-                ret.SetPixels(0, j, tex.width, 1, colors);
-            }
-            ret.SetPixels(0, yM, tex.width, tex.height - yM, tex.GetPixels(0, yM, tex.width, tex.height - yM));
-
-            ret.Apply();
-            return ret;
-        }
-
-
         public static Texture2D MeldDiff(Texture2D tex, Texture2D tex2) {
             Texture2D ret = new Texture2D(tex.width, tex.height);
             int yM = (int)(tex.height * 0.3f);
+            int yM2 = (int)(tex2.height * 0.4f); // hack to avoid dashed lines on NExt2.
+
             float ratio = (float)tex2.width / tex.width;
 
             Color[] colors = tex.GetPixels(0, 0, tex.width, 1);
-            Color[] diff = tex2.GetPixels(0, tex2.height / 2, tex2.width, 1);
-            diff.Subtract(colors);
+            Color[] diff = tex2.GetPixels(0, yM2, tex2.width, 1);
 
-            // TODO: which color values should I clamp or smoothen?
+            var ticks = System.Diagnostics.Stopwatch.StartNew();
+            diff.Subtract(colors);
             diff.SmoothenAPR();
             diff.Clamp();
 
