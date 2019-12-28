@@ -75,10 +75,10 @@ namespace HideTMPECrosswalks {
 
         public static void Test() {
 #if DEBUG
-            Extensions.Log("Testing ...");
+            //Extensions.Log("Testing ...");
             //PrefabUtils.DebugTests.NameTest();
-            PrefabUtils.DebugTests.Dumps();
-            Extensions.Log("Testing Done!");
+            //PrefabUtils.DebugTests.Dumps();
+            //Extensions.Log("Testing Done!");
 #endif
         }
 

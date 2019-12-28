@@ -21,7 +21,7 @@ namespace HideTMPECrosswalks.Utils {
         static object LogLock = new object();
         internal static void Log(string m) {
             lock (LogLock) {
-                var st = System.Environment.StackTrace;
+                //var st = System.Environment.StackTrace;
                 //m  = st + " : \n" + m;
 #if DEBUG
                 UnityEngine.Debug.Log(m);

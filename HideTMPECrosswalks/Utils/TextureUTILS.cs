@@ -124,6 +124,11 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static Texture2D Process(Texture tex, TProcessor func) {
+            if (tex == null)
+                throw new ArgumentNullException("tex is null");
+            if (func == null)
+                throw new ArgumentNullException("func is null");
+
             Texture2D newTexture = tex.TryMakeReadable();
             newTexture = func(newTexture);
             newTexture.anisoLevel = tex.anisoLevel;
@@ -133,6 +138,13 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static Texture2D Process(Texture tex, Texture tex2, TProcessor2 func) {
+            if (tex == null)
+                throw new ArgumentNullException("tex is null");
+            if (tex2 == null)
+                throw new ArgumentNullException("tex2 is null");
+            if (func == null)
+                throw new ArgumentNullException("func is null");
+
             Texture2D nodeTex = tex.TryMakeReadable();
             Texture2D segTex = tex2.TryMakeReadable();
             Texture2D newTexture = func(nodeTex, segTex);

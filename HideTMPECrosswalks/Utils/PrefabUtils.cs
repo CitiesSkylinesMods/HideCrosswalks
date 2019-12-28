@@ -265,18 +265,22 @@ namespace HideTMPECrosswalks.Utils {
 
             if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
                 tex = material.GetTexture(alpha);
-                if (TextureCache.Contains(tex)) {
-                    tex = TextureCache[tex] as Texture;
-                    Extensions.Log("Texture cache hit: " + tex.name);
-                } else {
-                    tex = TextureUtils.Process(tex, TextureUtils.Crop);
-                    Material material2 = info.m_segments[0].m_segmentMaterial;
-                    Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
-                    Texture tex2 = material2.GetTexture(alpha);
-                    tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
-                    TextureCache[tex] = tex;
+                if (tex != null) {
+                    if (TextureCache.Contains(tex)) {
+                        tex = TextureCache[tex] as Texture;
+                        Extensions.Log("Texture cache hit: " + tex.name);
+                    } else {
+                        tex = TextureUtils.Process(tex, TextureUtils.Crop);
+                        Material material2 = info.m_segments[0].m_segmentMaterial;
+                        Texture tex2 = material2.GetTexture(alpha);
+                        if (tex2 != null) {
+                            Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
+                            tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
+                        }
+                        TextureCache[tex] = tex;
+                    }
+                    ret.SetTexture(alpha, tex);
                 }
-                ret.SetTexture(alpha, tex);
             }
              MaterialCache[material] = ret;
 

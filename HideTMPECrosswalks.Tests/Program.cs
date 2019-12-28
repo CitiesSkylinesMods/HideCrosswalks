@@ -18,14 +18,26 @@ namespace HideTMPECrosswalks.Tests
 
         static void Main(string[] args)
         {
-            Log("Test1 ...");
-            TestColorUtils.Test1();
+            //Log("Test1 ...");
+            //TestColorUtils.Test1();
 
-            Log("Test2 ...");
-            TestColorUtils.Test2();
+            //Log("Test2 ...");
+            //TestColorUtils.Test2();
+
+            Test();
 
             Log("End of tests");
             System.Console.ReadKey();
+        }
+
+        static void Test() {
+            try {
+                throw new System.IO.FileNotFoundException("Some test exception");
+            }
+            catch {
+                Log("Catched exception");
+            }
+            Log("POINT A");
         }
     }
 
