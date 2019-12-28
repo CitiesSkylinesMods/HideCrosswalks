@@ -21,7 +21,6 @@ namespace HideTMPECrosswalks {
             LoadingWrapperPatch.OnPostLevelLoaded += DumpOnLoad.Test;
 
             LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearALLCache;
-
         }
 
         [UsedImplicitly]
@@ -68,7 +67,7 @@ namespace HideTMPECrosswalks {
 
     public class DumpOnLoad : LoadingExtensionBase {
 #if DEBUG
-        public override void OnCreated(ILoading loading) => Test();
+        public override void OnCreated(ILoading loading) { base.OnCreated(loading) ;Test(); }
         public override void OnLevelLoaded(LoadMode mode) => Test();
 #endif
 

@@ -1,4 +1,5 @@
 using ColossalFramework;
+using ICities;
 using System.Diagnostics;
 
 namespace HideTMPECrosswalks.Utils {
@@ -6,6 +7,8 @@ namespace HideTMPECrosswalks.Utils {
     public static class Extensions {
         internal static ref NetNode ToNode(this ushort id) => ref Singleton<NetManager>.instance.m_nodes.m_buffer[id];
         internal static ref NetSegment ToSegment(this ushort id ) => ref Singleton<NetManager>.instance.m_segments.m_buffer[id];
+
+        public static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
 
         internal static void LogLap(this Stopwatch ticks, string prefix = "") {
             ticks.Stop();

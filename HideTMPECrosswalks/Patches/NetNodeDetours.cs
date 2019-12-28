@@ -6,13 +6,18 @@ using System.Reflection;
 using Harmony;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using ICities;
 
 namespace HideTMPECrosswalks.Patches {
     using Utils;
     [HarmonyPatch()]
     public static class NetNode_RenderInstance {
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
-
+#if DEBUG
+            if(Extensions.currentMode == AppMode.AssetEditor) {
+                return true; // always hide crossings in asset editor for quick testing.
+            }
+#endif
             NetInfo info = segmentID.ToSegment().Info;
             bool ret = info.m_netAI is RoadBaseAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
             // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.

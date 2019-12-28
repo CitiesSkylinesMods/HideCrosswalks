@@ -218,22 +218,32 @@ namespace HideTMPECrosswalks.Utils {
             return ret;
         }
 
-        public static Texture2D FlipH(Texture2D original) {
+        public static Texture2D Mirror(Texture2D original) {
             int xN = original.width;
             int yN = original.height;
             Texture2D ret = new Texture2D(xN, yN);
 
-            for (int j = 0; j < yN; j++) {
-                Color[] colors = original.GetPixels(0, j, xN, 1);
-                colors.Flip();
-                ret.SetPixels(0, j, xN, 1, colors);
+            int last = xN - 1;
+            int half = xN / 2;
+            {
+                Color[] colors = original.GetPixels(0, 0, half, yN);
+                ret.SetPixels(0, 0, half, yN, colors);
+            }
+
+            for (int i = half; i <= last; i++) {
+                int i2 = last - i;
+                Color[] colors = original.GetPixels(i2, 0, 1, yN);
+                ret.SetPixels(i, 0, 1, yN, colors);
             }
 
             ret.Apply();
             return ret;
         }
 
+
 #if OLD_CODE
+
+
         ///CropOld => Crop where stretch=1f
         // I chose to write repeated code for the sake of simplicity and ease debugging.
         public static Texture2D CropOld(Texture2D original) {

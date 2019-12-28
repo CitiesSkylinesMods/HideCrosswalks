@@ -240,6 +240,18 @@ namespace HideTMPECrosswalks.Utils {
             Extensions.Log("cache cleared");
         }
 
+        private static NetInfo.Segment GetInfoSegment(NetInfo.Segment [] segments, NetSegment.Flags flags) {
+            foreach(var segment in segments) {
+                if(segment.CheckFlags(flags, out _)) {
+                    return segment;
+                }
+                NetInfo info;
+            }
+            return null;
+        }
+
+        public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
+
         public static Material HideCrossing(Material material, NetInfo info) {
             try {
                 if (MaterialCache == null) {
@@ -248,6 +260,8 @@ namespace HideTMPECrosswalks.Utils {
                 if (MaterialCache.Contains(material)) {
                     return (Material)MaterialCache[material];
                 }
+
+                bool asym = info.isAsym();
 
                 var ticks = System.Diagnostics.Stopwatch.StartNew();
                 string defuse = TextureUtils.TextureNames.Defuse;
@@ -261,6 +275,7 @@ namespace HideTMPECrosswalks.Utils {
                         Extensions.Log("Texture cache hit: " + tex.name);
                     } else {
                         tex = TextureUtils.Process(tex, TextureUtils.Crop);
+                        if(asym) tex = TextureUtils.Process(tex, TextureUtils.Mirror);
                         (tex as Texture2D).Compress(false);
                         TextureCache[tex] = tex;
                     }
@@ -275,13 +290,14 @@ namespace HideTMPECrosswalks.Utils {
                             Extensions.Log("Texture cache hit: " + tex.name);
                         } else {
                             tex = TextureUtils.Process(tex, TextureUtils.Crop);
-                            Material material2 = info.m_segments[0].m_segmentMaterial;
-                            Texture tex2 = material2.GetTexture(alpha);
+                            Material material2 = info.m_segments[0]?.m_material;
+                            Texture tex2 = material2?.GetTexture(alpha);
                             if (tex2 != null) {
                                 Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
                                 tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
                             }
 
+                            if (asym) tex = TextureUtils.Process(tex, TextureUtils.Mirror);
                             (tex as Texture2D).Compress(false);
                             TextureCache[tex] = tex;
                         }
