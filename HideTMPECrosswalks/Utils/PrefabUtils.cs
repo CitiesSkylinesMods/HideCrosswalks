@@ -241,51 +241,59 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static Material HideCrossing(Material material, NetInfo info) {
-            if (MaterialCache == null) {
-                return material; // exiting game.
-            }
-            if (MaterialCache.Contains(material)) {
-                return (Material)MaterialCache[material];
-            }
+            try {
+                if (MaterialCache == null) {
+                    return material; // exiting game.
+                }
+                if (MaterialCache.Contains(material)) {
+                    return (Material)MaterialCache[material];
+                }
 
-            var ticks = System.Diagnostics.Stopwatch.StartNew();
-            string defuse = TextureUtils.TextureNames.Defuse;
-            string alpha = TextureUtils.TextureNames.AlphaMAP;
-            Material ret = new Material(material);
+                var ticks = System.Diagnostics.Stopwatch.StartNew();
+                string defuse = TextureUtils.TextureNames.Defuse;
+                string alpha = TextureUtils.TextureNames.AlphaMAP;
+                Material ret = new Material(material);
 
-            Texture tex = material.GetTexture(defuse);
-            if (TextureCache.Contains(tex)) {
-                tex = TextureCache[tex] as Texture;
-                Extensions.Log("Texture cache hit: " + tex.name);
-            } else {
-                tex = TextureUtils.Process(tex, TextureUtils.Crop);
-                TextureCache[tex] = tex;
-            }
-            ret.SetTexture(defuse, tex);
-
-            if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
-                tex = material.GetTexture(alpha);
+                Texture tex = material.GetTexture(defuse);
                 if (tex != null) {
                     if (TextureCache.Contains(tex)) {
                         tex = TextureCache[tex] as Texture;
                         Extensions.Log("Texture cache hit: " + tex.name);
                     } else {
                         tex = TextureUtils.Process(tex, TextureUtils.Crop);
-                        Material material2 = info.m_segments[0].m_segmentMaterial;
-                        Texture tex2 = material2.GetTexture(alpha);
-                        if (tex2 != null) {
-                            Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
-                            tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
-                        }
                         TextureCache[tex] = tex;
                     }
-                    ret.SetTexture(alpha, tex);
+                    ret.SetTexture(defuse, tex);
                 }
-            }
-             MaterialCache[material] = ret;
 
-            Extensions.Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
-            return ret;
+                if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
+                    tex = material.GetTexture(alpha);
+                    if (tex != null) {
+                        if (TextureCache.Contains(tex)) {
+                            tex = TextureCache[tex] as Texture;
+                            Extensions.Log("Texture cache hit: " + tex.name);
+                        } else {
+                            tex = TextureUtils.Process(tex, TextureUtils.Crop);
+                            Material material2 = info.m_segments[0].m_segmentMaterial;
+                            Texture tex2 = material2.GetTexture(alpha);
+                            if (tex2 != null) {
+                                Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
+                                tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
+                            }
+                            TextureCache[tex] = tex;
+                        }
+                        ret.SetTexture(alpha, tex);
+                    }
+                }
+                MaterialCache[material] = ret;
+
+                Extensions.Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
+                return ret;
+            }
+            catch (Exception e){
+                Extensions.Log(e.ToString());
+                return material;
+            }
         }
     }
 }
