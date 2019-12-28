@@ -5,6 +5,6 @@ namespace HideTMPECrosswalks.Patches {
     public static class LoadingWrapperPatch {
         public delegate void Handler();
         public static event Handler OnPostLevelLoaded;
-        static void Postfix() => OnPostLevelLoaded.Invoke();
+        public static void Postfix() => OnPostLevelLoaded.Invoke();
     }
 }

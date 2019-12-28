@@ -5,6 +5,11 @@ VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HideTMPECrosswalks", "HideTMPECrosswalks\HideTMPECrosswalks.csproj", "{17034566-78DF-4C3D-BD3F-3B833CB2D872}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HideTMPECrosswalks.Tests", "HideTMPECrosswalks.Tests\HideTMPECrosswalks.Tests.csproj", "{F9DBDEF2-4186-4D64-9DA5-95D9F1FADE93}"
+	ProjectSection(ProjectDependencies) = postProject
+		{17034566-78DF-4C3D-BD3F-3B833CB2D872} = {17034566-78DF-4C3D-BD3F-3B833CB2D872}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +20,10 @@ Global
 		{17034566-78DF-4C3D-BD3F-3B833CB2D872}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17034566-78DF-4C3D-BD3F-3B833CB2D872}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17034566-78DF-4C3D-BD3F-3B833CB2D872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9DBDEF2-4186-4D64-9DA5-95D9F1FADE93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9DBDEF2-4186-4D64-9DA5-95D9F1FADE93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9DBDEF2-4186-4D64-9DA5-95D9F1FADE93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9DBDEF2-4186-4D64-9DA5-95D9F1FADE93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

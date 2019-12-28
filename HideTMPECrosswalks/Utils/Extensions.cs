@@ -23,9 +23,15 @@ namespace HideTMPECrosswalks.Utils {
             lock (LogLock) {
                 var st = System.Environment.StackTrace;
                 //m  = st + " : \n" + m;
+#if DEBUG
                 UnityEngine.Debug.Log(m);
+#endif
                 System.IO.File.AppendAllText("mod.debug.log", m + "\n\n");
             }
         }
+        internal static void Assert(bool con, string m="") {
+            if (!con) throw new System.Exception("Assertion failed: " + m);
+        }
+
     }
 }
