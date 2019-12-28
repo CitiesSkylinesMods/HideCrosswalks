@@ -261,6 +261,7 @@ namespace HideTMPECrosswalks.Utils {
                         Extensions.Log("Texture cache hit: " + tex.name);
                     } else {
                         tex = TextureUtils.Process(tex, TextureUtils.Crop);
+                        (tex as Texture2D).Compress(false);
                         TextureCache[tex] = tex;
                     }
                     ret.SetTexture(defuse, tex);
@@ -280,6 +281,8 @@ namespace HideTMPECrosswalks.Utils {
                                 Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
                                 tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
                             }
+
+                            (tex as Texture2D).Compress(false);
                             TextureCache[tex] = tex;
                         }
                         ret.SetTexture(alpha, tex);

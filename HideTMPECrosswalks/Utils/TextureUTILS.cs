@@ -1,10 +1,11 @@
-using UnityEngine;
 
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System;
 using System.Linq;
+
+using UnityEngine;
 
 namespace HideTMPECrosswalks.Utils {
     using static HideTMPECrosswalks.Utils.ColorUtils;
@@ -28,7 +29,7 @@ namespace HideTMPECrosswalks.Utils {
                         Material material = seg.m_segmentMaterial;
                         string baseName = "segment";
                         //if (info.m_segments.Length > 1) baseName += i;
-                        Dump(material, "_MainTex", baseName, dir:roadName);
+                        Dump(material, "_MainTex", baseName, dir: roadName);
                         //Dump(material, "_ARPMap", baseName, dir);
                         //try { Dump(material, "_XYSMap", baseName, dir); } catch { }
                     }
@@ -43,7 +44,7 @@ namespace HideTMPECrosswalks.Utils {
                 }
             }
 
-            public static void Dump(Material material, string baseName=null, string dir=null) {
+            public static void Dump(Material material, string baseName = null, string dir = null) {
                 if (dir == null) dir = "dummy";
                 if (baseName == null) baseName = material.name;
                 Dump(material, TextureNames.Defuse, baseName, dir);
@@ -56,10 +57,20 @@ namespace HideTMPECrosswalks.Utils {
                 Extensions.Log($"BEGIN : {texName} {baseName} {dir}");
                 Texture2D texture = material.GetReadableTexture(texName);
                 Extensions.Log($"Dumping texture " + texture.name);
-                byte[] bytes = texture.EncodeToPNG();
+                string path = GetFilePath(texName, baseName, dir);
+                Extensions.Log($"END: {texName} {baseName} {dir}");
+            }
 
+            public static void Dump(Texture tex, string path) {
+                Texture2D texture = tex as Texture2D;
+                byte[] bytes = texture.EncodeToPNG();
+                Extensions.Log("Dumping to " + path);
+                File.WriteAllBytes(path, bytes);
+            }
+
+            public static string GetFilePath(string texName, string baseName, string dir) {
                 string filename = baseName + texName + ".png";
-                foreach (char c in @"\/:<>|"  +"\"") {
+                foreach (char c in @"\/:<>|" + "\"") {
                     filename = filename.Replace(c.ToString(), "");
                 }
                 foreach (char c in @":<>|" + "\"") {
@@ -67,12 +78,19 @@ namespace HideTMPECrosswalks.Utils {
                 }
 
                 string path = Path.Combine("mod debug dumps", dir);
-                Extensions.Log("Dumping to " + path);
-                Directory.CreateDirectory(path);
-
                 path = Path.Combine(path, filename);
-                File.WriteAllBytes(path, bytes);
-                Extensions.Log($"END: {texName} {baseName} {dir}");
+                return path;
+            }
+
+            public static Texture2D Load(string path) {
+                Extensions.Log("Loading Texture from " + path);
+                byte[] bytes = File.ReadAllBytes(path);
+                Texture2D texture = new Texture2D(1, 1);
+                texture.LoadImage(bytes);
+                texture.anisoLevel = 16;
+                texture.Compress(true);
+                texture.name = path;
+                return texture;
             }
         }
 
@@ -82,7 +100,6 @@ namespace HideTMPECrosswalks.Utils {
             public static string XYSMap => "_XYSMap"; // TODO is this correct?
 
             public static string[] Names => new[] { Defuse, AlphaMAP, XYSMap };
-
         }
 
         public static Texture2D GetReadableTexture(this Material material, string type = "_MainTex") {
@@ -90,7 +107,7 @@ namespace HideTMPECrosswalks.Utils {
                 throw new Exception($"{type} bad texture name. valid texture names are" + String.Join(" ", TextureNames.Names));
             Texture2D texture = material.GetTexture(type) as Texture2D;
             string name = texture.name;
-            texture = texture.MakeReadable();
+            texture = texture.TryMakeReadable();
             texture.name = name + " "; // add space to avoid potential hash problems
             Extensions.Log($"GetReadableTexture: Material={material.name} texture={name}");
             return texture;
@@ -132,7 +149,7 @@ namespace HideTMPECrosswalks.Utils {
             Texture2D newTexture = tex.TryMakeReadable();
             newTexture = func(newTexture);
             newTexture.anisoLevel = tex.anisoLevel;
-            newTexture.Compress(true);
+            //newTexture.Compress(true);
             newTexture.name = tex.name + "-processed";
             return newTexture;
         }
@@ -149,7 +166,7 @@ namespace HideTMPECrosswalks.Utils {
             Texture2D segTex = tex2.TryMakeReadable();
             Texture2D newTexture = func(nodeTex, segTex);
             newTexture.anisoLevel = nodeTex.anisoLevel;
-            newTexture.Compress(true);
+            //newTexture.Compress(true);
             newTexture.name = tex.name + "-processed";
             return newTexture;
         }
@@ -157,9 +174,9 @@ namespace HideTMPECrosswalks.Utils {
         public static Texture2D MeldDiff(Texture2D tex, Texture2D tex2) {
             Texture2D ret = new Texture2D(tex.width, tex.height);
             int yM = (int)(tex.height * 0.3f);
-            int yM2 = (int)(tex2.height * 0.4f); // hack to avoid dashed lines on NExt2.
+            int yM2 = (int)(tex2.height * 0.4f); // hackish code to avoid dashed lines in NExt2.
 
-            float ratio = (float)tex2.width / tex.width;
+            //float ratio = (float)tex2.width / tex.width;
 
             Color[] colors = tex.GetPixels(0, 0, tex.width, 1);
             Color[] diff = tex2.GetPixels(0, yM2, tex2.width, 1);
@@ -172,10 +189,7 @@ namespace HideTMPECrosswalks.Utils {
             for (int j = 0; j < yM; j++) {
                 colors = tex.GetPixels(0, j, tex.width, 1);
                 float w = 1f - (float)j / (float)yM;
-                for (int i = 0; i < colors.Length; ++i) {
-                    int i2 = (int)(i * ratio);
-                    colors[i] += diff[i2] * w;
-                }
+                colors.Addw(diff, w);
                 ret.SetPixels(0, j, tex.width, 1, colors);
             }
             ret.SetPixels(0, yM, tex.width, tex.height - yM, tex.GetPixels(0, yM, tex.width, tex.height - yM));
@@ -185,10 +199,10 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static Texture2D Crop(Texture2D original) {
-            Texture2D ret = new Texture2D(original.width, original.height);
-
             int xN = original.width;
             int yN = original.height;
+            Texture2D ret = new Texture2D(xN,yN);
+
 
             float cropPortion = 0.30f;
             float stretchPortion = 0.40f;
@@ -199,6 +213,21 @@ namespace HideTMPECrosswalks.Utils {
                 ret.SetPixels(0, j, xN, 1, original.GetPixels(0, j2, xN, 1));
             }
             ret.SetPixels(0, yN0, xN, yN - yN0, original.GetPixels(0, yN0, xN, yN - yN0));
+
+            ret.Apply();
+            return ret;
+        }
+
+        public static Texture2D FlipH(Texture2D original) {
+            int xN = original.width;
+            int yN = original.height;
+            Texture2D ret = new Texture2D(xN, yN);
+
+            for (int j = 0; j < yN; j++) {
+                Color[] colors = original.GetPixels(0, j, xN, 1);
+                colors.Flip();
+                ret.SetPixels(0, j, xN, 1, colors);
+            }
 
             ret.Apply();
             return ret;

@@ -12,7 +12,6 @@ namespace HideTMPECrosswalks {
         public string Name => "RM TLM Crossings V2.3";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
 
-
         [UsedImplicitly]
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.

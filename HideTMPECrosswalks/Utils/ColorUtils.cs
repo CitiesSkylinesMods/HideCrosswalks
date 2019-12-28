@@ -10,6 +10,32 @@ namespace HideTMPECrosswalks.Utils {
             }
         }
 
+        public static void Addw(this Color[] colors, Color[] colors2, float w) {
+            float ratio = (float)colors2.Length / colors.Length;
+            if (ratio == 1f) {
+                Addw_fast(colors, colors2, w);
+                return;
+            }
+            for (int i = 0; i < colors.Length; ++i) {
+                int i2 = (int)(i * ratio);
+                colors[i] += colors2[i2]*w;
+            }
+        }
+
+        public static void Addw_fast(Color[] colors, Color[] colors2, float w) {
+            int n = colors.Length;
+            for (int i = 0; i < n; i+=1) {
+                colors[i] += colors2[i] * w;
+            }
+        }
+
+        public static void Flip(this Color[] colors) {
+            int last = colors.Length-1;
+            for (int i = 0; i < colors.Length; ++i) {
+                colors[i] = colors[last - i];
+            }
+        }
+
         #region smoothen
         public const float gradient = 0.005f;
         public const float edge = 0.05f;
