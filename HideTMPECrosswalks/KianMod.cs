@@ -68,14 +68,19 @@ namespace HideTMPECrosswalks {
     }
 
     public class DumpOnLoad : LoadingExtensionBase {
+#if DEBUG
         public override void OnCreated(ILoading loading) => Test();
         public override void OnLevelLoaded(LoadMode mode) => Test();
+#endif
 
         public static void Test() {
+#if DEBUG
             Extensions.Log("Testing ...");
             //PrefabUtils.DebugTests.NameTest();
             PrefabUtils.DebugTests.Dumps();
             Extensions.Log("Testing Done!");
+#endif
         }
+
     }
 }

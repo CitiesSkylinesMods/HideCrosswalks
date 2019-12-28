@@ -11,8 +11,8 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         #region smoothen
-        public const float gradient = 0.01f;
-        public const float edge = 0.075f;
+        public const float gradient = 0.005f;
+        public const float edge = 0.05f;
 
         public static float Smoothen(float c, float c_prev, float gradient = gradient) {
             if (c_prev - c > edge) c = c_prev - gradient;
@@ -46,7 +46,8 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static void Smoothen(this Color[] colors, float gradient = gradient) {
-            for (int i = 1; i < colors.Length; ++i) {
+            for (int i = 1; i < colors.Length; ++i
+                ) {
                 colors[i] = Smoothen(colors[i], colors[i - 1], gradient * colors.Length / 1024f);
             }
             for (int i = colors.Length - 2; i >= 0; --i) {

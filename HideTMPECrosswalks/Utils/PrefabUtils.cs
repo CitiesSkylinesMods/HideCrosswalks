@@ -205,11 +205,18 @@ namespace HideTMPECrosswalks.Utils {
         }
 
 
-        public static Hashtable MaterialCache = new Hashtable(100);
-        public static Hashtable TextureCache = new Hashtable(100);
+        public static Hashtable MaterialCache = null;
+        public static Hashtable TextureCache = null;
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
 
         public static void CachePrefabs() {
+            if (MaterialCache == null) {
+                MaterialCache = new Hashtable(100);
+            }
+            if(TextureCache == null) {
+                TextureCache = new Hashtable(100);
+            }
+
             for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
                 foreach (bool bStartNode in new bool[] { false, true }) {
                     if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
@@ -227,12 +234,16 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static void ClearALLCache() {
-            MaterialCache.Clear();
+            //MaterialCache = null;
+            //TextureCache = null;
             Always_Table = Never_Table = null;
             Extensions.Log("cache cleared");
         }
 
         public static Material HideCrossing(Material material, NetInfo info) {
+            if (MaterialCache == null) {
+                return material; // exiting game.
+            }
             if (MaterialCache.Contains(material)) {
                 return (Material)MaterialCache[material];
             }
