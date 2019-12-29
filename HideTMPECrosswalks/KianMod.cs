@@ -21,6 +21,13 @@ namespace HideTMPECrosswalks {
             LoadingWrapperPatch.OnPostLevelLoaded += DumpOnLoad.Test;
 
             LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearALLCache;
+            try {
+                AppMode mode = Extensions.currentMode;
+                if (mode == AppMode.Game || mode == AppMode.AssetEditor) {
+                    PrefabUtils.CachePrefabs();
+                }
+            }
+            catch { }
         }
 
         [UsedImplicitly]
@@ -45,7 +52,7 @@ namespace HideTMPECrosswalks {
         const string HarmonyId = "CS.kian.HideTMPECrosswalks";
         void InstallHarmony() {
             if (harmony == null) {
-                Debug.Log("HideTMPECrosswalks Patching...");
+                Extensions.Log("HideTMPECrosswalks Patching...",true);
 #if DEBUG
                 HarmonyInstance.DEBUG = true;
 #endif
@@ -59,7 +66,7 @@ namespace HideTMPECrosswalks {
             if (harmony != null) {
                 harmony.UnpatchAll(HarmonyId);
                 harmony = null;
-                Debug.Log("HideTMPECrosswalks Reverted...");
+                Extensions.Log("HideTMPECrosswalks patches Reverted.",true);
             }
         }
         #endregion

@@ -103,7 +103,7 @@ namespace HideTMPECrosswalks.Utils {
             public static void DumpDebugTextures(NetInfo info) {
                 string name = info.GetUncheckedLocalizedTitle();
                 Material material = info.m_nodes[0].m_nodeMaterial;
-                TextureUtils.DumpJob.Dump(material,  baseName: "node original ", dir: name);
+                TextureUtils.DumpJob.Dump(material, baseName: "node original ", dir: name);
 
                 Material material2 = info.m_segments[0].m_segmentMaterial;
                 TextureUtils.DumpJob.Dump(material2, TextureUtils.TextureNames.AlphaMAP, baseName: "segment original", dir: name);
@@ -213,7 +213,7 @@ namespace HideTMPECrosswalks.Utils {
             if (MaterialCache == null) {
                 MaterialCache = new Hashtable(100);
             }
-            if(TextureCache == null) {
+            if (TextureCache == null) {
                 TextureCache = new Hashtable(100);
             }
 
@@ -240,17 +240,27 @@ namespace HideTMPECrosswalks.Utils {
             Extensions.Log("cache cleared");
         }
 
-        private static NetInfo.Segment GetInfoSegment(NetInfo.Segment [] segments, NetSegment.Flags flags) {
-            foreach(var segment in segments) {
-                if(segment.CheckFlags(flags, out _)) {
-                    return segment;
+        public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
+
+        public static bool HasMedian(this NetInfo info) {
+            foreach (var lane in info.m_lanes) {
+                if (lane.m_laneType == NetInfo.LaneType.None) {
+                    return true;
                 }
-                NetInfo info;
             }
-            return null;
+            return false;
         }
 
-        public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
+        public static bool HasDecoration(this NetInfo info) {
+            string title = info.GetUncheckedLocalizedTitle().ToLower();
+            return title.Contains("tree") || title.Contains("grass");
+        }
+
+        public static bool ScaledNode(this NetInfo info) {
+            bool ret = !info.HasDecoration() && !info.HasMedian() && !info.isAsym();
+            Extensions.Log(info.name + " : Scale: " + ret);
+            return ret;
+        }
 
         public static Material HideCrossing(Material material, NetInfo info) {
             try {
@@ -294,6 +304,9 @@ namespace HideTMPECrosswalks.Utils {
                             Texture tex2 = material2?.GetTexture(alpha);
                             if (tex2 != null) {
                                 Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
+                                if (info.ScaledNode()) {
+                                    tex2 = TextureUtils.Process(tex2, TextureUtils.Stretch);
+                                }
                                 tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
                             }
 

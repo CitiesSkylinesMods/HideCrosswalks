@@ -198,6 +198,33 @@ namespace HideTMPECrosswalks.Utils {
             return ret;
         }
 
+        /// <summary>
+        /// stretches if ratiuo is bigger than 1.
+        /// shrinks if ratio is smaller than 1.
+        /// </summary>
+        public static Texture2D Stretch(Texture2D original) {
+            float ratio = 0.915f;
+            int xN = original.width;
+            int yN = original.height;
+            Texture2D ret = new Texture2D(xN, yN);
+
+            int last = xN - 1;
+            int half = xN / 2;
+            for (int i = 0; i <= xN; i++) {
+                int diff = half - i;
+                diff = (int)(diff * ratio);
+                int i2 = half - diff;
+                if (i2 < 0 && i2 >= xN)
+                    continue;
+
+                Color[] colors = original.GetPixels(i, 0, 1, yN);
+                ret.SetPixels(i2, 0, 1, yN, colors);
+            }
+
+            ret.Apply();
+            return ret;
+        }
+
         public static Texture2D Crop(Texture2D original) {
             int xN = original.width;
             int yN = original.height;
