@@ -58,6 +58,7 @@ namespace HideTMPECrosswalks.Utils {
                 Texture2D texture = material.GetReadableTexture(texName);
                 Extensions.Log($"Dumping texture " + texture.name);
                 string path = GetFilePath(texName, baseName, dir);
+                Dump(texture, path);
                 Extensions.Log($"END: {texName} {baseName} {dir}");
             }
 
@@ -66,6 +67,14 @@ namespace HideTMPECrosswalks.Utils {
                 byte[] bytes = texture.EncodeToPNG();
                 Extensions.Log("Dumping to " + path);
                 File.WriteAllBytes(path, bytes);
+            }
+
+            public static void Dump(Texture tex, NetInfo info) {
+                string path = GetFilePath(
+                    texName:"",
+                    baseName:tex.name ?? throw new NullReferenceException("tex.name is null"),
+                    dir: info.GetUncheckedLocalizedTitle());
+                Dump(tex, path);
             }
 
             public static string GetFilePath(string texName, string baseName, string dir) {
@@ -78,6 +87,7 @@ namespace HideTMPECrosswalks.Utils {
                 }
 
                 string path = Path.Combine("mod debug dumps", dir);
+                Directory.CreateDirectory(path);
                 path = Path.Combine(path, filename);
                 return path;
             }
@@ -106,38 +116,20 @@ namespace HideTMPECrosswalks.Utils {
             if (!TextureNames.Names.Contains(type))
                 throw new Exception($"{type} bad texture name. valid texture names are" + String.Join(" ", TextureNames.Names));
             Texture2D texture = material.GetTexture(type) as Texture2D;
-            string name = texture.name;
             texture = texture.TryMakeReadable();
-            texture.name = name + " "; // add space to avoid potential hash problems
-            Extensions.Log($"GetReadableTexture: Material={material.name} texture={name}");
+            Extensions.Log($"GetReadableTexture: Material={material.name} texture={texture.name}");
             return texture;
         }
 
         public static Texture2D TryMakeReadable(this Texture tex) {
             Extensions.Log($"TryMakeReadable:  texture={tex.name}");
             try {
-                return tex.MakeReadable() as Texture2D;
+                Texture2D ret = tex.MakeReadable() as Texture2D;
+                ret.name = tex.name + " "; // add space to avoid potential hash problems
+                return ret;
             } catch {
                 return tex as Texture2D;
             }
-        }
-
-        public static void Process(Material material, string name, TProcessor func) {
-            Texture2D texture = material.GetReadableTexture(name);
-            Texture2D newTexture = func(texture);
-            newTexture.anisoLevel = texture.anisoLevel;
-            newTexture.Compress(true);
-            material.SetTexture(name, newTexture);
-        }
-
-        public static void Process(Material nodeMaterial, Material segmentMaterial, string name, TProcessor2 func) {
-            Texture2D nodeTex = nodeMaterial.GetReadableTexture(name);
-            Texture2D segTex = segmentMaterial.GetReadableTexture(name);
-
-            Texture2D newTexture = func(nodeTex,segTex);
-            newTexture.anisoLevel = nodeTex.anisoLevel;
-            newTexture.Compress(true);
-            nodeMaterial.SetTexture(name, newTexture);
         }
 
         public static Texture2D Process(Texture tex, TProcessor func) {
@@ -150,7 +142,8 @@ namespace HideTMPECrosswalks.Utils {
             newTexture = func(newTexture);
             newTexture.anisoLevel = tex.anisoLevel;
             //newTexture.Compress(true);
-            newTexture.name = tex.name + "-processed";
+            //newTexture.name = tex.name + "-processed";
+            newTexture.name = tex.name + "-" + func.ToString();
             return newTexture;
         }
 
@@ -167,7 +160,9 @@ namespace HideTMPECrosswalks.Utils {
             Texture2D newTexture = func(nodeTex, segTex);
             newTexture.anisoLevel = nodeTex.anisoLevel;
             //newTexture.Compress(true);
-            newTexture.name = tex.name + "-processed";
+            //newTexture.name = tex.name + "-processed";
+            newTexture.name = tex.name + "-" + func.ToString();
+
             return newTexture;
         }
 
@@ -245,7 +240,12 @@ namespace HideTMPECrosswalks.Utils {
             return ret;
         }
 
+        public static bool IsInverted(this Texture tex) => tex.name.ToLower().Contains("inverted");
+
         public static Texture2D Mirror(Texture2D original) {
+            Extensions.Log("Mirror: texture name:" + original.name);
+            if (original.IsInverted())
+                return MirrorInv(original);
             int xN = original.width;
             int yN = original.height;
             Texture2D ret = new Texture2D(xN, yN);
@@ -267,9 +267,50 @@ namespace HideTMPECrosswalks.Utils {
             return ret;
         }
 
+        public static Texture2D MirrorInv(Texture2D original) {
+            Extensions.Log("MirrorInv: texture name:" + original.name);
+
+            int xN = original.width;
+            int yN = original.height;
+            Texture2D ret = new Texture2D(xN, yN);
+
+            int last = xN - 1;
+            int half = xN / 2;
+
+
+            for (int i = 0; i < half; i++) {
+                int i2 = last - i;
+                Color[] colors = original.GetPixels(i2, 0, 1, yN);
+                ret.SetPixels(i, 0, 1, yN, colors);
+            }
+            {
+                Color[] colors = original.GetPixels(half, 0, xN-half, yN);
+                ret.SetPixels(half, 0, xN - half, yN, colors);
+            }
+
+            ret.Apply();
+            return ret;
+        }
+
 
 #if OLD_CODE
+       public static void Process(Material material, string name, TProcessor func) {
+            Texture2D texture = material.GetReadableTexture(name);
+            Texture2D newTexture = func(texture);
+            newTexture.anisoLevel = texture.anisoLevel;
+            newTexture.Compress(true);
+            material.SetTexture(name, newTexture);
+        }
 
+        public static void Process(Material nodeMaterial, Material segmentMaterial, string name, TProcessor2 func) {
+            Texture2D nodeTex = nodeMaterial.GetReadableTexture(name);
+            Texture2D segTex = segmentMaterial.GetReadableTexture(name);
+
+            Texture2D newTexture = func(nodeTex,segTex);
+            newTexture.anisoLevel = nodeTex.anisoLevel;
+            newTexture.Compress(true);
+            nodeMaterial.SetTexture(name, newTexture);
+        }
 
         ///CropOld => Crop where stretch=1f
         // I chose to write repeated code for the sake of simplicity and ease debugging.

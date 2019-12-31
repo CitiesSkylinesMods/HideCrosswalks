@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 namespace HideTMPECrosswalks.Utils {
     using Patches;
     using Settings;
+    using static TextureUtils;
 
     public static class PrefabUtils {
 
@@ -62,7 +63,9 @@ namespace HideTMPECrosswalks.Utils {
                     NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                     if (info?.m_netAI is RoadAI) {
                         string name = info.GetUncheckedLocalizedTitle();
-                        bool b = name.ToLower().Contains("suburban");
+                        bool b;
+                        b = name.ToLower().Contains("asym");
+                        //b = true;
                         if (b) {
                             string m = name;
                             RoadAI ai = info.m_netAI as RoadAI;
@@ -83,15 +86,16 @@ namespace HideTMPECrosswalks.Utils {
                     NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                     if (info?.m_netAI is RoadAI) {
                         string name = info.GetUncheckedLocalizedTitle().Trim();
-                        bool b = name.ToLower().Contains("12");
-                        b |= name == "Six-Lane Road";
-                        b |= name == "Six-Lane Road with Median";
-                        b |= name == "Eight-Lane Road";
-                        b |= name == "Four-Lane Road";
-                        b |= name == "Four-Lane Road with Median";
-                        b |= name.ToLower().Contains("suburb");
+                        bool b = false;
+                        //b |= name.ToLower().Contains("12");
+                        //b |= name == "Six-Lane Road";
+                        //b |= name == "Six-Lane Road with Median";
+                        //b |= name == "Eight-Lane Road";
+                        //b |= name == "Four-Lane Road";
+                        //b |= name == "Four-Lane Road with Median";
+                        //b |= name.ToLower().Contains("suburb");
                         b |= name.ToLower().Contains("2+3");
-
+                        b |= name.ToLower().Contains("2+4");
                         if (b) {
                             Extensions.Log("found " + name);
                             DumpDebugTextures(info);
@@ -102,27 +106,20 @@ namespace HideTMPECrosswalks.Utils {
 
             public static void DumpDebugTextures(NetInfo info) {
                 string name = info.GetUncheckedLocalizedTitle();
+                string alpha = TextureNames.AlphaMAP;
                 Material material = info.m_nodes[0].m_nodeMaterial;
-                TextureUtils.DumpJob.Dump(material, baseName: "node original ", dir: name);
-
+                DumpJob.Dump(material, alpha, baseName: "node-original ", dir: name);
                 Material material2 = info.m_segments[0].m_segmentMaterial;
-                TextureUtils.DumpJob.Dump(material2, TextureUtils.TextureNames.AlphaMAP, baseName: "segment original", dir: name);
+                DumpJob.Dump(material2, alpha, baseName: "segment-original", dir: name);
 
-                ///////////////////////////// Defuse processing
+                string texName = TextureNames.AlphaMAP;
+                var tex = material2.GetTexture(texName);
+                if (info.isAsym()) tex = Process(tex, Mirror);
+                string path = DumpJob.GetFilePath(texName, "segment-mirrored", info.GetUncheckedLocalizedTitle());
+                DumpJob.Dump(tex, path);
 
-                Material ret = new Material(material);
-                TextureUtils.Process(ret, TextureUtils.TextureNames.Defuse, TextureUtils.Crop);
-                TextureUtils.DumpJob.Dump(ret, TextureUtils.TextureNames.Defuse, baseName: "node cropped", dir: name);
-
-                //TODO try this on test on clus's asym road
-                //Material ret2 = new Material(material);
-                //TextureUtils.Process(ret2, TextureUtils.TextureNames.Defuse, TextureUtils.CropOld);
-                //TextureUtils.DumpJob.Dump(ret2, TextureUtils.TextureNames.Defuse, baseName: "node cropped old", dir: name);
-
-                /////////////////////////////// Alpha processing
-                TextureUtils.Process(ret, TextureUtils.TextureNames.AlphaMAP, TextureUtils.Crop);
-                TextureUtils.Process(ret, material2, "_APRMap", TextureUtils.MeldDiff);
-                TextureUtils.DumpJob.Dump(ret, TextureUtils.TextureNames.AlphaMAP, baseName: "node melt", dir: name);
+                material = HideCrossing(material, info);
+                DumpJob.Dump(material, alpha, baseName: "node-processed ", dir: name);
 
 
             }
@@ -253,11 +250,12 @@ namespace HideTMPECrosswalks.Utils {
 
         public static bool HasDecoration(this NetInfo info) {
             string title = info.GetUncheckedLocalizedTitle().ToLower();
-            return title.Contains("tree") || title.Contains("grass");
+            return title.Contains("tree") || title.Contains("grass") || title.Contains("arterial");
         }
 
         public static bool ScaledNode(this NetInfo info) {
-            bool ret = !info.HasDecoration() && !info.HasMedian() && !info.isAsym();
+            bool ret = !info.HasDecoration() && !info.HasMedian() && !info.isAsym() && !info.m_isCustomContent;
+            ret |= info.name == "AsymAvenueL2R3";
             Extensions.Log(info.name + " : Scale: " + ret);
             return ret;
         }
@@ -274,8 +272,8 @@ namespace HideTMPECrosswalks.Utils {
                 bool asym = info.isAsym();
 
                 var ticks = System.Diagnostics.Stopwatch.StartNew();
-                string defuse = TextureUtils.TextureNames.Defuse;
-                string alpha = TextureUtils.TextureNames.AlphaMAP;
+                string defuse = TextureNames.Defuse;
+                string alpha = TextureNames.AlphaMAP;
                 Material ret = new Material(material);
 
                 Texture tex = material.GetTexture(defuse);
@@ -284,8 +282,8 @@ namespace HideTMPECrosswalks.Utils {
                         tex = TextureCache[tex] as Texture;
                         Extensions.Log("Texture cache hit: " + tex.name);
                     } else {
-                        tex = TextureUtils.Process(tex, TextureUtils.Crop);
-                        if(asym) tex = TextureUtils.Process(tex, TextureUtils.Mirror);
+                        //if (asym) tex = Process(tex, Mirror);
+                        tex = Process(tex, Crop);
                         (tex as Texture2D).Compress(false);
                         TextureCache[tex] = tex;
                     }
@@ -299,19 +297,18 @@ namespace HideTMPECrosswalks.Utils {
                             tex = TextureCache[tex] as Texture;
                             Extensions.Log("Texture cache hit: " + tex.name);
                         } else {
-                            tex = TextureUtils.Process(tex, TextureUtils.Crop);
+                            tex = Process(tex, Crop);
                             Material material2 = info.m_segments[0]?.m_material;
                             Texture tex2 = material2?.GetTexture(alpha);
                             if (tex2 != null) {
                                 Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
+                                if (asym) tex2 = Process(tex2, Mirror);
                                 if (info.ScaledNode()) {
-                                    tex2 = TextureUtils.Process(tex2, TextureUtils.Stretch);
+                                    tex2 = Process(tex2, Stretch);
                                 }
-                                tex = TextureUtils.Process(tex, tex2, TextureUtils.MeldDiff);
+                                tex = Process(tex, tex2, MeldDiff);
                             }
-
-                            if (asym) tex = TextureUtils.Process(tex, TextureUtils.Mirror);
-                            (tex as Texture2D).Compress(false);
+                            (tex as Texture2D).Compress(false); //TODO make un-readable?
                             TextureCache[tex] = tex;
                         }
                         ret.SetTexture(alpha, tex);
