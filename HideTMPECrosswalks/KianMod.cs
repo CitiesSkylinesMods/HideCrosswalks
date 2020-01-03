@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace HideTMPECrosswalks {
     public class KianModInfo : IUserMod {
-        public string Name => "RM TLM Crossings V2.4";
+        public string Name => "RM TMPE Crossings V2.4";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
 
         [UsedImplicitly]
@@ -83,10 +83,10 @@ namespace HideTMPECrosswalks {
             if (!Extensions.InGame && !Extensions.InAssetEditor)
                 return;
 
-            //Extensions.Log("Testing ...");
-            //PrefabUtils.DebugTests.NameTest();
-            //PrefabUtils.DebugTests.Dumps();
-            //Extensions.Log("Testing Done!");
+            Extensions.Log("Testing ...");
+            PrefabUtils.DebugTests.NameTest();
+            PrefabUtils.DebugTests.Dumps();
+            Extensions.Log("Testing Done!");
         }
 
     }

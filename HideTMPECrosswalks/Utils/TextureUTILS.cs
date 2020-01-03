@@ -54,16 +54,14 @@ namespace HideTMPECrosswalks.Utils {
             }
 
             public static void Dump(Material material, string texName, string baseName, string dir) {
-                Extensions.Log($"BEGIN : {texName} {baseName} {dir}");
                 Texture2D texture = material.GetReadableTexture(texName);
-                Extensions.Log($"Dumping texture " + texture.name);
                 string path = GetFilePath(texName, baseName, dir);
                 Dump(texture, path);
-                Extensions.Log($"END: {texName} {baseName} {dir}");
             }
 
             public static void Dump(Texture tex, string path) {
-                Texture2D texture = tex as Texture2D;
+                Texture2D texture = tex.TryMakeReadable();
+                Extensions.Log($"Dumping texture " + texture.name);
                 byte[] bytes = texture.EncodeToPNG();
                 Extensions.Log("Dumping to " + path);
                 File.WriteAllBytes(path, bytes);
@@ -71,14 +69,17 @@ namespace HideTMPECrosswalks.Utils {
 
             public static void Dump(Texture tex, NetInfo info) {
                 string path = GetFilePath(
-                    texName:"",
+                    texType:"",
                     baseName:tex.name ?? throw new NullReferenceException("tex.name is null"),
                     dir: info.GetUncheckedLocalizedTitle());
                 Dump(tex, path);
             }
 
-            public static string GetFilePath(string texName, string baseName, string dir) {
-                string filename = baseName + texName + ".png";
+            public static string GetFilePath(string texType, string baseName, NetInfo info) =>
+                GetFilePath(texType, baseName, info.GetUncheckedLocalizedTitle());
+
+            public static string GetFilePath(string texType, string baseName, string dir) {
+                string filename = baseName + texType + ".png";
                 foreach (char c in @"\/:<>|" + "\"") {
                     filename = filename.Replace(c.ToString(), "");
                 }
@@ -122,7 +123,7 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static Texture2D TryMakeReadable(this Texture tex) {
-            Extensions.Log($"TryMakeReadable:  texture={tex.name}");
+            //Extensions.Log($"TryMakeReadable:  texture={tex.name}");
             try {
                 Texture2D ret = tex.MakeReadable() as Texture2D;
                 ret.name = tex.name + " "; // add space to avoid potential hash problems
@@ -292,7 +293,6 @@ namespace HideTMPECrosswalks.Utils {
             ret.Apply();
             return ret;
         }
-
 
 #if OLD_CODE
        public static void Process(Material material, string name, TProcessor func) {

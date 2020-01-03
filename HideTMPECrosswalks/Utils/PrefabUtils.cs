@@ -96,8 +96,9 @@ namespace HideTMPECrosswalks.Utils {
                         //b |= name == "Four-Lane Road";
                         //b |= name == "Four-Lane Road with Median";
                         //b |= name.ToLower().Contains("suburb");
-                        b |= name.ToLower().Contains("2+3");
+                        //b |= name.ToLower().Contains("2+3");
                         //b |= name.ToLower().Contains("2+4");
+                        b = info.category == "RoadsLarge";
                         if (b) {
                             Extensions.Log("found " + name);
                             DumpDebugTextures(info);
@@ -116,7 +117,13 @@ namespace HideTMPECrosswalks.Utils {
 
                 var tex = material2.GetTexture(alpha);
                 if (info.isAsym()) tex = Process(tex, Mirror);
-                string path = DumpJob.GetFilePath(alpha, "segment-mirrored", info.GetUncheckedLocalizedTitle());
+                float ratio = info.ScaleRatio();
+                if (ratio != 1f) {
+                    Texture2D ScaleRatio(Texture2D t) => Scale(t, ratio);
+                    tex = Process(tex, ScaleRatio);
+                }
+                string s = ratio == 1 ? "segment-mirrored" : "segment-mirrored-scaled";
+                string path = DumpJob.GetFilePath(alpha, s, info.GetUncheckedLocalizedTitle());
                 DumpJob.Dump(tex, path);
 
                 material = HideCrossing(material, info);
