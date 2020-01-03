@@ -142,8 +142,7 @@ namespace HideTMPECrosswalks.Utils {
             newTexture = func(newTexture);
             newTexture.anisoLevel = tex.anisoLevel;
             //newTexture.Compress(true);
-            //newTexture.name = tex.name + "-processed";
-            newTexture.name = tex.name + "-" + func.ToString();
+            newTexture.name = tex.name + "-" + Extensions.GetPrettyFunctionName(func.Method);
             return newTexture;
         }
 
@@ -160,13 +159,13 @@ namespace HideTMPECrosswalks.Utils {
             Texture2D newTexture = func(nodeTex, segTex);
             newTexture.anisoLevel = nodeTex.anisoLevel;
             //newTexture.Compress(true);
-            //newTexture.name = tex.name + "-processed";
-            newTexture.name = tex.name + "-" + func.ToString();
+            newTexture.name = tex.name + "-" + Extensions.GetPrettyFunctionName(func.Method);
 
             return newTexture;
         }
 
         public static Texture2D MeldDiff(Texture2D tex, Texture2D tex2) {
+            Extensions.Log($"MeldDiff node:<{tex.name}> segment:<{tex2.name}>");
             Texture2D ret = new Texture2D(tex.width, tex.height);
             int yM = (int)(tex.height * 0.3f);
             int yM2 = (int)(tex2.height * 0.4f); // hackish code to avoid dashed lines in NExt2.
@@ -176,10 +175,9 @@ namespace HideTMPECrosswalks.Utils {
             Color[] colors = tex.GetPixels(0, 0, tex.width, 1);
             Color[] diff = tex2.GetPixels(0, yM2, tex2.width, 1);
 
-            var ticks = System.Diagnostics.Stopwatch.StartNew();
             diff.Subtract(colors);
-            diff.SmoothenAPR();
             diff.Clamp();
+            diff.SmoothenAPR();
 
             for (int j = 0; j < yM; j++) {
                 colors = tex.GetPixels(0, j, tex.width, 1);
@@ -190,6 +188,11 @@ namespace HideTMPECrosswalks.Utils {
             ret.SetPixels(0, yM, tex.width, tex.height - yM, tex.GetPixels(0, yM, tex.width, tex.height - yM));
 
             ret.Apply();
+
+            //DumpJob.Dump(tex, DumpJob.GetFilePath("tex", "", "melddiff"));
+            //DumpJob.Dump(tex2, DumpJob.GetFilePath("tex2", "", "melddiff"));
+            //DumpJob.Dump(ret, DumpJob.GetFilePath("ret", "", "melddiff"));
+
             return ret;
         }
 
@@ -197,15 +200,14 @@ namespace HideTMPECrosswalks.Utils {
         /// stretches if ratiuo is bigger than 1.
         /// shrinks if ratio is smaller than 1.
         /// </summary>
-        public static Texture2D Stretch(Texture2D original) {
-            float ratio = 0.915f;
+        public static Texture2D Scale(Texture2D original, float ratio = 0.915f) {
+            Extensions.Log($"Scaling {original.name} raito:{ratio}");
             int xN = original.width;
             int yN = original.height;
             Texture2D ret = new Texture2D(xN, yN);
 
-            int last = xN - 1;
             int half = xN / 2;
-            for (int i = 0; i <= xN; i++) {
+            for (int i = 0; i < xN; i++) {
                 int diff = half - i;
                 diff = (int)(diff * ratio);
                 int i2 = half - diff;
@@ -215,7 +217,6 @@ namespace HideTMPECrosswalks.Utils {
                 Color[] colors = original.GetPixels(i, 0, 1, yN);
                 ret.SetPixels(i2, 0, 1, yN, colors);
             }
-
             ret.Apply();
             return ret;
         }

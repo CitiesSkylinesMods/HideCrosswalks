@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 namespace HideTMPECrosswalks.Tests
 {
@@ -12,8 +8,11 @@ namespace HideTMPECrosswalks.Tests
             System.Console.WriteLine(m);
         }
         public static void Assert(bool con, string m) {
-            Log("Asserting: " + m);
-            System.Diagnostics.Debug.Assert(con, m);
+            //Log("Asserting: " + m);
+            if (!con)
+                Log("Assertion FAILED!!!! " + m);
+            else
+                Log("Assertion passed:" + m);
         }
 
         static void Main(string[] args)
@@ -31,13 +30,26 @@ namespace HideTMPECrosswalks.Tests
         }
 
         static void Test() {
-            try {
-                throw new System.IO.FileNotFoundException("Some test exception");
+            void ScaleRatio() {
+                TheFunctionName();
             }
-            catch {
-                Log("Catched exception");
-            }
-            Log("POINT A");
+            FType lamdaScale = () => TheFunctionName();
+
+            string s = GetName(lamdaScale);
+            Log(s);
+        }
+
+        public static string GetName(FType f) {
+            string s =  f.Method.Name;
+            //string[] ss = s.Split(new[] { "g__", "|" }, System.StringSplitOptions.RemoveEmptyEntries);
+            //if (ss.Length == 3)
+            //    return ss[1];
+            return s;
+        }
+
+        public delegate void FType();
+        public static void TheFunctionName() {
+
         }
     }
 

@@ -38,11 +38,11 @@ namespace HideTMPECrosswalks.Utils {
 
         #region smoothen
         public const float gradient = 0.005f;
-        public const float edge = 0.05f;
+        public const float edge = 0.075f;
 
         public static float Smoothen(float c, float c_prev, float gradient = gradient) {
-            if (c_prev - c > edge) c = c_prev - gradient;
-            if (c_prev - c < -edge) c = c_prev + gradient;
+            c = SmoothenUp(c, c_prev, gradient);
+            c = SmoothenDown(c, c_prev, gradient);
             return c;
         }
 
@@ -114,3 +114,4 @@ namespace HideTMPECrosswalks.Utils {
         #endregion clamp
     }
 }
+

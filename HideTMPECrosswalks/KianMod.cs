@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace HideTMPECrosswalks {
     public class KianModInfo : IUserMod {
-        public string Name => "RM TLM Crossings V2.3";
+        public string Name => "RM TLM Crossings V2.4";
         public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
 
         [UsedImplicitly]
@@ -18,8 +18,9 @@ namespace HideTMPECrosswalks {
             InstallHarmony();
 
             LoadingWrapperPatch.OnPostLevelLoaded += PrefabUtils.CachePrefabs;
-            LoadingWrapperPatch.OnPostLevelLoaded += DumpOnLoad.Test;
-
+#if DEBUG
+            LoadingWrapperPatch.OnPostLevelLoaded += TestOnLoad.Test;
+#endif
             LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearALLCache;
             try {
                 AppMode mode = Extensions.currentMode;
@@ -35,8 +36,9 @@ namespace HideTMPECrosswalks {
             UninstallHarmony();
             PrefabUtils.ClearALLCache();
             LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.CachePrefabs;
-            LoadingWrapperPatch.OnPostLevelLoaded -= DumpOnLoad.Test;
-
+#if DEBUG
+            LoadingWrapperPatch.OnPostLevelLoaded -= TestOnLoad.Test;
+#endif
             LoadingManager.instance.m_levelUnloaded -= PrefabUtils.ClearALLCache;
             Options.instance = null;
         }
@@ -72,20 +74,22 @@ namespace HideTMPECrosswalks {
         #endregion
     }
 
-    public class DumpOnLoad : LoadingExtensionBase {
 #if DEBUG
+    public class TestOnLoad : LoadingExtensionBase {
         public override void OnCreated(ILoading loading) { base.OnCreated(loading) ;Test(); }
         public override void OnLevelLoaded(LoadMode mode) => Test();
-#endif
 
         public static void Test() {
-#if DEBUG
+            if (!Extensions.InGame && !Extensions.InAssetEditor)
+                return;
+
             //Extensions.Log("Testing ...");
             //PrefabUtils.DebugTests.NameTest();
             //PrefabUtils.DebugTests.Dumps();
             //Extensions.Log("Testing Done!");
-#endif
         }
 
     }
+#endif
+
 }

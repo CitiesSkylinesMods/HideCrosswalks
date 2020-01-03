@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Text.RegularExpressions;
 
 namespace HideTMPECrosswalks.Utils {
     using Patches;
@@ -64,20 +63,23 @@ namespace HideTMPECrosswalks.Utils {
                     if (info?.m_netAI is RoadAI) {
                         string name = info.GetUncheckedLocalizedTitle();
                         bool b;
-                        b = name.ToLower().Contains("asym");
-                        //b = true;
+                        //b = name.ToLower().Contains("asym");
+                        b = true;
                         if (b) {
                             string m = name;
                             RoadAI ai = info.m_netAI as RoadAI;
-                            m += "|" + ai?.m_elevatedInfo?.name;
-                            m += "|" + ai?.m_bridgeInfo?.name;
-                            m += "|" + ai?.m_slopeInfo?.name;
-                            m += "|" + ai?.m_tunnelInfo?.name;
+                            //m += "|" + ai?.m_elevatedInfo?.name;
+                            //m += "|" + ai?.m_bridgeInfo?.name;
+                            //m += "|" + ai?.m_slopeInfo?.name;
+                            //m += "|" + ai?.m_tunnelInfo?.name;
+                            m += "|| level:" + info.GetClassLevel();
+                            m += " class:" + info.m_class;
+                            m += " category:" + info.category;
                             Extensions.Log(m);
                         }
-
                     }
                 }
+                Extensions.Log(Extensions.BIG("DONE PRITING NAMES!"));
             }
             public static bool RoadNameEqual(string n1, string n2) => n1.Trim().ToLower() == n2.Trim().ToLower();
 
@@ -95,7 +97,7 @@ namespace HideTMPECrosswalks.Utils {
                         //b |= name == "Four-Lane Road with Median";
                         //b |= name.ToLower().Contains("suburb");
                         b |= name.ToLower().Contains("2+3");
-                        b |= name.ToLower().Contains("2+4");
+                        //b |= name.ToLower().Contains("2+4");
                         if (b) {
                             Extensions.Log("found " + name);
                             DumpDebugTextures(info);
@@ -112,10 +114,9 @@ namespace HideTMPECrosswalks.Utils {
                 Material material2 = info.m_segments[0].m_segmentMaterial;
                 DumpJob.Dump(material2, alpha, baseName: "segment-original", dir: name);
 
-                string texName = TextureNames.AlphaMAP;
-                var tex = material2.GetTexture(texName);
+                var tex = material2.GetTexture(alpha);
                 if (info.isAsym()) tex = Process(tex, Mirror);
-                string path = DumpJob.GetFilePath(texName, "segment-mirrored", info.GetUncheckedLocalizedTitle());
+                string path = DumpJob.GetFilePath(alpha, "segment-mirrored", info.GetUncheckedLocalizedTitle());
                 DumpJob.Dump(tex, path);
 
                 material = HideCrossing(material, info);
@@ -253,9 +254,12 @@ namespace HideTMPECrosswalks.Utils {
             return title.Contains("tree") || title.Contains("grass") || title.Contains("arterial");
         }
 
-        public static bool ScaledNode(this NetInfo info) {
-            bool ret = !info.HasDecoration() && !info.HasMedian() && !info.isAsym() && !info.m_isCustomContent;
-            ret |= info.name == "AsymAvenueL2R3";
+        public static float ScaleRatio(this NetInfo info) {
+            float ret = 1f;
+            if (!info.HasDecoration() && !info.HasMedian() && !info.isAsym() && !info.m_isCustomContent)
+                ret = 0.915f;
+            else if (info.name == "AsymAvenueL2R3")
+                ret = 0.91f;
             Extensions.Log(info.name + " : Scale: " + ret);
             return ret;
         }
@@ -282,7 +286,6 @@ namespace HideTMPECrosswalks.Utils {
                         tex = TextureCache[tex] as Texture;
                         Extensions.Log("Texture cache hit: " + tex.name);
                     } else {
-                        //if (asym) tex = Process(tex, Mirror);
                         tex = Process(tex, Crop);
                         (tex as Texture2D).Compress(false);
                         TextureCache[tex] = tex;
@@ -290,7 +293,12 @@ namespace HideTMPECrosswalks.Utils {
                     ret.SetTexture(defuse, tex);
                 }
 
-                if (info.GetClassLevel() > ItemClass.Level.Level1 || info.m_isCustomContent) {
+                string[] exempt_categories = {
+                    "RoadsTiny",
+                    "RoadsSmall",
+                    //"RoadsSmallHV",
+                };
+                if (!exempt_categories.Contains(info.category)) {
                     tex = material.GetTexture(alpha);
                     if (tex != null) {
                         if (TextureCache.Contains(tex)) {
@@ -301,10 +309,11 @@ namespace HideTMPECrosswalks.Utils {
                             Material material2 = info.m_segments[0]?.m_material;
                             Texture tex2 = material2?.GetTexture(alpha);
                             if (tex2 != null) {
-                                Extensions.Log($"melding {info.name} - node material = {material.name} -> {ret} | segment material = {material2.name}");
                                 if (asym) tex2 = Process(tex2, Mirror);
-                                if (info.ScaledNode()) {
-                                    tex2 = Process(tex2, Stretch);
+                                float ratio = info.ScaleRatio();
+                                if ( ratio != 1f) {
+                                    Texture2D ScaleRatio(Texture2D t) => Scale(t, ratio);
+                                    tex2 = Process(tex2, ScaleRatio);
                                 }
                                 tex = Process(tex, tex2, MeldDiff);
                             }
