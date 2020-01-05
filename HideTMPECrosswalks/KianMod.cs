@@ -83,10 +83,11 @@ namespace HideTMPECrosswalks {
             if (!Extensions.InGame && !Extensions.InAssetEditor)
                 return;
 
-            Extensions.Log("Testing ...");
-            PrefabUtils.DebugTests.NameTest();
-            PrefabUtils.DebugTests.Dumps();
-            Extensions.Log("Testing Done!");
+            //Extensions.Log("Testing ...");
+            //PrefabUtils.DebugTests.NameTest();
+            //PrefabUtils.DebugTests.Dumps();
+            //PrefabUtils.DebugTests.WierdNodeTest();
+            //Extensions.Log("Testing Done!");
         }
 
     }

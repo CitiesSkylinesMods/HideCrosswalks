@@ -4,6 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// TODO:
+//  - fix asym elevated <-----
+
 namespace HideTMPECrosswalks.Utils {
     using Patches;
     using Settings;
@@ -57,6 +60,34 @@ namespace HideTMPECrosswalks.Utils {
             public static string R6L => "Six-Lane Road";
             public static string R4L => "Four-Lane Road";
 
+            public static void MakeSameNodeSegMat(NetInfo info) {
+                var node = info.m_nodes[0];
+                var seg = info.m_segments[0];
+                //foreach (string texType in TextureNames.Names) {
+                //    try {
+                //        Texture tseg = seg.m_material.GetTexture(texType);
+                //        node.m_material.SetTexture(texType, tseg);
+                //        string m = $"{info.name} - {texType}> Made node tex == seg tex ";
+                //        Extensions.Log(Extensions.BIG(m));
+                //    }
+                //    catch { }
+                //}
+                node.m_material = node.m_nodeMaterial = seg.m_material;
+                string m = $"{info.name}> Made node material == seg material ";
+                Extensions.Log(Extensions.BIG(m));
+            }
+
+            public static void WierdNodeTest() {
+                for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
+                    NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                    if (IsNormalGroundRoad(info)) {
+                        if (info.GetUncheckedLocalizedTitle() == R6L) {
+                            info = (info.m_netAI as RoadAI).m_elevatedInfo;
+                            MakeSameNodeSegMat(info);
+                        }
+                    }
+                }
+            }
             public static void NameTest() {
                 for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
                     NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
@@ -96,11 +127,12 @@ namespace HideTMPECrosswalks.Utils {
                         //b |= name == "Four-Lane Road";
                         //b |= name == "Four-Lane Road with Median";
                         //b |= name.ToLower().Contains("suburb");
-                        //b |= name.ToLower().Contains("2+3");
-                        //b |= name.ToLower().Contains("2+4");
-                        b = info.category == "RoadsLarge";
+                        b |= name.ToLower().Contains("2+3");
+                        b |= name.ToLower().Contains("2+4");
+                        //b = info.category == "RoadsLarge";
                         if (b) {
                             Extensions.Log("found " + name);
+                            info = (info.m_netAI as RoadAI).m_elevatedInfo;
                             DumpDebugTextures(info);
                         }
                     }
@@ -123,7 +155,7 @@ namespace HideTMPECrosswalks.Utils {
                     tex = Process(tex, ScaleRatio);
                 }
                 string s = ratio == 1 ? "segment-mirrored" : "segment-mirrored-scaled";
-                string path = DumpJob.GetFilePath(alpha, s, info.GetUncheckedLocalizedTitle());
+                string path = DumpJob.GetFilePath(alpha, s, dir:name);
                 DumpJob.Dump(tex, path);
 
                 material = HideCrossing(material, info);
@@ -247,6 +279,27 @@ namespace HideTMPECrosswalks.Utils {
 
         public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
 
+        public static NetInfo GetGroundInfo(this NetInfo info) {
+            if (info.m_netAI is RoadAI)
+                return info;
+            int n = PrefabCollection<NetInfo>.LoadedCount();
+            for(uint i=0; i < n; ++i) {
+                NetInfo info2 = PrefabCollection<NetInfo>.GetLoaded(i);
+                if (IsNormalGroundRoad(info2)) {
+                    RoadAI ai = info2.m_netAI as RoadAI;
+                    bool b;
+                    b = ai.m_elevatedInfo == info;
+                    b |= ai.m_bridgeInfo == info;
+                    b |= ai.m_tunnelInfo == info;
+                    b |= ai.m_slopeInfo == info;
+                    if (b)
+                        return info2;
+                }
+            }
+            return null;//in case of failure.
+        }
+
+
         public static bool HasMedian(this NetInfo info) {
             foreach (var lane in info.m_lanes) {
                 if (lane.m_laneType == NetInfo.LaneType.None) {
@@ -263,12 +316,40 @@ namespace HideTMPECrosswalks.Utils {
 
         public static float ScaleRatio(this NetInfo info) {
             float ret = 1f;
+            if(!(info.m_netAI is RoadAI)) {
+                return ret;
+            }
+
             if (!info.HasDecoration() && !info.HasMedian() && !info.isAsym() && !info.m_isCustomContent)
                 ret = 0.915f;
             else if (info.name == "AsymAvenueL2R3")
                 ret = 0.91f;
             Extensions.Log(info.name + " : Scale: " + ret);
             return ret;
+        }
+
+        public static bool IsNExt(NetInfo info) {
+            string c = info.m_class.name.ToLower();
+            bool ret =  c.StartsWith("next");
+            Extensions.Log($"IsNExt returns {ret} : {info.GetUncheckedLocalizedTitle()} : " + c);
+            return ret;
+        }
+
+        public static bool HasSameNodeAndSegmentTextures(NetInfo info, string texType = null) {
+            string defuse = TextureNames.Defuse;
+            string alpha = TextureNames.AlphaMAP;
+            texType = texType ?? defuse;
+            foreach(var node in info.m_nodes) {
+                foreach(var seg in info.m_segments) {
+                    if (node.m_material == seg.m_material) return true;
+                    Texture t1 = node.m_material.GetTexture(texType);
+                    Texture t2 = seg.m_material.GetTexture(texType);
+                    if (t1 == t2)
+                        return true;
+                }
+            }
+            return false;
+
         }
 
         public static Material HideCrossing(Material material, NetInfo info) {
@@ -279,6 +360,19 @@ namespace HideTMPECrosswalks.Utils {
                 if (MaterialCache.Contains(material)) {
                     return (Material)MaterialCache[material];
                 }
+                if (HasSameNodeAndSegmentTextures(info)) {
+                    // TODO why this works but the WierdNodeTest() fails.
+                    string m = $"{info.name} is {info.category }is without proper node texture.";
+                    Extensions.Log(m);
+                    MaterialCache[material] = material;
+                    return material;
+                }
+#if DEBUG
+                bool dump = true;
+#else
+                bool dump = false;
+#endif
+                if(dump)DumpJob.Dump(info);
 
                 bool asym = info.isAsym();
 
@@ -298,6 +392,7 @@ namespace HideTMPECrosswalks.Utils {
                         TextureCache[tex] = tex;
                     }
                     ret.SetTexture(defuse, tex);
+                    if (dump) DumpJob.Dump(tex, DumpJob.GetFilePath(defuse, "node-processed", info));
                 }
 
                 string[] exempt_categories = {
@@ -323,6 +418,8 @@ namespace HideTMPECrosswalks.Utils {
                                     tex2 = Process(tex2, ScaleRatio);
                                 }
                                 tex = Process(tex, tex2, MeldDiff);
+                                if (dump) DumpJob.Dump(tex2, DumpJob.GetFilePath(alpha,"segment-processed", info));
+                                if (dump) DumpJob.Dump(tex, DumpJob.GetFilePath(alpha, "node-processed", info));
                             }
                             (tex as Texture2D).Compress(false); //TODO make un-readable?
                             TextureCache[tex] = tex;

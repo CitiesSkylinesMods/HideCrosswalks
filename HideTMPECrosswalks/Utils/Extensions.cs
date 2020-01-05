@@ -62,8 +62,9 @@ namespace HideTMPECrosswalks.Utils {
                 return ret_;
             }
             m = "  " + m + "  ";
-            string stars1 = mul("*", 80);
-            string stars2 = mul("*", (80 - m.Length) / 2);
+            int n = 120;
+            string stars1 = mul("*", n);
+            string stars2 = mul("*", (n - m.Length) / 2);
             string ret = stars1 + "\n" + stars2 + m + stars2 + "\n" + stars1;
             return ret;
         }

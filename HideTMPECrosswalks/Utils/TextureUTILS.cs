@@ -22,16 +22,14 @@ namespace HideTMPECrosswalks.Utils {
                 // not intersted in multi-thread processing. I just wan it to be outside of simulation thread.
                 lock (locker) {
                     string roadName = info.GetUncheckedLocalizedTitle();
-                    //for (int i = 0; i < info.m_segments.Length; ++i)
+                    for (int i = 0; i < info.m_segments.Length; ++i)
                     {
-                        int i = 0;
                         var seg = info.m_segments[i];
                         Material material = seg.m_segmentMaterial;
                         string baseName = "segment";
                         //if (info.m_segments.Length > 1) baseName += i;
-                        Dump(material, "_MainTex", baseName, dir: roadName);
-                        //Dump(material, "_ARPMap", baseName, dir);
-                        //try { Dump(material, "_XYSMap", baseName, dir); } catch { }
+                        Dump(material,  baseName, dir: roadName);
+                        break; //first one is enough
                     }
                     for (int i = 0; i < info.m_nodes.Length; ++i) {
                         var node = info.m_nodes[i];
@@ -39,7 +37,7 @@ namespace HideTMPECrosswalks.Utils {
                         string baseName = "node";
                         if (info.m_nodes.Length > 1) baseName += i;
                         Dump(material, baseName, dir: roadName);
-
+                        break; //first one is enough
                     }
                 }
             }
@@ -227,7 +225,6 @@ namespace HideTMPECrosswalks.Utils {
             int yN = original.height;
             Texture2D ret = new Texture2D(xN,yN);
 
-
             float cropPortion = 0.30f;
             float stretchPortion = 0.40f;
             int yN0 = (int)(yN * stretchPortion);
@@ -243,6 +240,7 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static bool IsInverted(this Texture tex) => tex.name.ToLower().Contains("inverted");
+        public static bool IsElevated(this Texture tex) => tex.name.ToLower().Contains("elevated");
 
         public static Texture2D Mirror(Texture2D original) {
             Extensions.Log("Mirror: texture name:" + original.name);
@@ -250,21 +248,32 @@ namespace HideTMPECrosswalks.Utils {
                 return MirrorInv(original);
             int xN = original.width;
             int yN = original.height;
+
             Texture2D ret = new Texture2D(xN, yN);
 
             int last = xN - 1;
-            int half = xN / 2;
-            {
-                Color[] colors = original.GetPixels(0, 0, half, yN);
-                ret.SetPixels(0, 0, half, yN, colors);
+            int first = 0;
+            if (original.IsElevated()) {
+                last = xN * 722 / 1024;
+                first = xN * 107 / 1024;
             }
+            int width = (last - first + 1);
+            int pivot = width / 2 + first;
+            Extensions.Log($"first:{first} last:{last} width:{width} pivot:{pivot}");
 
-            for (int i = half; i <= last; i++) {
-                int i2 = last - i;
+            {
+                Color[] colors = original.GetPixels(0, 0, pivot, yN);
+                ret.SetPixels(0, 0, pivot, yN, colors);
+            }
+            for (int i = pivot; i <= last; i++) {
+                int i2 = last - i + first;
                 Color[] colors = original.GetPixels(i2, 0, 1, yN);
                 ret.SetPixels(i, 0, 1, yN, colors);
             }
-
+            if (last + 1 < xN) {
+                Color[] colors = original.GetPixels(last + 1, 0, xN - last -1, yN);
+                ret.SetPixels(last + 1, 0, xN - last-1, yN, colors);
+            }
             ret.Apply();
             return ret;
         }
@@ -277,17 +286,27 @@ namespace HideTMPECrosswalks.Utils {
             Texture2D ret = new Texture2D(xN, yN);
 
             int last = xN - 1;
-            int half = xN / 2;
+            int first = 0;
+            if (original.IsElevated()) {
+                last = xN * 722 / 1024;
+                first = xN * 167 / 1024;
+            }
+            int width = (last - first + 1);
+            int pivot = width / 2 + first;
+            Extensions.Log($"first:{first} last:{last} width:{width} pivot:{pivot}");
 
-
-            for (int i = 0; i < half; i++) {
-                int i2 = last - i;
+            if (first > 0) {
+                Color[] colors = original.GetPixels(0, 0, first, yN);
+                ret.SetPixels(0, 0, first, yN, colors);
+            }
+            for (int i = first; i < pivot; i++) {
+                int i2 = last - i + first;
                 Color[] colors = original.GetPixels(i2, 0, 1, yN);
                 ret.SetPixels(i, 0, 1, yN, colors);
             }
             {
-                Color[] colors = original.GetPixels(half, 0, xN-half, yN);
-                ret.SetPixels(half, 0, xN - half, yN, colors);
+                Color[] colors = original.GetPixels(pivot, 0, xN-pivot, yN);
+                ret.SetPixels(pivot, 0, xN - pivot, yN, colors);
             }
 
             ret.Apply();

@@ -30,26 +30,13 @@ namespace HideTMPECrosswalks.Tests
         }
 
         static void Test() {
-            void ScaleRatio() {
-                TheFunctionName();
-            }
-            FType lamdaScale = () => TheFunctionName();
-
-            string s = GetName(lamdaScale);
-            Log(s);
+            A a1 = new A { i = 5 };
+            A a2 = new A { i = 5 };
+            Assert(a1 == a2, "a1==a2");
         }
 
-        public static string GetName(FType f) {
-            string s =  f.Method.Name;
-            //string[] ss = s.Split(new[] { "g__", "|" }, System.StringSplitOptions.RemoveEmptyEntries);
-            //if (ss.Length == 3)
-            //    return ss[1];
-            return s;
-        }
-
-        public delegate void FType();
-        public static void TheFunctionName() {
-
+        class A {
+            public int i;
         }
     }
 
