@@ -268,11 +268,11 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static void HideCrossing2(Material material, NetInfo info) {
-#if DEBUG
-            bool dump = true;
-#else
             bool dump = false;
+#if DEBUG
+            //dump = true;
 #endif
+
             if (dump) DumpUtils.Dump(info);
 
             Texture tex = material.GetTexture(ID_Defuse);
