@@ -13,9 +13,7 @@ namespace HideTMPECrosswalks.Utils {
     using static TextureUtils;
 
     public static class PrefabUtils {
-
-
-        private static bool IsNormalGroundRoad(NetInfo info) {
+        internal static bool IsNormalGroundRoad(this NetInfo info) {
             try {
                 if (info != null && info.m_netAI is RoadAI) {
                     var ai = info.m_netAI as RoadAI;
@@ -34,7 +32,7 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         private static string GetRoadTitle(NetInfo info) {
-            Extensions.Assert(IsNormalGroundRoad(info), $"IsNormalGroundRoad(info={info.name})");
+            Extensions.Assert(info.IsNormalGroundRoad(), $"IsNormalGroundRoad(info={info.name})");
 
             //TODO: use Regular expressions instead of to lower.
             string name = info.GetUncheckedLocalizedTitle().ToLower();
@@ -54,117 +52,7 @@ namespace HideTMPECrosswalks.Utils {
         }
 
 
-#if DEBUG
 
-        public static class DebugTests {
-            public static string R6L => "Six-Lane Road";
-            public static string R4L => "Four-Lane Road";
-
-            public static void MakeSameNodeSegMat(NetInfo info) {
-                var node = info.m_nodes[0];
-                var seg = info.m_segments[0];
-                //foreach (string texType in TextureNames.Names) {
-                //    try {
-                //        Texture tseg = seg.m_material.GetTexture(texType);
-                //        node.m_material.SetTexture(texType, tseg);
-                //        string m = $"{info.name} - {texType}> Made node tex == seg tex ";
-                //        Extensions.Log(Extensions.BIG(m));
-                //    }
-                //    catch { }
-                //}
-                node.m_material = node.m_nodeMaterial = seg.m_material;
-                string m = $"{info.name}> Made node material == seg material ";
-                Extensions.Log(Extensions.BIG(m));
-            }
-
-            public static void WierdNodeTest() {
-                for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
-                    NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                    if (IsNormalGroundRoad(info)) {
-                        if (info.GetUncheckedLocalizedTitle() == R6L) {
-                            info = (info.m_netAI as RoadAI).m_elevatedInfo;
-                            MakeSameNodeSegMat(info);
-                        }
-                    }
-                }
-            }
-            public static void NameTest() {
-                for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
-                    NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                    if (info?.m_netAI is RoadAI) {
-                        string name = info.GetUncheckedLocalizedTitle();
-                        bool b;
-                        //b = name.ToLower().Contains("asym");
-                        b = true;
-                        if (b) {
-                            string m = name;
-                            RoadAI ai = info.m_netAI as RoadAI;
-                            //m += "|" + ai?.m_elevatedInfo?.name;
-                            //m += "|" + ai?.m_bridgeInfo?.name;
-                            //m += "|" + ai?.m_slopeInfo?.name;
-                            //m += "|" + ai?.m_tunnelInfo?.name;
-                            m += "|| level:" + info.GetClassLevel();
-                            m += " class:" + info.m_class;
-                            m += " category:" + info.category;
-                            Extensions.Log(m);
-                        }
-                    }
-                }
-                Extensions.Log(Extensions.BIG("DONE PRITING NAMES!"));
-            }
-            public static bool RoadNameEqual(string n1, string n2) => n1.Trim().ToLower() == n2.Trim().ToLower();
-
-            public static void Dumps() {
-                for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
-                    NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                    if (info?.m_netAI is RoadAI) {
-                        string name = info.GetUncheckedLocalizedTitle().Trim();
-                        bool b = false;
-                        //b |= name.ToLower().Contains("12");
-                        //b |= name == "Six-Lane Road";
-                        //b |= name == "Six-Lane Road with Median";
-                        //b |= name == "Eight-Lane Road";
-                        //b |= name == "Four-Lane Road";
-                        //b |= name == "Four-Lane Road with Median";
-                        //b |= name.ToLower().Contains("suburb");
-                        b |= name.ToLower().Contains("2+3");
-                        b |= name.ToLower().Contains("2+4");
-                        //b = info.category == "RoadsLarge";
-                        if (b) {
-                            Extensions.Log("found " + name);
-                            info = (info.m_netAI as RoadAI).m_elevatedInfo;
-                            DumpDebugTextures(info);
-                        }
-                    }
-                }
-            }
-
-            public static void DumpDebugTextures(NetInfo info) {
-                string name = info.GetUncheckedLocalizedTitle();
-                string alpha = TextureNames.AlphaMAP;
-                Material material = info.m_nodes[0].m_nodeMaterial;
-                DumpJob.Dump(material, alpha, baseName: "node-original ", dir: name);
-                Material material2 = info.m_segments[0].m_segmentMaterial;
-                DumpJob.Dump(material2, alpha, baseName: "segment-original", dir: name);
-
-                var tex = material2.GetTexture(alpha);
-                if (info.isAsym()) tex = Process(tex, Mirror);
-                float ratio = info.ScaleRatio();
-                if (ratio != 1f) {
-                    Texture2D ScaleRatio(Texture2D t) => Scale(t, ratio);
-                    tex = Process(tex, ScaleRatio);
-                }
-                string s = ratio == 1 ? "segment-mirrored" : "segment-mirrored-scaled";
-                string path = DumpJob.GetFilePath(alpha, s, dir:name);
-                DumpJob.Dump(tex, path);
-
-                material = HideCrossing(material, info);
-                DumpJob.Dump(material, alpha, baseName: "node-processed ", dir: name);
-
-
-            }
-        }
-#endif
 
         public static string[] GetRoadNames() {
             List<string> ret = new List<string>();
@@ -277,13 +165,11 @@ namespace HideTMPECrosswalks.Utils {
             Extensions.Log("cache cleared");
         }
 
-        public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
-
         public static NetInfo GetGroundInfo(this NetInfo info) {
             if (info.m_netAI is RoadAI)
                 return info;
             int n = PrefabCollection<NetInfo>.LoadedCount();
-            for(uint i=0; i < n; ++i) {
+            for (uint i = 0; i < n; ++i) {
                 NetInfo info2 = PrefabCollection<NetInfo>.GetLoaded(i);
                 if (IsNormalGroundRoad(info2)) {
                     RoadAI ai = info2.m_netAI as RoadAI;
@@ -299,6 +185,8 @@ namespace HideTMPECrosswalks.Utils {
             return null;//in case of failure.
         }
 
+        public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
+        public static bool isOneWay(this NetInfo info) => info.m_forwardVehicleLaneCount == 0 ||  info.m_backwardVehicleLaneCount == 0;
 
         public static bool HasMedian(this NetInfo info) {
             foreach (var lane in info.m_lanes) {
@@ -316,41 +204,38 @@ namespace HideTMPECrosswalks.Utils {
 
         public static float ScaleRatio(this NetInfo info) {
             float ret = 1f;
-            if(!(info.m_netAI is RoadAI)) {
-                return ret;
+            if (info.m_netAI is RoadAI) {
+                bool b = info.HasDecoration() || info.HasMedian() || info.m_isCustomContent;
+                b |= info.isAsym() && !info.isOneWay() && info.name != "AsymAvenueL2R3";
+                if(!b)
+                    ret = 0.91f;
+                Extensions.Log(info.name + " : Scale: " + ret);
             }
-
-            if (!info.HasDecoration() && !info.HasMedian() && !info.isAsym() && !info.m_isCustomContent)
-                ret = 0.915f;
-            else if (info.name == "AsymAvenueL2R3")
-                ret = 0.91f;
-            Extensions.Log(info.name + " : Scale: " + ret);
             return ret;
         }
 
         public static bool IsNExt(NetInfo info) {
             string c = info.m_class.name.ToLower();
-            bool ret =  c.StartsWith("next");
+            bool ret = c.StartsWith("next");
             Extensions.Log($"IsNExt returns {ret} : {info.GetUncheckedLocalizedTitle()} : " + c);
             return ret;
         }
 
-        public static bool HasSameNodeAndSegmentTextures(NetInfo info, string texType = null) {
-            string defuse = TextureNames.Defuse;
-            string alpha = TextureNames.AlphaMAP;
-            texType = texType ?? defuse;
-            foreach(var node in info.m_nodes) {
-                foreach(var seg in info.m_segments) {
+        public static bool HasSameNodeAndSegmentTextures(NetInfo info, int texID) {
+            foreach (var node in info.m_nodes) {
+                foreach (var seg in info.m_segments) {
                     if (node.m_material == seg.m_material) return true;
-                    Texture t1 = node.m_material.GetTexture(texType);
-                    Texture t2 = seg.m_material.GetTexture(texType);
-                    if (t1 == t2)
-                        return true;
+                    //Texture t1 = node.m_material.GetTexture(texID);
+                    //Texture t2 = seg.m_material.GetTexture(texID);
+                    //if (t1 == t2)
+                    //    return true;
                 }
             }
             return false;
 
         }
+
+
 
         public static Material HideCrossing(Material material, NetInfo info) {
             try {
@@ -360,82 +245,84 @@ namespace HideTMPECrosswalks.Utils {
                 if (MaterialCache.Contains(material)) {
                     return (Material)MaterialCache[material];
                 }
-                if (HasSameNodeAndSegmentTextures(info)) {
+                if (HasSameNodeAndSegmentTextures(info, ID_Defuse)) {
                     // TODO why this works but the WierdNodeTest() fails.
-                    string m = $"{info.name} is {info.category }is without proper node texture.";
+                    string m = $"{info.name} is {info.category} is without proper node texture.";
                     Extensions.Log(m);
                     MaterialCache[material] = material;
                     return material;
                 }
-#if DEBUG
-                bool dump = true;
-#else
-                bool dump = false;
-#endif
-                if(dump)DumpJob.Dump(info);
-
-                bool asym = info.isAsym();
 
                 var ticks = System.Diagnostics.Stopwatch.StartNew();
-                string defuse = TextureNames.Defuse;
-                string alpha = TextureNames.AlphaMAP;
                 Material ret = new Material(material);
+                HideCrossing2(ret, info);
+                MaterialCache[material] = ret;
+                Extensions.Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
+                return ret;
+            }
+            catch (Exception e) {
+                Extensions.Log(e.ToString());
+                MaterialCache[material] = material; // do not repeat the same mistake!
+                return material;
+            }
+        }
 
-                Texture tex = material.GetTexture(defuse);
+        public static void HideCrossing2(Material material, NetInfo info) {
+#if DEBUG
+            bool dump = true;
+#else
+            bool dump = false;
+#endif
+            if (dump) DumpUtils.Dump(info);
+
+            Texture tex = material.GetTexture(ID_Defuse);
+            if (tex != null) {
+                if (TextureCache.Contains(tex)) {
+                    tex = TextureCache[tex] as Texture;
+                    Extensions.Log("Texture cache hit: " + tex.name);
+                } else {
+                    tex = Process(tex, Crop);
+                    (tex as Texture2D).Compress(false);
+                    TextureCache[tex] = tex;
+                }
+                material.SetTexture(ID_Defuse, tex);
+                if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_Defuse, "node-processed", info));
+            }
+
+            string[] exempt_categories = {
+                    //"RoadsTiny",
+                    "RoadsSmall",
+                    //"RoadsSmallHV",
+                };
+            if (!exempt_categories.Contains(info.category)) {
+                tex = material.GetTexture(ID_APRMap);
                 if (tex != null) {
                     if (TextureCache.Contains(tex)) {
                         tex = TextureCache[tex] as Texture;
                         Extensions.Log("Texture cache hit: " + tex.name);
                     } else {
                         tex = Process(tex, Crop);
-                        (tex as Texture2D).Compress(false);
-                        TextureCache[tex] = tex;
-                    }
-                    ret.SetTexture(defuse, tex);
-                    if (dump) DumpJob.Dump(tex, DumpJob.GetFilePath(defuse, "node-processed", info));
-                }
-
-                string[] exempt_categories = {
-                    "RoadsTiny",
-                    "RoadsSmall",
-                    //"RoadsSmallHV",
-                };
-                if (!exempt_categories.Contains(info.category)) {
-                    tex = material.GetTexture(alpha);
-                    if (tex != null) {
-                        if (TextureCache.Contains(tex)) {
-                            tex = TextureCache[tex] as Texture;
-                            Extensions.Log("Texture cache hit: " + tex.name);
-                        } else {
-                            tex = Process(tex, Crop);
-                            Material material2 = info.m_segments[0]?.m_material;
-                            Texture tex2 = material2?.GetTexture(alpha);
-                            if (tex2 != null) {
-                                if (asym) tex2 = Process(tex2, Mirror);
+                        Material material2 = info.m_segments[0]?.m_material;
+                        Texture tex2 = material2?.GetTexture(ID_APRMap);
+                        if (tex2 != null) {
+                            if (info.m_netAI is RoadAI) {
+                                if (info.isAsym()) tex2 = Process(tex2, Mirror);
                                 float ratio = info.ScaleRatio();
-                                if ( ratio != 1f) {
+                                if (ratio != 1f) {
                                     Texture2D ScaleRatio(Texture2D t) => Scale(t, ratio);
                                     tex2 = Process(tex2, ScaleRatio);
                                 }
-                                tex = Process(tex, tex2, MeldDiff);
-                                if (dump) DumpJob.Dump(tex2, DumpJob.GetFilePath(alpha,"segment-processed", info));
-                                if (dump) DumpJob.Dump(tex, DumpJob.GetFilePath(alpha, "node-processed", info));
+                                if (dump) DumpUtils.Dump(tex2, DumpUtils.GetFilePath(ID_APRMap, "segment-processed", info));
                             }
-                            (tex as Texture2D).Compress(false); //TODO make un-readable?
-                            TextureCache[tex] = tex;
+                            tex = Process(tex, tex2, MeldDiff);
+                            if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_APRMap, "node-processed", info));
                         }
-                        ret.SetTexture(alpha, tex);
+                        (tex as Texture2D).Compress(false); //TODO make un-readable?
+                        TextureCache[tex] = tex;
                     }
-                }
-                MaterialCache[material] = ret;
-
-                Extensions.Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
-                return ret;
-            }
-            catch (Exception e){
-                Extensions.Log(e.ToString());
-                return material;
-            }
-        }
-    }
-}
+                    material.SetTexture(ID_APRMap, tex);
+                } // end if cache
+            } // end if tex
+        } // end if !exempt
+    } // end class
+} // end namespace

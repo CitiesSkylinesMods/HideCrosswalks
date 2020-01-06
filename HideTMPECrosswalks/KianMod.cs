@@ -75,22 +75,7 @@ namespace HideTMPECrosswalks {
     }
 
 #if DEBUG
-    public class TestOnLoad : LoadingExtensionBase {
-        public override void OnCreated(ILoading loading) { base.OnCreated(loading) ;Test(); }
-        public override void OnLevelLoaded(LoadMode mode) => Test();
 
-        public static void Test() {
-            if (!Extensions.InGame && !Extensions.InAssetEditor)
-                return;
-
-            //Extensions.Log("Testing ...");
-            //PrefabUtils.DebugTests.NameTest();
-            //PrefabUtils.DebugTests.Dumps();
-            //PrefabUtils.DebugTests.WierdNodeTest();
-            //Extensions.Log("Testing Done!");
-        }
-
-    }
 #endif
 
 }

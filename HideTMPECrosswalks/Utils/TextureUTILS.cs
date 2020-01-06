@@ -12,109 +12,19 @@ namespace HideTMPECrosswalks.Utils {
     public static class TextureUtils {
         public delegate Texture2D TProcessor(Texture2D tex);
         public delegate Texture2D TProcessor2(Texture2D tex, Texture2D tex2);
-
-        public static class DumpJob {
-            public static bool Lunch(NetInfo info) =>
-                ThreadPool.QueueUserWorkItem((_) => Dump(info));
-
-            static object locker = new object();
-            public static void Dump(NetInfo info) {
-                // not intersted in multi-thread processing. I just wan it to be outside of simulation thread.
-                lock (locker) {
-                    string roadName = info.GetUncheckedLocalizedTitle();
-                    for (int i = 0; i < info.m_segments.Length; ++i)
-                    {
-                        var seg = info.m_segments[i];
-                        Material material = seg.m_segmentMaterial;
-                        string baseName = "segment";
-                        //if (info.m_segments.Length > 1) baseName += i;
-                        Dump(material,  baseName, dir: roadName);
-                        break; //first one is enough
-                    }
-                    for (int i = 0; i < info.m_nodes.Length; ++i) {
-                        var node = info.m_nodes[i];
-                        Material material = node.m_nodeMaterial;
-                        string baseName = "node";
-                        if (info.m_nodes.Length > 1) baseName += i;
-                        Dump(material, baseName, dir: roadName);
-                        break; //first one is enough
-                    }
-                }
-            }
-
-            public static void Dump(Material material, string baseName = null, string dir = null) {
-                if (dir == null) dir = "dummy";
-                if (baseName == null) baseName = material.name;
-                Dump(material, TextureNames.Defuse, baseName, dir);
-                Dump(material, TextureNames.AlphaMAP, baseName, dir);
-                try { Dump(material, TextureNames.XYSMap, baseName, dir); } catch { }
-
-            }
-
-            public static void Dump(Material material, string texName, string baseName, string dir) {
-                Texture2D texture = material.GetReadableTexture(texName);
-                string path = GetFilePath(texName, baseName, dir);
-                Dump(texture, path);
-            }
-
-            public static void Dump(Texture tex, string path) {
-                Texture2D texture = tex.TryMakeReadable();
-                Extensions.Log($"Dumping texture " + texture.name);
-                byte[] bytes = texture.EncodeToPNG();
-                Extensions.Log("Dumping to " + path);
-                File.WriteAllBytes(path, bytes);
-            }
-
-            public static void Dump(Texture tex, NetInfo info) {
-                string path = GetFilePath(
-                    texType:"",
-                    baseName:tex.name ?? throw new NullReferenceException("tex.name is null"),
-                    dir: info.GetUncheckedLocalizedTitle());
-                Dump(tex, path);
-            }
-
-            public static string GetFilePath(string texType, string baseName, NetInfo info) =>
-                GetFilePath(texType, baseName, info.GetUncheckedLocalizedTitle());
-
-            public static string GetFilePath(string texType, string baseName, string dir) {
-                string filename = baseName + texType + ".png";
-                foreach (char c in @"\/:<>|" + "\"") {
-                    filename = filename.Replace(c.ToString(), "");
-                }
-                foreach (char c in @":<>|" + "\"") {
-                    dir = dir.Replace(c.ToString(), "");
-                }
-
-                string path = Path.Combine("mod debug dumps", dir);
-                Directory.CreateDirectory(path);
-                path = Path.Combine(path, filename);
-                return path;
-            }
-
-            public static Texture2D Load(string path) {
-                Extensions.Log("Loading Texture from " + path);
-                byte[] bytes = File.ReadAllBytes(path);
-                Texture2D texture = new Texture2D(1, 1);
-                texture.LoadImage(bytes);
-                texture.anisoLevel = 16;
-                texture.Compress(true);
-                texture.name = path;
-                return texture;
-            }
+        internal static int ID_Defuse => NetManager.instance.ID_MainTex;
+        internal static int ID_APRMap => NetManager.instance.ID_APRMap;
+        internal static int ID_XYSMap => NetManager.instance.ID_XYSMap;
+        internal static string getTexName(int id) {
+            if (id == ID_Defuse) return "_MainTex";
+            if (id == ID_APRMap) return "_APRMap";
+            if (id == ID_XYSMap) return "_XYSMap";
+            throw new Exception("Bad Texture ID");
         }
+        internal static int[] texIDs => new int[]{ID_Defuse, ID_APRMap,ID_XYSMap };
 
-        public static class TextureNames {
-            public static string Defuse => "_MainTex";
-            public static string AlphaMAP => "_APRMap";
-            public static string XYSMap => "_XYSMap"; // TODO is this correct?
-
-            public static string[] Names => new[] { Defuse, AlphaMAP, XYSMap };
-        }
-
-        public static Texture2D GetReadableTexture(this Material material, string type = "_MainTex") {
-            if (!TextureNames.Names.Contains(type))
-                throw new Exception($"{type} bad texture name. valid texture names are" + String.Join(" ", TextureNames.Names));
-            Texture2D texture = material.GetTexture(type) as Texture2D;
+        public static Texture2D GetReadableTexture(this Material material, int id) {
+            Texture2D texture = material.GetTexture(id) as Texture2D;
             texture = texture.TryMakeReadable();
             Extensions.Log($"GetReadableTexture: Material={material.name} texture={texture.name}");
             return texture;
@@ -122,13 +32,12 @@ namespace HideTMPECrosswalks.Utils {
 
         public static Texture2D TryMakeReadable(this Texture tex) {
             //Extensions.Log($"TryMakeReadable:  texture={tex.name}");
-            try {
-                Texture2D ret = tex.MakeReadable() as Texture2D;
-                ret.name = tex.name + " "; // add space to avoid potential hash problems
-                return ret;
-            } catch {
-                return tex as Texture2D;
-            }
+            Texture2D ret;
+            try{ ret = tex.MakeReadable() as Texture2D; }
+            catch{ ret = tex as Texture2D; }
+            ret.name = tex.name;
+            Extensions.Log("TryMakeReadable: " + tex.name);
+            return ret;
         }
 
         public static Texture2D Process(Texture tex, TProcessor func) {
@@ -188,9 +97,9 @@ namespace HideTMPECrosswalks.Utils {
 
             ret.Apply();
 
-            //DumpJob.Dump(tex, DumpJob.GetFilePath("tex", "", "melddiff"));
-            //DumpJob.Dump(tex2, DumpJob.GetFilePath("tex2", "", "melddiff"));
-            //DumpJob.Dump(ret, DumpJob.GetFilePath("ret", "", "melddiff"));
+            //DumpUtils.Dump(tex, DumpUtils.GetFilePath("tex", "", "melddiff"));
+            //DumpUtils.Dump(tex2, DumpUtils.GetFilePath("tex2", "", "melddiff"));
+            //DumpUtils.Dump(ret, DumpUtils.GetFilePath("ret", "", "melddiff"));
 
             return ret;
         }
