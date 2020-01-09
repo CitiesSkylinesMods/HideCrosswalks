@@ -235,8 +235,6 @@ namespace HideTMPECrosswalks.Utils {
 
         }
 
-
-
         public static Material HideCrossing(Material material, NetInfo info) {
             try {
                 if (MaterialCache == null) {
@@ -289,12 +287,7 @@ namespace HideTMPECrosswalks.Utils {
                 if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_Defuse, "node-processed", info));
             }
 
-            string[] exempt_categories = {
-                    //"RoadsTiny",
-                    "RoadsSmall",
-                    //"RoadsSmallHV",
-                };
-            if (!exempt_categories.Contains(info.category)) {
+            if (info.category != "RoadsSmall" || info.m_isCustomContent || info.isAsym()) {
                 tex = material.GetTexture(ID_APRMap);
                 if (tex != null) {
                     if (TextureCache.Contains(tex)) {
