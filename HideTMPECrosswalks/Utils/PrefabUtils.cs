@@ -224,18 +224,17 @@ namespace HideTMPECrosswalks.Utils {
         public static bool HasSameNodeAndSegmentTextures(NetInfo info, int texID) {
             foreach (var node in info.m_nodes) {
                 foreach (var seg in info.m_segments) {
-                    if (node.m_material == seg.m_material) return true;
-                    //Texture t1 = node.m_material.GetTexture(texID);
-                    //Texture t2 = seg.m_material.GetTexture(texID);
-                    //if (t1 == t2)
-                    //    return true;
+                    if (node.m_directConnect == true)
+                        continue;
+                    Texture t1 = node.m_nodeMaterial.GetTexture(texID);
+                    Texture t2 = seg.m_segmentMaterial.GetTexture(texID);
+                    if (t1 == t2)
+                        return true;
                 }
             }
             return false;
 
         }
-
-
 
         public static Material HideCrossing(Material material, NetInfo info) {
             try {
@@ -289,12 +288,7 @@ namespace HideTMPECrosswalks.Utils {
                 if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_Defuse, "node-processed", info));
             }
 
-            string[] exempt_categories = {
-                    //"RoadsTiny",
-                    "RoadsSmall",
-                    //"RoadsSmallHV",
-                };
-            if (!exempt_categories.Contains(info.category)) {
+            if (info.category != "RoadsSmall" || info.m_isCustomContent || info.isAsym()) {
                 tex = material.GetTexture(ID_APRMap);
                 if (tex != null) {
                     if (TextureCache.Contains(tex)) {
