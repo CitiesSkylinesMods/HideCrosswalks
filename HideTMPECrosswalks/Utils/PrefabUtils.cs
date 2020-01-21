@@ -318,5 +318,16 @@ namespace HideTMPECrosswalks.Utils {
                 } // end if cache
             } // end if tex
         } // end if !exempt
+
+        public static bool CanHideCrossings(this NetInfo info) {
+            // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
+            // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
+            return info.CanHideMarkings() && info.m_hasPedestrianLanes && info.m_hasForwardVehicleLanes;
+        }
+
+        public static bool CanHideMarkings(this NetInfo  info) {
+            return info.m_netAI is RoadBaseAI;
+        }
+
     } // end class
 } // end namespace

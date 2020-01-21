@@ -19,20 +19,12 @@ namespace HideTMPECrosswalks.Patches {
             }
 #endif
             NetInfo info = segmentID.ToSegment().Info;
-            bool ret = info.m_netAI is RoadBaseAI && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
-            // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
-            // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
-            ret &= info.m_hasPedestrianLanes;
+            bool ret1 = info.CanHideCrossings() && TMPEUTILS.HasCrossingBan(segmentID, nodeID);
+            bool ret2 = info.CanHideMarkings() && NS2Utils.HideJunction(segmentID);
 
             //Texture cache is not broken.
-            ret &= PrefabUtils.MaterialCache != null;
-
-            //TODO optimize
-            //bool never = PrefabUtils.NeverZebra(info);
-            //bool always = PrefabUtils.AlwaysZebra(info);
-            //ret |= always;
-            //ret &= !never;
-
+            bool ret = PrefabUtils.MaterialCache != null;
+            ret &= ret1 || ret2;
             return ret;
         }
 

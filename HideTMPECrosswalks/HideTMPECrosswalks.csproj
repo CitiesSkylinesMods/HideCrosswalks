@@ -64,6 +64,10 @@
       <HintPath>..\libs\TrafficManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="NetworkSkins">
+      <HintPath>..\libs\NetworkSkins.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KianMod.cs" />
@@ -76,6 +80,7 @@
     <Compile Include="Utils\DumpUtils.cs" />
     <Compile Include="Utils\ColorUtils.cs" />
     <Compile Include="Utils\Extensions.cs" />
+    <Compile Include="Utils\NS2Utils.cs" />
     <Compile Include="Utils\PrefabUtils.cs" />
     <Compile Include="Utils\TextureUTILS.cs" />
     <Compile Include="Utils\TMPEUtils.cs" />
