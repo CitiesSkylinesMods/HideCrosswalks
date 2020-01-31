@@ -221,16 +221,12 @@ namespace HideTMPECrosswalks.Utils {
             return ret;
         }
 
-        public static bool HasSameNodeAndSegmentTextures(NetInfo info, int texID) {
-            foreach (var node in info.m_nodes) {
-                foreach (var seg in info.m_segments) {
-                    if (node.m_directConnect == true)
-                        continue;
-                    Texture t1 = node.m_nodeMaterial.GetTexture(texID);
-                    Texture t2 = seg.m_segmentMaterial.GetTexture(texID);
-                    if (t1 == t2)
-                        return true;
-                }
+        public static bool HasSameNodeAndSegmentTextures(NetInfo info, Material nodeMaterial, int texID) {
+            foreach (var seg in info.m_segments) {
+                Texture t1 = nodeMaterial.GetTexture(texID);
+                Texture t2 = seg.m_segmentMaterial.GetTexture(texID);
+                if (t1 == t2)
+                    return true;
             }
             return false;
 
@@ -244,7 +240,7 @@ namespace HideTMPECrosswalks.Utils {
                 if (MaterialCache.Contains(material)) {
                     return (Material)MaterialCache[material];
                 }
-                if (HasSameNodeAndSegmentTextures(info, ID_Defuse)) {
+                if (HasSameNodeAndSegmentTextures(info, material, ID_Defuse)) {
                     // TODO why this works but the WierdNodeTest() fails.
                     string m = $"{info.name} is {info.category} is without proper node texture.";
                     Extensions.Log(m);
