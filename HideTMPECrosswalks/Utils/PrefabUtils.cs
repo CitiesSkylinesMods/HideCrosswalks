@@ -322,7 +322,7 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static bool CanHideMarkings(this NetInfo  info) {
-            return info.m_netAI is RoadBaseAI;
+            return (info.m_netAI is RoadBaseAI ) & KianModInfo.IsEnabled;
         }
 
     } // end class

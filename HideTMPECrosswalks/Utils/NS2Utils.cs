@@ -40,7 +40,7 @@ namespace HideTMPECrosswalks.Utils {
         }
         private static bool _HideJunction2(ushort segmentID) {
             var skin = NetworkSkins.Skins.NetworkSkinManager.SegmentSkins[segmentID];
-            bool ret = skin != null && (skin.m_color.b - 0.506f < 0.001f);
+            bool ret = skin != null && Mathf.Abs(skin.m_color.b-0.506f ) < 0.001f;
             //Extensions.Log($"_HideJunction2 segment:{segmentID} skin_color:{skin.m_color} return:{ret}");
             return ret;
         }

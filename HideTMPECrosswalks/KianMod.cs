@@ -11,9 +11,10 @@ namespace HideTMPECrosswalks {
     public class KianModInfo : IUserMod {
         public string Name => "RM Crossings V2.5";
         public string Description => "Hide Crosswalks when TMPE bans them or when NS2 removes them.";
-
+        public static bool IsEnabled = false;
         [UsedImplicitly]
         public void OnEnabled() {
+            IsEnabled = true;
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
             InstallHarmony();
 
@@ -33,6 +34,7 @@ namespace HideTMPECrosswalks {
 
         [UsedImplicitly]
         public void OnDisabled() {
+            IsEnabled = false;
             UninstallHarmony();
             PrefabUtils.ClearALLCache();
             LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.CachePrefabs;
