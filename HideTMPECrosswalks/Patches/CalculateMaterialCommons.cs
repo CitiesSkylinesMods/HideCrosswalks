@@ -3,7 +3,7 @@ using Harmony;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection;
-
+using ColossalFramework;
 /* Notes
 
  */
@@ -17,8 +17,8 @@ namespace HideCrosswalks.Patches {
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
             // TODO move to netnode.updateflags
             NetInfo info = segmentID.ToSegment().Info;
-            bool isJunction = (nodeID.ToNode().m_flags & NetNode.Flags.Junction) != 0;
-            Extensions.Assert(isJunction, "isJunction");
+            bool isJunction = nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction);
+            Extensions.Assert(isJunction, $"isJunction | segmentID:{segmentID} nodeID:{nodeID}");
             bool ret0 = info.CanHideMarkings(); // must use the same condition as in Roads()
 
             if (Extensions.InAssetEditor ) {

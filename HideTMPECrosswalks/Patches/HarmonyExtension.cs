@@ -1,21 +1,21 @@
 using Harmony;
-using ICities;
-using JetBrains.Annotations;
-using UnityEngine;
 using HideCrosswalks.Utils;
-using HideCrosswalks.Patches;
-using HideCrosswalks.Settings;
-using System.Collections.Generic;
 
 namespace HideCrosswalks.Patches
 {
     public class HarmonyExtension
     {
         HarmonyInstance harmony;
-        const string HarmonyId = "CS.Kian.HideCrosswalks";
+        public const string HARMONY_ID = "CS.Kian.HideCrosswalks";
 
-        public  void InstallHarmony()
+        public void InstallHarmony()
         {
+#if !DEBUG
+            if (Extensions.InAssetEditor) {
+                Extensions.Log("skipped InstallHarmony in asset editor release build");
+                return;
+            }
+#endif
             if (harmony == null)
             {
                 Extensions.Log("HideCrosswalks Patching...", true);
@@ -23,7 +23,7 @@ namespace HideCrosswalks.Patches
                 HarmonyInstance.DEBUG = true;
 #endif
                 HarmonyInstance.SELF_PATCHING = false;
-                harmony = HarmonyInstance.Create(HarmonyId);
+                harmony = HarmonyInstance.Create(HARMONY_ID);
                 harmony.PatchAll(GetType().Assembly);
             }
         }
@@ -32,7 +32,7 @@ namespace HideCrosswalks.Patches
         {
             if (harmony != null)
             {
-                harmony.UnpatchAll(HarmonyId);
+                harmony.UnpatchAll(HARMONY_ID);
                 harmony = null;
                 Extensions.Log("HideCrosswalks patches Reverted.", true);
             }

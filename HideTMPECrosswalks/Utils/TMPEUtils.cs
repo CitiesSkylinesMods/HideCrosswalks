@@ -31,7 +31,8 @@ namespace HideCrosswalks.Utils {
         }
 
         private static bool _HasCrossingBan(ushort segmentID, bool bStartNode) {
-            return !TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(segmentID, bStartNode);
+            CSUtil.Commons.TernaryBool b = TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.GetPedestrianCrossingAllowed(segmentID, bStartNode);
+            return b == CSUtil.Commons.TernaryBool.False;
         }
     }
 }

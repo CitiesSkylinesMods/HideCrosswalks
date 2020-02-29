@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-//TODO check out material.MainTextureScale
-//regarding weird nodes, what if we return a copy of the material?
-
+// TODO check out material.MainTextureScale
+// regarding weird nodes, what if we return a copy of the material?
+// Loading screens Mod owner wrote this about LODs: https://steamcommunity.com/workshop/filedetails/discussion/667342976/1636416951459546732/
 namespace HideCrosswalks.Utils {
     using static TextureUtils;
     using static PrefabUtils;
@@ -26,10 +26,9 @@ namespace HideCrosswalks.Utils {
 
         public static Material HideCrossings(Material material, Material segMaterial, NetInfo info, bool lod = false) {
             try {
-                Extensions.Assert(MaterialCache != null, "MaterialCache!=null");
-                //if (MaterialCache == null) {
-                //    return material; // exiting game.
-                //}
+                if (MaterialCache == null) {
+                    return material; // program is loading/unloading
+                }
                 if (MaterialCache.Contains(material)) {
                     return (Material)MaterialCache[material];
                 }

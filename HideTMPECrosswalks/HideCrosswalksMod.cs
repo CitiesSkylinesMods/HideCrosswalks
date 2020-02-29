@@ -15,11 +15,12 @@ namespace HideCrosswalks {
         public void OnEnabled() {
             _isEnabled = true;
             Extensions.ClearLog();
+
             LoadingWrapperPatch.OnPostLevelLoaded += PrefabUtils.CachePrefabs;
 #if DEBUG
             LoadingWrapperPatch.OnPostLevelLoaded += TestOnLoad.Test;
 #endif
-            LoadingManager.instance.m_levelUnloaded += MaterialUtils.Clear;
+            LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearCache;
 
             if (Extensions.InGame) {
                 PrefabUtils.CachePrefabs();
@@ -28,19 +29,20 @@ namespace HideCrosswalks {
 
         [UsedImplicitly]
         public void OnDisabled() {
-            if (Extensions.InGame || Extensions.InAssetEditor) {
-                LoadingExtension.Instance.OnLevelUnloading();
+            _isEnabled = false;
+
+            if(Extensions.InGame | Extensions.InAssetEditor) {
                 LoadingExtension.Instance.OnReleased();
             }
 
-            _isEnabled = false;
             PrefabUtils.ClearCache();
-
             LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.CachePrefabs;
+            LoadingManager.instance.m_levelUnloaded -= PrefabUtils.ClearCache;
+
 #if DEBUG
             LoadingWrapperPatch.OnPostLevelLoaded -= TestOnLoad.Test;
 #endif
-            LoadingManager.instance.m_levelUnloaded -= PrefabUtils.ClearCache;
+
             //Options.instance = null;
         }
 
@@ -54,31 +56,15 @@ namespace HideCrosswalks {
         internal static LoadingExtension Instance;
         HarmonyExtension harmonyExt;
         public override void OnCreated(ILoading loading) {
-            Instance = this;
             base.OnCreated(loading);
+            Instance = this;
             harmonyExt = new HarmonyExtension();
-            if (Extensions.InGame) {
-                OnLevelLoaded(LoadMode.NewGame);
-            } else if (Extensions.InAssetEditor) {
-                OnLevelLoaded(LoadMode.NewAsset);
-            }
-        }
-        public override void OnReleased() {
-            harmonyExt = null;
-            base.OnReleased();
-        }
-        public override void OnLevelLoaded(LoadMode mode) {
-#if !DEBUG
-            if (Extensions.InAssetEditor) {
-                Extensions.Log("skipped InstallHarmony in asset editor release build");
-                return;
-            }
-#endif
-
             harmonyExt.InstallHarmony();
         }
-        public override void OnLevelUnloading() {
+        public override void OnReleased() {
             harmonyExt?.UninstallHarmony();
+            harmonyExt = null;
+            base.OnReleased();
         }
     }
 }

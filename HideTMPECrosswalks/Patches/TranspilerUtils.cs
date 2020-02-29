@@ -17,9 +17,20 @@ namespace HideCrosswalks.Patches {
             return codes;
         }
 
-        public static CodeInstruction GetLDArg(MethodInfo method, string name) {
-            byte idx = (byte)(GetParameterLoc(method, name) + 1);
-            return new CodeInstruction(OpCodes.Ldarg_S, idx);
+
+        public static CodeInstruction GetLDArg(MethodInfo method, string argName) {
+            byte idx = (byte)(GetParameterLoc(method, argName) + 1);
+            if (idx == 0) {
+                return new CodeInstruction(OpCodes.Ldarg_0);
+            } else if (idx == 1) {
+                return new CodeInstruction(OpCodes.Ldarg_1);
+            } else if (idx == 2) {
+                return new CodeInstruction(OpCodes.Ldarg_2);
+            } else if (idx == 3) {
+                return new CodeInstruction(OpCodes.Ldarg_3);
+            } else {
+                return new CodeInstruction(OpCodes.Ldarg_S, idx);
+            }
         }
 
         /// <summary>
@@ -127,19 +138,53 @@ namespace HideCrosswalks.Patches {
             return ret;
         }
 
+        public class InstructionNotFoundException : Exception {
+            public InstructionNotFoundException() : base() { }
+            public InstructionNotFoundException(string m) : base(m) { }
+
+        }
+
         public static int SearchInstruction(List<CodeInstruction> codes, CodeInstruction instruction, int index, int dir = +1, int counter = 1) {
+            try {
+                return SearchGeneric(codes, idx => IsSameInstruction(codes[idx], instruction), index, dir, counter);
+            }
+            catch (InstructionNotFoundException) {
+                throw new InstructionNotFoundException(" Did not found instruction: " + instruction);
+            }
+        }
+
+        public delegate bool Comperator(int idx);
+        public static int SearchGeneric(List<CodeInstruction> codes, Comperator comperator, int index, int dir = +1, int counter = 1) {
             int count = 0;
-            for (; index < codes.Count; index += dir) {
-                if (TranspilerUtils.IsSameInstruction(codes[index], instruction)) {
+            for (; 0 <= index && index < codes.Count; index += dir) {
+                if (comperator(index)) {
                     if (++count == counter)
                         break;
                 }
             }
-            if (index >= codes.Count || count != counter) {
-                throw new Exception(" Did not found instruction: " + instruction);
+            if (count != counter) {
+                throw new InstructionNotFoundException(" Did not found instruction[s]. Comperator =  " + comperator);
             }
             Log("Found : \n" + new[] { codes[index], codes[index + 1] }.IL2STR());
             return index;
+        }
+
+        public static Label GetContinueLabel(List<CodeInstruction> codes, int index, int counter = 1, int dir = -1) {
+            // continue command is in form of branch into the end of for loop.
+            index = SearchGeneric(codes, idx => IsBR32(codes[idx].opcode), index, dir: dir, counter: counter);
+            return (Label)codes[index].operand;
+        }
+
+        public static bool IsBR32(OpCode opcode) {
+            // TODO complete list.
+            return opcode == OpCodes.Br || opcode == OpCodes.Brtrue || opcode == OpCodes.Brfalse || opcode == OpCodes.Beq;
+        }
+
+        public static void MoveLabels(CodeInstruction source, CodeInstruction target) {
+            // move labels
+            var labels = source.labels;
+            target.labels.AddRange((IEnumerable<Label>)labels);
+            labels.Clear();
         }
 
         /// <summary>
@@ -151,24 +196,25 @@ namespace HideCrosswalks.Patches {
                     throw new Exception("Bad Instructions:\n" + insertion.IL2STR());
             Log($"replacing <{codes[index]}>\nInsert between: <{codes[index - 1]}>  and  <{codes[index + 1]}>");
 
+            MoveLabels(codes[index], insertion[0]);
             codes.RemoveAt(index);
             codes.InsertRange(index, insertion);
 
             Log("Replacing with\n" + insertion.IL2STR());
-            Log("PEEK (RESULTING CODE):\n" + codes.GetRange(index - 4, 14).IL2STR());
-
+            Log("PEEK (RESULTING CODE):\n" + codes.GetRange(index - 4, insertion.Length + 8).IL2STR());
         }
 
-        public static void InsertInstructions(List<CodeInstruction> codes, CodeInstruction[] insertion, int index) {
+        public static void InsertInstructions(List<CodeInstruction> codes, CodeInstruction[] insertion, int index, bool moveLabels = true) {
             foreach (var code in insertion)
                 if (code == null)
                     throw new Exception("Bad Instructions:\n" + insertion.IL2STR());
             Log($"Insert point:\n between: <{codes[index - 1]}>  and  <{codes[index]}>");
 
+            MoveLabels(codes[index], insertion[0]);
             codes.InsertRange(index, insertion);
 
             Log("\n" + insertion.IL2STR());
-            Log("PEEK:\n" + codes.GetRange(index - 4, 14).IL2STR());
+            Log("PEEK:\n" + codes.GetRange(index - 4, insertion.Length + 12).IL2STR());
         }
     }
 }
