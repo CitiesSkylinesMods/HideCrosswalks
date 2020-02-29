@@ -18,11 +18,11 @@ namespace HideCrosswalks.Utils {
                 return ret;
             }
             catch (Exception e) {
-                Extensions.Log(e.Message);
-                Extensions.Log("IsNormalRoad catched exception");
-                Extensions.Log($"exception: info = {info}");
-                Extensions.Log($"exception: info is {info.GetType()}");
-                Extensions.Log($"Exception: name = {info?.name} ");
+                Log.Info(e.Message);
+                Log.Info("IsNormalRoad catched exception");
+                Log.Info($"exception: info = {info}");
+                Log.Info($"exception: info is {info.GetType()}");
+                Log.Info($"Exception: name = {info?.name} ");
                 return false;
             }
         }
@@ -115,7 +115,7 @@ namespace HideCrosswalks.Utils {
         public static bool NeverZebra(NetInfo info) {
             try { return (bool)Never_Table[info.m_prefabDataIndex]; }
             catch {
-                Extensions.Log($"NeverZebra:Never_array[{info.m_prefabDataIndex}] index out of range. info:{info.name}");
+                Log.Info($"NeverZebra:Never_array[{info.m_prefabDataIndex}] index out of range. info:{info.name}");
                 return false;
             }
         }

@@ -14,12 +14,12 @@ namespace HideCrosswalks.Utils {
         public static void CachePrefabs() {
 #if !DEBUG
             if (Extensions.InAssetEditor) {
-                Extensions.Log("skipped caching prefabs in asset editor release build");
+                Log.Info("skipped caching prefabs in asset editor release build");
                 return;
             }
 #endif
-            MaterialUtils.Init();
             TextureUtils.Init();
+            MaterialUtils.Init();
             for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
                 foreach (bool bStartNode in new bool[] { false, true }) {
                     if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
@@ -27,13 +27,13 @@ namespace HideCrosswalks.Utils {
                         ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
                         foreach (var node in segment.Info.m_nodes) {
                             //cache:
-                            Extensions.Log("Caching " + segment.Info.name);
+                            Log.Info("Caching " + segment.Info.name);
                             CalculateMaterialCommons.CalculateMaterial(node.m_nodeMaterial, nodeID, segmentID);
                         }
                     }
                 }
             }
-            Extensions.Log("all prefabs cached");
+            Log.Info("all prefabs cached");
         }
 
         public static void ClearCache() {
@@ -79,7 +79,7 @@ namespace HideCrosswalks.Utils {
                 b |= info.isAsym() && !info.isOneWay() && info.name != "AsymAvenueL2R3";
                 if(!b)
                     ret = 0.91f;
-                Extensions.Log(info.name + " : Scale: " + ret);
+                Log.Info(info.name + " : Scale: " + ret);
             }
             return ret;
         }
@@ -87,7 +87,7 @@ namespace HideCrosswalks.Utils {
         public static bool IsNExt(this NetInfo info) {
             string c = info.m_class.name.ToLower();
             bool ret = c.StartsWith("next");
-            //Extensions.Log($"IsNExt returns {ret} : {info.GetUncheckedLocalizedTitle()} : " + c);
+            //Log.Info($"IsNExt returns {ret} : {info.GetUncheckedLocalizedTitle()} : " + c);
             return ret;
         }
 

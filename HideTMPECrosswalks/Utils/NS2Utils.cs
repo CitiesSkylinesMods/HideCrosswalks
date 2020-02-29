@@ -13,11 +13,11 @@ namespace HideCrosswalks.Utils {
                 return _HideJunction(segmentID);
             }
             catch (FileNotFoundException _) {
-                Debug.Log("ERROR ****** NS2 not found! *****");
+                Log.Info("WARNING ****** NS2 not found! *****");
                 exists = false;
             }
             catch (Exception e) {
-                Debug.Log(e + "\n" + e.StackTrace);
+                Log.Error(e.ToString());
                 exists = false;
             }
             return false;
@@ -35,13 +35,13 @@ namespace HideCrosswalks.Utils {
         private static bool _HideJunction1(ushort segmentID) {
             var skin = NetworkSkins.Skins.NetworkSkinManager.SegmentSkins[segmentID];
             bool ret = skin != null && skin.m_nodeMarkingsHidden;
-            //Extensions.Log($"_HideJunction1 segment:{segmentID} m_nodeMarkingsHidden:{skin.m_nodeMarkingsHidden} return:{ret}");
+            //Log.Info($"_HideJunction1 segment:{segmentID} m_nodeMarkingsHidden:{skin.m_nodeMarkingsHidden} return:{ret}");
             return ret;
         }
         private static bool _HideJunction2(ushort segmentID) {
             var skin = NetworkSkins.Skins.NetworkSkinManager.SegmentSkins[segmentID];
             bool ret = skin != null && Mathf.Abs(skin.m_color.b-0.506f ) < 0.001f;
-            //Extensions.Log($"_HideJunction2 segment:{segmentID} skin_color:{skin.m_color} return:{ret}");
+            //Log.Info($"_HideJunction2 segment:{segmentID} skin_color:{skin.m_color} return:{ret}");
             return ret;
         }
     }

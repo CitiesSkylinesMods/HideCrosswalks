@@ -1,8 +1,6 @@
 using ColossalFramework;
 using ICities;
-using System.Diagnostics;
 using System.Reflection;
-using System;
 
 namespace HideCrosswalks.Utils {
 
@@ -25,40 +23,12 @@ namespace HideCrosswalks.Utils {
         internal static bool InGame => CheckGameMode(AppMode.Game);
         internal static bool InAssetEditor => CheckGameMode(AppMode.AssetEditor);
 
-
-        internal static void LogLap(this Stopwatch ticks, string prefix = "") {
-            ticks.Stop();
-            Log(prefix + "TICKS elapsed: " + ticks.ElapsedTicks.ToString("E2"));
-            ticks.Reset();
-            ticks.Start();
-        }
-        internal static void Lap(this Stopwatch ticks) {
-            ticks.Reset();
-            ticks.Start();
-        }
-
-        const string FILE_NAME = "RMCrosswalks.debug.log";
-        internal static void ClearLog() {
-            System.IO.File.WriteAllText(FILE_NAME, "");
-        }
-
-        static object LogLock = new object();
-        internal static void Log(string m, bool unitylog = false) {
-            lock (LogLock) {
-                //var st = System.Environment.StackTrace;
-                //m  = st + " : \n" + m;
-#if DEBUG
-                UnityEngine.Debug.Log(m);
-#else
-                if(unitylog)UnityEngine.Debug.Log(m);
-#endif
-
-
-                System.IO.File.AppendAllText(FILE_NAME, m + "\n\n");
-            }
-        }
         internal static void Assert(bool con, string m="") {
-            if (!con) throw new System.Exception("Assertion failed: " + m);
+            if (!con) {
+                m = "Assertion failed: " + m;
+                Log.Error(m);
+                throw new System.Exception(m);
+            }
         }
 
         internal static string BIG(string m) {

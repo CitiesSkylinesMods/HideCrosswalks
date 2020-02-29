@@ -20,7 +20,7 @@ namespace HideCrosswalks.Utils {
                     return texture as Texture2D;
             }
             catch { }
-            Extensions.Log("Warning: failed to get texture from material :" + material.name);
+            Log.Info("Warning: failed to get texture from material :" + material.name);
             return null;
         }
 
@@ -35,7 +35,7 @@ namespace HideCrosswalks.Utils {
                 if (HasSameNodeAndSegmentTextures(info, material, ID_Defuse)) {
                     // TODO why this works but the WierdNodeTest() fails.
                     string m = $"{info.name} is {info.category} is without proper node texture.";
-                    Extensions.Log(m);
+                    Log.Info(m);
                     MaterialCache[material] = material;
                     return material;
                 }
@@ -44,11 +44,11 @@ namespace HideCrosswalks.Utils {
                 Material ret = new Material(material);
                 HideCrossings0(ret, segMaterial, info, lod);
                 MaterialCache[material] = ret;
-                Extensions.Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
+                Log.Info($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
                 return ret;
             }
             catch (Exception e) {
-                Extensions.Log(e.ToString());
+                Log.Info(e.ToString());
                 MaterialCache[material] = material; // do not repeat the same mistake!
                 return material;
             }
@@ -71,13 +71,13 @@ namespace HideCrosswalks.Utils {
                 if (dump) DumpUtils.Dump(tex, info);
                 if (TextureCache.Contains(tex)) {
                     tex = TextureCache[tex] as Texture2D;
-                    Extensions.Log("Texture cache hit: " + tex.name);
+                    Log.Info("Texture cache hit: " + tex.name);
                 } else {
-                    Extensions.Log("POINT A tex = " + tex.name);
+                    Log.Info("processing Defuse texture for " + tex.name);
                     tex = tex.GetReadableCopy();
                     tex.CropAndStrech(); if (dump) DumpUtils.Dump(tex, info);
                     tex.Finalize(lod);
-                    TextureCache[tex] = tex;
+                    TextureCache[material.GetTexture(ID_Defuse)] = tex;
                 }
                 if (dump) DumpUtils.Dump(tex, info);
                 material.SetTexture(ID_Defuse, tex);
@@ -86,15 +86,15 @@ namespace HideCrosswalks.Utils {
 
             if (info.category != "RoadsSmall" || !info.m_isCustomContent || info.isAsym()) {
                 tex = material.TryGetTexture2D(ID_APRMap);
-                tex2 = segMaterial.TryGetTexture2D(ID_APRMap); Extensions.Log("POINT B: tex.width=" + tex.width);
+                tex2 = segMaterial.TryGetTexture2D(ID_APRMap);
                 if (tex != null && tex2 != null) {
                     if (dump) DumpUtils.Dump(tex, info);
                     if (dump) DumpUtils.Dump(tex2, info);
                     if (TextureCache.Contains(tex)) {
                         tex = TextureCache[tex] as Texture2D;
-                        Extensions.Log("Texture cache hit: " + tex.name);
+                        Log.Info("Texture cache hit: " + tex.name);
                     } else {
-                        Extensions.Log("POINT B tex = " + tex.name);
+                        Log.Info("processing APR texture for " + tex.name);
                         bool linear = lod && !info.IsNExt();
                         tex = tex.GetReadableCopy(linear: linear);
                         tex2 = tex2.GetReadableCopy(linear: linear);
@@ -111,7 +111,7 @@ namespace HideCrosswalks.Utils {
                         tex.MeldDiff(tex2); if (dump) DumpUtils.Dump(tex, info);
 
                         tex.Finalize(lod);
-                        TextureCache[tex] = tex;
+                        TextureCache[material.GetTexture(ID_APRMap)] = tex;
                     }
                     material.SetTexture(ID_APRMap, tex);
                     if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_APRMap, "node-processed", info));

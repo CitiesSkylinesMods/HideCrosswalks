@@ -9,7 +9,7 @@ namespace HideCrosswalks.Patches.NetNodePatches {
 
     [HarmonyPatch()]
     public static class RenderInstance {
-        static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);
+        static void Log(string m) => Utils.Log.Info("NetNode_RenderInstance Transpiler: " + m);
 
         // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
         static MethodInfo Target => typeof(global::NetNode).GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -29,7 +29,7 @@ namespace HideCrosswalks.Patches.NetNodePatches {
                 Log("successfully patched NetNode.RenderInstance");
                 return codes;
             }catch(Exception e) {
-                Log(e + "\n" + Environment.StackTrace);
+                Utils.Log.Error(e.ToString());
                 throw e;
             }
         }

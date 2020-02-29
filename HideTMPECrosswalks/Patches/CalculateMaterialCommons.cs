@@ -22,7 +22,7 @@ namespace HideCrosswalks.Patches {
             bool ret0 = info.CanHideMarkings(); // must use the same condition as in Roads()
 
             if (Extensions.InAssetEditor ) {
-                //Extensions.Log($"Should hide crossings: {ret0} | stack:\n" + System.Environment.StackTrace);
+                //Log._Debug($"Should hide crossings: {ret0} | stack:\n" + System.Environment.StackTrace);
 #if DEBUG
                 return ret0; // always hide crossings in asset editor for quick testing.
 #else
@@ -32,7 +32,7 @@ namespace HideCrosswalks.Patches {
             bool ret1 = ret0 && TMPEUTILS.HasCrossingBan(segmentID, nodeID) && info.CanHideCrossings();
             bool ret2 = ret0 && NS2Utils.HideJunction(segmentID);
             bool ret =  ret1 || ret2;
-            //Extensions.Log($"ShouldHideCrossing ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
+            //Log._Debug($"ShouldHideCrossing ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
             return ret;
         }
 

@@ -12,13 +12,13 @@ namespace HideCrosswalks.Patches
         {
 #if !DEBUG
             if (Extensions.InAssetEditor) {
-                Extensions.Log("skipped InstallHarmony in asset editor release build");
+                Log.Info("skipped InstallHarmony in asset editor release build");
                 return;
             }
 #endif
             if (harmony == null)
             {
-                Extensions.Log("HideCrosswalks Patching...", true);
+                Log.Info("HideCrosswalks Patching...");
 #if DEBUG
                 HarmonyInstance.DEBUG = true;
 #endif
@@ -34,7 +34,7 @@ namespace HideCrosswalks.Patches
             {
                 harmony.UnpatchAll(HARMONY_ID);
                 harmony = null;
-                Extensions.Log("HideCrosswalks patches Reverted.", true);
+                Log.Info("HideCrosswalks patches Reverted.");
             }
         }
     }

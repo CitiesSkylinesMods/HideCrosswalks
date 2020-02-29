@@ -31,7 +31,7 @@ namespace HideCrosswalks.Utils {
                 m += s;
             }
 
-            Extensions.Log(m);
+            Log.Info(m);
         }
 
         public static void Dump(NetInfo info) {
@@ -72,15 +72,15 @@ namespace HideCrosswalks.Utils {
 
         public static void Dump(Texture tex, string path) {
             Texture2D texture = tex is Texture2D ? tex as Texture2D : throw new Exception($"texture:{tex} is not texture2D");
-            Extensions.Log($"Dumping texture:<{tex.name}> size:<{tex.width}x{tex.height}>");
+            Log.Info($"Dumping texture:<{tex.name}> size:<{tex.width}x{tex.height}>");
             texture = texture.TryMakeReadable();
 
             byte[] bytes = texture.EncodeToPNG();
             if (bytes == null) {
-                Extensions.Log($"Warning! bytes == null. Failed to dump {tex?.name} with format  {(tex as Texture2D).format} to {path}.");
+                Log.Info($"Warning! bytes == null. Failed to dump {tex?.name} with format  {(tex as Texture2D).format} to {path}.");
                 return;
             }
-            Extensions.Log("Dumping to " + path);
+            Log.Info("Dumping to " + path);
             File.WriteAllBytes(path, bytes);
         }
 
@@ -113,7 +113,7 @@ namespace HideCrosswalks.Utils {
         }
 
         public static Texture2D Load(string path) {
-            Extensions.Log("Loading Texture from " + path);
+            Log.Info("Loading Texture from " + path);
             byte[] bytes = File.ReadAllBytes(path);
             Texture2D texture = new Texture2D(1, 1);
             texture.LoadImage(bytes);

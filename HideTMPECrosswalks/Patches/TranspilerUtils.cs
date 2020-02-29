@@ -8,7 +8,7 @@ namespace HideCrosswalks.Patches {
     using Utils;
     public static class TranspilerUtils {
         static void Log(object message) {
-            Extensions.Log("TRANSPILER " + message);
+            Utils.Log._Debug("TRANSPILER " + message);
         }
 
         public static List<CodeInstruction> ToCodeList(IEnumerable<CodeInstruction> instructions) {

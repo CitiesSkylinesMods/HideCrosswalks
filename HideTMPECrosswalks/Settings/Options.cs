@@ -28,9 +28,9 @@ namespace HideCrosswalks.Settings {
                 loaded_always = s[0];
                 loaded_never = s[1];
             }catch(FileNotFoundException e) {
-                Extensions.Log("Load failed" + e.Message);
+                Log.Info("Load failed" + e.Message);
             }catch(Exception e) {
-                Extensions.Log("Load failed" + e);
+                Log.Info("Load failed" + e);
             }
         }
 

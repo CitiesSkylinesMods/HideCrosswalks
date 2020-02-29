@@ -17,13 +17,13 @@ namespace HideCrosswalks.Utils {
             }
             catch (FileNotFoundException _) {
                 if (!warned) {
-                    Debug.Log("ERROR ****** TMPE not found! *****");
+                    Log.Info("WARNING ****** TMPE not found! *****");
                     warned = true;
                 }
             }
             catch (Exception e) {
                 if (!warned) {
-                    Debug.Log(e + "\n" + e.StackTrace);
+                    Log.Error(e.ToString());
                     warned = true;
                 }
             }

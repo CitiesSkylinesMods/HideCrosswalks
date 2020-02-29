@@ -14,14 +14,14 @@ namespace HideCrosswalks {
             if (!Extensions.InGame && !Extensions.InAssetEditor)
                 return;
 
-            //Extensions.Log("Testing ...");
+            //Log.Info("Testing ...");
             ////DebugTests.NameTest();
             ////DebugTests.Dumps();
             ////DebugTests.WierdNodeTest();
             ////DebugTests.UVTest();
             //_Test();
 
-            //Extensions.Log("Testing Done!");
+            //Log.Info("Testing Done!");
         }
 
         public static class DebugTests {
@@ -36,13 +36,13 @@ namespace HideCrosswalks {
                 //        Texture tseg = seg.m_material.GetTexture(texType);
                 //        node.m_material.SetTexture(texType, tseg);
                 //        string m = $"{info.name} - {texType}> Made node tex == seg tex ";
-                //        Extensions.Log(Extensions.BIG(m));
+                //        Log.Info(Extensions.BIG(m));
                 //    }
                 //    catch { }
                 //}
                 node.m_material = node.m_nodeMaterial = seg.m_material;
                 string m = $"{info.name}> Made node material == seg material ";
-                Extensions.Log(Extensions.BIG(m));
+                Log.Info(Extensions.BIG(m));
             }
 
             public static void WierdNodeTest() {
@@ -74,11 +74,11 @@ namespace HideCrosswalks {
                             m += "|| level:" + info.GetClassLevel();
                             m += " class:" + info.m_class;
                             m += " category:" + info.category;
-                            Extensions.Log(m);
+                            Log.Info(m);
                         }
                     }
                 }
-                Extensions.Log(Extensions.BIG("DONE PRITING NAMES!"));
+                Log.Info(Extensions.BIG("DONE PRITING NAMES!"));
             }
             public static bool RoadNameEqual(string n1, string n2) => n1.Trim().ToLower() == n2.Trim().ToLower();
 

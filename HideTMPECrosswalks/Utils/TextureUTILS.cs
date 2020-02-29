@@ -82,7 +82,7 @@ namespace HideCrosswalks.Utils {
                     return 8;
                 default:
                     string m = $"unxpected texture width:{tex.width}. texture:{tex.name}";
-                    Extensions.Log(m);
+                    Log.Info(m);
 #if DEBUG
                     throw new Exception(m);
 #endif
@@ -92,7 +92,7 @@ namespace HideCrosswalks.Utils {
         public static float OffsetPortion(this Texture2D tex) => tex.Offset() / (float)tex.width;
 
         public static void MeldDiff(this Texture2D tex, Texture2D tex2) {
-            Extensions.Log($"MeldDiff node:<{tex.name}> segment:<{tex2.name}>");
+            Log.Info($"MeldDiff node:<{tex.name}> segment:<{tex2.name}>");
             //DumpUtils.Dump(tex, DumpUtils.GetFilePath("tex", "", "melddiff"));
             //DumpUtils.Dump(tex2, DumpUtils.GetFilePath("tex2", "", "melddiff"));
             int offset = tex.Offset();
@@ -110,7 +110,7 @@ namespace HideCrosswalks.Utils {
                 colors = tex.GetPixels(0, j, tex.width, 1);
                 int j2 = j - offset;
                 float w = j2 < 0 ? 1f : 1f - j2 / (float)(yM - offset);
-                //Extensions.Log(""+w);
+                //Log.Info(""+w);
                 colors.Addw(diff, w);
                 tex.SetPixels(0, j, tex.width, 1, colors);
             }
@@ -163,7 +163,7 @@ namespace HideCrosswalks.Utils {
         public static void Scale(this Texture2D texture, float ratio = 0.915f) {
             if (ratio == 1f)
                 return;
-            Extensions.Log($"Scaling {texture.name} raito:{ratio}");
+            Log.Info($"Scaling {texture.name} raito:{ratio}");
             int xN = texture.width;
             int yN = texture.height;
             Texture2D tmp = texture.CreateTempCopy();
@@ -185,7 +185,7 @@ namespace HideCrosswalks.Utils {
 
 
         public static void Mirror(this Texture2D texture) {
-            Extensions.Log("Mirror: texture name:" + texture.name);
+            Log.Info("Mirror: texture name:" + texture.name);
             if (texture.IsInverted())
                 MirrorInv(texture);
             int xN = texture.width;
@@ -199,7 +199,7 @@ namespace HideCrosswalks.Utils {
             }
             int width = (last - first + 1);
             int pivot = width / 2 + first;
-            Extensions.Log($"first:{first} last:{last} width:{width} pivot:{pivot}");
+            Log.Info($"first:{first} last:{last} width:{width} pivot:{pivot}");
 
 
             for (int i = pivot; i <= last; i++) {
@@ -213,7 +213,7 @@ namespace HideCrosswalks.Utils {
         }
 
         public static void MirrorInv(this Texture2D texture) {
-            Extensions.Log("MirrorInv: texture name:" + texture.name);
+            Log.Info("MirrorInv: texture name:" + texture.name);
 
             int xN = texture.width;
             int yN = texture.height;
@@ -226,7 +226,7 @@ namespace HideCrosswalks.Utils {
             }
             int width = (last - first + 1);
             int pivot = width / 2 + first;
-            Extensions.Log($"first:{first} last:{last} width:{width} pivot:{pivot}");
+            Log.Info($"first:{first} last:{last} width:{width} pivot:{pivot}");
 
             for (int i = first; i < pivot; i++) {
                 int i2 = last - i + first;
@@ -333,7 +333,7 @@ namespace HideCrosswalks.Utils {
 
             Color ret = colors[xN / 2]; // middle
             ticks.LogLap($"GetMedianColor : middle = {ret} ");
-            Extensions.Log("GetMedianColor : min = " + colors[0]);
+            Log.Info("GetMedianColor : min = " + colors[0]);
 
             return ret;
         }
