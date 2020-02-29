@@ -91,6 +91,14 @@ namespace HideCrosswalks.Utils {
 
         public static float OffsetPortion(this Texture2D tex) => tex.Offset() / (float)tex.width;
 
+        internal static Color MedianColor = new Color32(25, 25, 25, 255);
+        public static Texture2D GetSimpleDefuseTexture() {
+            Texture2D ret = new Texture2D(1, 1);
+            ret.SetPixel(0,0,MedianColor);
+            ret.Apply();
+            return ret;
+        }
+
         public static void MeldDiff(this Texture2D tex, Texture2D tex2) {
             Log.Info($"MeldDiff node:<{tex.name}> segment:<{tex2.name}>");
             //DumpUtils.Dump(tex, DumpUtils.GetFilePath("tex", "", "melddiff"));
