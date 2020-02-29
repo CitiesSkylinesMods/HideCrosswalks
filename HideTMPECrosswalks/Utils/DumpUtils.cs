@@ -3,7 +3,7 @@ using System.IO;
 using System;
 using UnityEngine;
 
-namespace HideTMPECrosswalks.Utils {
+namespace HideCrosswalks.Utils {
     using static TextureUtils;
     public static class DumpUtils {
         public static void LogUVs(NetInfo info1, NetInfo info2) {
@@ -23,7 +23,7 @@ namespace HideTMPECrosswalks.Utils {
 
             int n = Math.Min(Math.Min(UVseg1.Length, UVseg2.Length), Math.Min(UVnode1.Length, UVnode2.Length));
             string str(Vector2 v) => "<" + v.x.ToString("0.000") + " " + v.y.ToString("0.000") + ">";
-            for (int i= 0; i < n; ++i){
+            for (int i = 0; i < n; ++i) {
                 string s1 = str(v11[i]) + " | " + str(v12[i]);
                 string s2 = str(v21[i]) + " | " + str(v22[i]);
                 string s = i.ToString("000") + "   " + s1 + "\n";
@@ -43,7 +43,7 @@ namespace HideTMPECrosswalks.Utils {
                 string baseName = "segment";
                 //if (info.m_segments.Length > 1) baseName += i;
                 Dump(material, baseName, info);
-                break; //first one is enough
+                //break; //first one is enough
             }
             for (int i = 0; i < info.m_nodes.Length; ++i) {
                 var node = info.m_nodes[i];
@@ -51,11 +51,11 @@ namespace HideTMPECrosswalks.Utils {
                 string baseName = "node";
                 if (info.m_nodes.Length > 1) baseName += i;
                 Dump(material, baseName, info);
-                break; //first one is enough
+                //break; //first one is enough
             }
         }
 
-        public static void Dump(Material material, string baseName, NetInfo info ) {
+        public static void Dump(Material material, string baseName, NetInfo info) {
             if (baseName == null) baseName = material.name;
             Dump(material, ID_Defuse, baseName, info);
             Dump(material, ID_APRMap, baseName, info);
@@ -65,15 +65,21 @@ namespace HideTMPECrosswalks.Utils {
 
         public static void Dump(Material material, int texID, string baseName, NetInfo info) {
             if (material == null) throw new ArgumentNullException("material");
-            Texture2D texture = material.GetReadableTexture(texID);
+            Texture2D texture = material.TryGetTexture2D(texID);
             string path = GetFilePath(texID, baseName ?? material.name, info);
             Dump(texture, path);
         }
 
         public static void Dump(Texture tex, string path) {
-            Texture2D texture = tex.TryMakeReadable();
-            Extensions.Log($"Dumping texture " + texture.name);
+            Texture2D texture = tex is Texture2D ? tex as Texture2D : throw new Exception($"texture:{tex} is not texture2D");
+            Extensions.Log($"Dumping texture:<{tex.name}> size:<{tex.width}x{tex.height}>");
+            texture = texture.TryMakeReadable();
+
             byte[] bytes = texture.EncodeToPNG();
+            if (bytes == null) {
+                Extensions.Log($"Warning! bytes == null. Failed to dump {tex?.name} with format  {(tex as Texture2D).format} to {path}.");
+                return;
+            }
             Extensions.Log("Dumping to " + path);
             File.WriteAllBytes(path, bytes);
         }

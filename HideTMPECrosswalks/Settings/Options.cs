@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using ColossalFramework.UI;
 using System.IO;
-using HideTMPECrosswalks.Utils;
+using HideCrosswalks.Utils;
 using ICities;
 using UnityEngine;
 
-namespace HideTMPECrosswalks.Settings {
+namespace HideCrosswalks.Settings {
     public class Options {
         public static Options instance = null;
         public static readonly char delemiter = '|';
-        static readonly string Path = "HideTMPECrosswalks.save";
+        static readonly string Path = "HideCrosswalks.save";
 
         string loaded_always = "";
         UICheckboxDropDownExt _ui_always;
@@ -59,18 +59,11 @@ namespace HideTMPECrosswalks.Settings {
             UIHelper helper = helperBase as UIHelper;
             UIComponent container = helper.self as UIComponent;
 
-            _ui_always = container.AddUIComponent<UICheckboxDropDownExt>();
-            _ui_always.Title = "Always";
-            _ui_always.selectedItems = Split(loaded_always);
-            _ui_always.eventAfterDropdownClose += (_) => PrefabUtils.CacheAlways(_ui_always.selectedItems);
-            PrefabUtils.CacheAlways(_ui_always.selectedItems);
-
-
             _ui_never = container.AddUIComponent<UICheckboxDropDownExt>();
             _ui_never.Title = "Never";
             _ui_never.selectedItems = Split(loaded_never);
-            _ui_never.eventAfterDropdownClose += (_) => PrefabUtils.CacheNever(_ui_never.selectedItems);
-            PrefabUtils.CacheNever(_ui_never.selectedItems);
+            _ui_never.eventAfterDropdownClose += (_) => RoadUtils.CacheNever(_ui_never.selectedItems);
+            RoadUtils.CacheNever(_ui_never.selectedItems);
 
             helper.AddButton("Save", Save);
         }
@@ -148,7 +141,7 @@ namespace HideTMPECrosswalks.Settings {
                 foreach (string item in selectedItems) {
                     AddItem(item, true);
                 }
-                foreach (string item in PrefabUtils.GetRoadNames()) {
+                foreach (string item in RoadUtils.GetRoadNames()) {
                     if (!selectedItems.Contains(item)) {
                         AddItem(item, false);
                     }

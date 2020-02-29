@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System;
 
-namespace HideTMPECrosswalks.Utils {
+namespace HideCrosswalks.Utils {
 
     public static class Extensions {
         internal static ref NetNode ToNode(this ushort id) => ref Singleton<NetManager>.instance.m_nodes.m_buffer[id];
@@ -37,6 +37,11 @@ namespace HideTMPECrosswalks.Utils {
             ticks.Start();
         }
 
+        const string FILE_NAME = "RMCrosswalks.debug.log";
+        internal static void ClearLog() {
+            System.IO.File.WriteAllText(FILE_NAME, "");
+        }
+
         static object LogLock = new object();
         internal static void Log(string m, bool unitylog = false) {
             lock (LogLock) {
@@ -49,7 +54,7 @@ namespace HideTMPECrosswalks.Utils {
 #endif
 
 
-                System.IO.File.AppendAllText("mod.debug.log", m + "\n\n");
+                System.IO.File.AppendAllText(FILE_NAME, m + "\n\n");
             }
         }
         internal static void Assert(bool con, string m="") {

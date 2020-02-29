@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HideTMPECrosswalks", "HideTMPECrosswalks\HideTMPECrosswalks.csproj", "{17034566-78DF-4C3D-BD3F-3B833CB2D872}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HideCrosswalks", "HideTMPECrosswalks\HideCrosswalks.csproj", "{17034566-78DF-4C3D-BD3F-3B833CB2D872}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HideTMPECrosswalks.Tests", "HideTMPECrosswalks.Tests\HideTMPECrosswalks.Tests.csproj", "{F9DBDEF2-4186-4D64-9DA5-95D9F1FADE93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HideCrosswalks.Tests", "HideTMPECrosswalks.Tests\HideCrosswalks.Tests.csproj", "{F9DBDEF2-4186-4D64-9DA5-95D9F1FADE93}"
 	ProjectSection(ProjectDependencies) = postProject
 		{17034566-78DF-4C3D-BD3F-3B833CB2D872} = {17034566-78DF-4C3D-BD3F-3B833CB2D872}
 	EndProjectSection

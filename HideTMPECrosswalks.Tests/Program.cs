@@ -1,5 +1,5 @@
 using UnityEngine;
-namespace HideTMPECrosswalks.Tests
+namespace HideCrosswalks.Tests
 {
     using static Program;
     public static class Program {
@@ -40,7 +40,7 @@ namespace HideTMPECrosswalks.Tests
         }
     }
 
-    public static class TestColorUtils {
+    public static class Experiments {
         public static void Test1() {
             Color c1 = new Color(.1f, .2f, .3f, .4f);
             Color c2 = Color.clear - c1;

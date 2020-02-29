@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
-namespace HideTMPECrosswalks.Utils {
+namespace HideCrosswalks.Utils {
     public static class NS2Utils {
         static bool exists = true;
 

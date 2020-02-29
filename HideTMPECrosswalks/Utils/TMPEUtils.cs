@@ -1,12 +1,8 @@
-using ICities;
 using System;
 using System.IO;
 using UnityEngine;
 
-namespace HideTMPECrosswalks.Utils {
-    using static Extensions;
-
-    // Code from roundabout builder: https://github.com/Strdate/AutomaticRoundaboutBuilder/blob/master/RoundaboutBuilder/ModLoadingExtension.cs
+namespace HideCrosswalks.Utils {
     public static class TMPEUTILS {
         private static bool warned=false;
 
@@ -32,12 +28,10 @@ namespace HideTMPECrosswalks.Utils {
                 }
             }
             return false;
-
         }
 
         private static bool _HasCrossingBan(ushort segmentID, bool bStartNode) {
-            CSUtil.Commons.TernaryBool b = TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.GetPedestrianCrossingAllowed(segmentID, bStartNode);
-            return b == CSUtil.Commons.TernaryBool.False;
+            return !TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(segmentID, bStartNode);
         }
     }
 }
