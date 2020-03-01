@@ -53,7 +53,12 @@ namespace HideCrosswalks.Settings {
             UIHelper helper = helperBase as UIHelper;
             UIComponent container = helper.self as UIComponent;
 
-            if (Extensions.IsActive) {
+            bool active = Extensions.IsActive;
+#if DEBUG
+            active = true; // Fast test of options from main menu
+#endif
+
+            if (active) {
                 _ui_never = container.AddUIComponent<UICheckboxDropDownExt>();
                 _ui_never.Title = "Except List";
                 _ui_never.tooltip = "TMPE cannot hide crosswalks from roads in this list.\nThis list does not affect NS2 junction markings.";
@@ -79,11 +84,10 @@ namespace HideCrosswalks.Settings {
 
             public override void Start() {
                 base.Start();
-                //TODO search for the line bellow in GITHUB to print all names
-                //atlas = Utils.GetAtlas("Ingame");
+                atlas = TextureUtils.GetAtlas("InMapEditor");
                 size = new Vector2(120f, 30);
                 listBackground = "GenericPanelLight";
-                itemHeight = 8;
+                itemHeight = 10;
                 itemHover = "ListItemHover";
                 itemHighlight = "ListItemHighlight";
                 normalBgSprite = "ButtonMenu";
@@ -96,7 +100,7 @@ namespace HideCrosswalks.Settings {
                 popupColor = new Color32(45, 52, 61, 255);
                 popupTextColor = new Color32(170, 170, 170, 255);
                 zOrder = 1;
-                textScale = 0.7f;
+                textScale = 0.65f;
                 verticalAlignment = UIVerticalAlignment.Middle;
                 horizontalAlignment = UIHorizontalAlignment.Left;
                 textFieldPadding = new RectOffset(8, 0, 0, 0);

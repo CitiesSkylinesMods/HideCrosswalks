@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
+using ColossalFramework.UI;
 
 namespace HideCrosswalks.Utils {
     using static ColorUtils;
@@ -21,6 +22,16 @@ namespace HideCrosswalks.Utils {
         internal static Hashtable TextureCache = null;
         public static void Init() => TextureCache = new Hashtable(500);
         public static void Clear() => TextureCache = null;
+
+        public static UITextureAtlas GetAtlas(string name) {
+            UITextureAtlas[] atlases = Resources.FindObjectsOfTypeAll(typeof(UITextureAtlas)) as UITextureAtlas[];
+            foreach(var atlas in atlases) {
+                if (atlas.name == name)
+                    return atlas;
+            }
+            return null;
+            
+        }
 
         /// <summary>
         /// reteurns a copy of the texture with the differenc that: mipmap=false, linear=false, readable=true;
@@ -86,6 +97,7 @@ namespace HideCrosswalks.Utils {
 #if DEBUG
                     throw new Exception(m);
 #endif
+                    return 0;
             }
         }
 

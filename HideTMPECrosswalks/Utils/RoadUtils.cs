@@ -120,10 +120,13 @@ namespace HideCrosswalks.Utils {
 
         internal static bool CalculateCanHideCrossingsRaw(NetInfo info) {
             bool ret = CalculateCanHideMarkingsRaw(info);
+            if (!ret)
+                return false;
 
-            // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
+            // highways without pedesterian lanes have no crossings to hide to the best of my knowledege.
             // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
-            ret &= info.m_hasPedestrianLanes && info.m_hasForwardVehicleLanes;
+            RoadBaseAI ai = info.m_netAI as RoadBaseAI;
+            ret &= info.m_hasPedestrianLanes || !ai.m_highwayRules;
 
             ret &= !exempts_.Contains(info?.name);
             return ret;
