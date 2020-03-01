@@ -45,7 +45,7 @@ namespace HideCrosswalks {
         }
 
         public static bool GetCanHideMarkings(NetInfo info) {
-            return HideCrosswalksMod.IsEnabled && NetInfoExtArray?[info.m_prefabDataIndex] != null;
+            return HideCrosswalksMod.IsEnabled && Extensions.IsActive && NetInfoExtArray?[info.m_prefabDataIndex] != null;
         } // end method
         #endregion
     } // end class

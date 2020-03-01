@@ -11,7 +11,7 @@ namespace HideCrosswalks {
         public override void OnLevelLoaded(LoadMode mode) => Test();
 
         public static void Test() {
-            if (!Extensions.InGame && !Extensions.InAssetEditor)
+            if (!Extensions.IsActive)
                 return;
 
             //Log.Info("Testing ...");

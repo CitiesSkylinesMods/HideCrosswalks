@@ -85,8 +85,8 @@ namespace HideCrosswalks.Utils {
                 if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_Defuse, "node-processed", info));
             }
 
-            if (info.category != "RoadsSmall" || !info.m_isCustomContent || info.isAsym()) {
-                tex = material.TryGetTexture2D(ID_APRMap);
+            tex = material.TryGetTexture2D(ID_APRMap);
+            if(tex.name != "RoadSmallNode-default-apr" && tex.name != "BasicRoad2_Junction-apr") { 
                 tex2 = segMaterial.TryGetTexture2D(ID_APRMap);
                 if (tex != null && tex2 != null) {
                     if (dump) DumpUtils.Dump(tex, info);

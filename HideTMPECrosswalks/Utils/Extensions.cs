@@ -10,18 +10,21 @@ namespace HideCrosswalks.Utils {
         //internal static NetLane ToLane(this int id) => Singleton<NetManager>.instance.m_lanes.m_buffer[id];
 
         internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
-        internal static bool CheckGameMode(AppMode mode) => CheckGameMode(new[] { mode });
-        internal static bool CheckGameMode(AppMode[] modes) {
+        internal static bool CheckGameMode(AppMode mode) {
             try {
-                foreach (var mode in modes) {
-                    if (currentMode == mode)
-                        return true;
-                }
+                if (currentMode == mode)
+                    return true;
             } catch { }
             return false;
         }
         internal static bool InGame => CheckGameMode(AppMode.Game);
         internal static bool InAssetEditor => CheckGameMode(AppMode.AssetEditor);
+        internal static bool IsActive =>
+#if DEBUG
+            InGame || InAssetEditor;
+#else
+            InGame;
+#endif
 
         internal static void Assert(bool con, string m="") {
             if (!con) {

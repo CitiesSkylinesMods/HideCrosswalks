@@ -53,16 +53,22 @@ namespace HideCrosswalks.Settings {
             UIHelper helper = helperBase as UIHelper;
             UIComponent container = helper.self as UIComponent;
 
-            _ui_never = container.AddUIComponent<UICheckboxDropDownExt>();
-            _ui_never.Title = "Except List";
-            _ui_never.tooltip = "TMPE cannot hide crosswalks from roads in this list.\nThis list does not affect NS2 junction markings.";
-            _ui_never.selectedItems = Split(loaded_never);
+            if (Extensions.IsActive) {
+                _ui_never = container.AddUIComponent<UICheckboxDropDownExt>();
+                _ui_never.Title = "Except List";
+                _ui_never.tooltip = "TMPE cannot hide crosswalks from roads in this list.\nThis list does not affect NS2 junction markings.";
+                _ui_never.selectedItems = Split(loaded_never);
 
-            void HandleAfterDropdownClose(UICheckboxDropDown _) => NetInfoExt.InitNetInfoExtArray();
-            _ui_never.eventAfterDropdownClose += HandleAfterDropdownClose;
-            NetInfoExt.InitNetInfoExtArray();
+                void HandleAfterDropdownClose(UICheckboxDropDown _) => NetInfoExt.InitNetInfoExtArray();
+                _ui_never.eventAfterDropdownClose += HandleAfterDropdownClose;
+                NetInfoExt.InitNetInfoExtArray();
 
-            helper.AddButton("Save", Save);
+                helper.AddButton("Save", Save);
+            } else {
+                var label = container.AddUIComponent<UILabel>();
+                label.text = "Options are only available in game";
+            }
+
         }
 
 
@@ -73,6 +79,7 @@ namespace HideCrosswalks.Settings {
 
             public override void Start() {
                 base.Start();
+                //TODO search for the line bellow in GITHUB to print all names
                 //atlas = Utils.GetAtlas("Ingame");
                 size = new Vector2(120f, 30);
                 listBackground = "GenericPanelLight";
@@ -100,7 +107,7 @@ namespace HideCrosswalks.Settings {
 
                 UIButton button = AddUIComponent<UIButton>();
                 this.triggerButton = button;
-                //button.atlas = Utils.GetAtlas("Ingame");
+                //button.atlas = // TODO uncomment this to change button atlas
                 button.text = Title;
                 button.textPadding = new RectOffset(14, 0, -7, 0);
                 button.size = this.size;

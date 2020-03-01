@@ -21,14 +21,12 @@ namespace HideCrosswalks.Patches {
             Extensions.Assert(isJunction, $"isJunction | segmentID:{segmentID} nodeID:{nodeID}");
             bool ret0 = NetInfoExt.GetCanHideMarkings(info);
 
+#if DEBUG
             if (Extensions.InAssetEditor ) {
                 //Log._Debug($"Should hide crossings: {ret0} | stack:\n" + System.Environment.StackTrace);
-#if DEBUG
                 return ret0; // always hide crossings in asset editor for quick testing.
-#else
-                return false;
-#endif
             }
+#endif
             bool ret1 = TMPEUTILS.HasCrossingBan(segmentID, nodeID) & NetInfoExt.GetCanHideCrossings(info);
             bool ret2 = ret0 & NS2Utils.HideJunctionMarkings(segmentID);
             bool ret =  ret1 | ret2;

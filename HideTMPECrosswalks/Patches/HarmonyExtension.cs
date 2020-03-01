@@ -11,6 +11,7 @@ namespace HideCrosswalks.Patches
         public void InstallHarmony()
         {
 #if !DEBUG
+            // TODO: this does not work because Before OnCreate we don't know if we are in asset editor.
             if (Extensions.InAssetEditor) {
                 Log.Info("skipped InstallHarmony in asset editor release build");
                 return;
