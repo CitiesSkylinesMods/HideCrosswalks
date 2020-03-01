@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using HideCrosswalks.Settings;
 
 namespace HideCrosswalks.Utils {
     using static PrefabUtils;
@@ -90,35 +91,18 @@ namespace HideCrosswalks.Utils {
             return name;
         }
 
-        // TODO make array.
-        private static Hashtable Never_Table;
-        //private static bool[] Never_array;
-
-        public static void CacheNever(IEnumerable<string> roads) {
-            int count = PrefabCollection<NetInfo>.LoadedCount();
-            Never_Table = new Hashtable(count * 10);
-            for (uint i = 0; i < count; ++i) {
-                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (IsNormalGroundRoad(info)) {
-                    string name = GetRoadTitle(info);
-                    bool b = (bool)roads.Contains(name);
-                    RoadAI ai = info.m_netAI as RoadAI;
-                    Never_Table[i] = b;
-                    Never_Table[ai.m_slopeInfo.m_prefabDataIndex] = b;
-                    Never_Table[ai.m_elevatedInfo.m_prefabDataIndex] = b;
-                    Never_Table[ai.m_bridgeInfo.m_prefabDataIndex] = b;
-                    Never_Table[ai.m_tunnelInfo.m_prefabDataIndex] = b;
-                }
+        public static bool IsExempt(NetInfo info) {
+            Extensions.Assert(info != null, "info!=null");
+            NetAI ai = info.m_netAI;
+            Extensions.Assert(ai is RoadBaseAI,"ai is RoadBaseAI");
+            if (!(ai is RoadAI)) {
+                info = GetGroundInfo(info);
             }
-        }
-
-        public static bool NeverZebra(NetInfo info) {
-            try { return (bool)Never_Table[info.m_prefabDataIndex]; }
-            catch {
-                Log.Info($"NeverZebra:Never_array[{info.m_prefabDataIndex}] index out of range. info:{info.name}");
+            if (info == null || !IsNormalGroundRoad(info)) {
                 return false;
             }
+            string name = GetRoadTitle(info);
+            return Options.instance?.Never?.Contains(name) ?? false;
         }
-
     }
 }

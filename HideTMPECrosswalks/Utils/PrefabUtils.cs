@@ -6,7 +6,6 @@ using UnityEngine;
 namespace HideCrosswalks.Utils {
     using Patches;
     using Settings;
-    using static TextureUtils;
 
     public static class PrefabUtils {
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
@@ -18,6 +17,7 @@ namespace HideCrosswalks.Utils {
                 return;
             }
 #endif
+            NetInfoExt.InitNetInfoExtArray();
             TextureUtils.Init();
             MaterialUtils.Init();
             for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
@@ -37,6 +37,7 @@ namespace HideCrosswalks.Utils {
         }
 
         public static void ClearCache() {
+            NetInfoExt.NetInfoExtArray = null;
             MaterialUtils.Clear();
             TextureUtils.Clear();
         }
@@ -56,7 +57,7 @@ namespace HideCrosswalks.Utils {
         }
 
         public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
-        public static bool isOneWay(this NetInfo info) => info.m_forwardVehicleLaneCount == 0 ||  info.m_backwardVehicleLaneCount == 0;
+        public static bool isOneWay(this NetInfo info) => info.m_forwardVehicleLaneCount == 0 || info.m_backwardVehicleLaneCount == 0;
 
         public static bool HasMedian(this NetInfo info) {
             foreach (var lane in info.m_lanes) {
@@ -77,7 +78,7 @@ namespace HideCrosswalks.Utils {
             if (info.m_netAI is RoadAI) {
                 bool b = info.HasDecoration() || info.HasMedian() || info.m_isCustomContent;
                 b |= info.isAsym() && !info.isOneWay() && info.name != "AsymAvenueL2R3";
-                if(!b)
+                if (!b)
                     ret = 0.91f;
                 Log.Info(info.name + " : Scale: " + ret);
             }
@@ -102,14 +103,11 @@ namespace HideCrosswalks.Utils {
         }
 
         public static bool CanHideCrossings(this NetInfo info) {
-            // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
-            // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
-            return info.CanHideMarkings() && info.m_hasPedestrianLanes && info.m_hasForwardVehicleLanes;
+            return NetInfoExt.NetInfoExtArray[info.m_prefabDataIndex]?.CanHideCrossings ?? false;
         }
 
         public static bool CanHideMarkings(this NetInfo  info) {
-            return (info.m_netAI is RoadBaseAI ) & HideCrosswalksMod.IsEnabled;
+            return NetInfoExt.NetInfoExtArray[info.m_prefabDataIndex] != null;
         }
-
     } // end class
 } // end namespace

@@ -32,6 +32,7 @@ namespace HideCrosswalks.Utils {
                 if (MaterialCache.Contains(material)) {
                     return (Material)MaterialCache[material];
                 }
+
                 if (HasSameNodeAndSegmentTextures(info, material, ID_Defuse)) {
                     // TODO why this works but the WierdNodeTest() fails.
                     string m = $"{info.name} is {info.category} is without proper node texture.";

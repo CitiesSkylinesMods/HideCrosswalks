@@ -62,8 +62,7 @@ namespace HideCrosswalks.Settings {
             _ui_never = container.AddUIComponent<UICheckboxDropDownExt>();
             _ui_never.Title = "Never";
             _ui_never.selectedItems = Split(loaded_never);
-            _ui_never.eventAfterDropdownClose += (_) => RoadUtils.CacheNever(_ui_never.selectedItems);
-            RoadUtils.CacheNever(_ui_never.selectedItems);
+
 
             helper.AddButton("Save", Save);
         }

@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="HideCrosswalksMod.cs" />
     <Compile Include="Legacy.cs" />
+    <Compile Include="NetInfoExt.cs" />
     <Compile Include="Patches\HarmonyExtension.cs" />
     <Compile Include="Patches\LoadingWrapperPatch.cs" />
     <Compile Include="Patches\CalculateMaterialCommons.cs" />
