@@ -3,14 +3,27 @@ using JetBrains.Annotations;
 using HideCrosswalks.Utils;
 using HideCrosswalks.Patches;
 using HideCrosswalks.Settings;
+using System;
 
 namespace HideCrosswalks {
     public class HideCrosswalksMod : IUserMod {
-        public string Name => "RM Crossings V3.0";
+        public string Name => "RM Crossings " + VersionString + " " + BRANCH;
         public string Description => "Hide Crosswalks when TMPE bans them or when NS2 removes them.";
         private static bool _isEnabled = false;
-        public static bool IsEnabled => _isEnabled;
-        internal static bool IsEnabledInternal => _isEnabled;
+        internal static bool IsEnabled => _isEnabled;
+        //internal static bool IsEnabledInternal => _isEnabled;
+
+
+#if DEBUG
+        public const string BRANCH = "DEBUG";
+#else
+        public const string BRANCH = "";
+#endif
+
+        public static Version ModVersion => typeof(HideCrosswalksMod).Assembly.GetName().Version;
+
+        // used for in-game display
+        public static string VersionString => ModVersion.ToString(2);
 
         [UsedImplicitly]
         public void OnEnabled() {
