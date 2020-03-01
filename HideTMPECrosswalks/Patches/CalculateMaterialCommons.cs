@@ -19,19 +19,19 @@ namespace HideCrosswalks.Patches {
             NetInfo info = segmentID.ToSegment().Info;
             bool isJunction = nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction);
             Extensions.Assert(isJunction, $"isJunction | segmentID:{segmentID} nodeID:{nodeID}");
-            bool ret0 = info.CanHideMarkings(); // must use the same condition as in Roads()
+            bool ret0 = NetInfoExt.GetCanHideMarkings(info);
 
             if (Extensions.InAssetEditor ) {
                 //Log._Debug($"Should hide crossings: {ret0} | stack:\n" + System.Environment.StackTrace);
 #if DEBUG
                 return ret0; // always hide crossings in asset editor for quick testing.
 #else
-            return false;
+                return false;
 #endif
             }
-            bool ret1 = ret0 && TMPEUTILS.HasCrossingBan(segmentID, nodeID) && info.CanHideCrossings();
-            bool ret2 = ret0 && NS2Utils.HideJunction(segmentID);
-            bool ret =  ret1 || ret2;
+            bool ret1 = TMPEUTILS.HasCrossingBan(segmentID, nodeID) & NetInfoExt.GetCanHideCrossings(info);
+            bool ret2 = ret0 & NS2Utils.HideJunctionMarkings(segmentID);
+            bool ret =  ret1 | ret2;
             //Log._Debug($"ShouldHideCrossing ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
             return ret;
         }

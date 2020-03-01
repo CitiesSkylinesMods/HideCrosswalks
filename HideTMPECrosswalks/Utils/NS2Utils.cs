@@ -6,7 +6,7 @@ namespace HideCrosswalks.Utils {
     public static class NS2Utils {
         static bool exists = true;
 
-        public static bool HideJunction(ushort segmentID) {
+        public static bool HideJunctionMarkings(ushort segmentID) {
             if (!exists)
                 return false;
             try {

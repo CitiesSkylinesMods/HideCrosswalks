@@ -12,11 +12,7 @@ namespace HideCrosswalks.Settings {
     public class Options {
         public static Options instance = null;
         public static readonly char delemiter = '|';
-        static readonly string Path = "HideCrosswalks.save";
-
-        string loaded_always = "";
-        UICheckboxDropDownExt _ui_always;
-        public List<string> Always => _ui_always.selectedItems;
+        static readonly string Path = "HideCrosswalks.Config.txt";
 
         string loaded_never = "";
         UICheckboxDropDownExt _ui_never;
@@ -25,19 +21,17 @@ namespace HideCrosswalks.Settings {
         public void Load() {
             try{
                 string[] s = File.ReadAllLines(Path);
-                loaded_always = s[0];
-                loaded_never = s[1];
+                loaded_never = s[0];
             }catch(FileNotFoundException e) {
-                Log.Info("Load failed" + e.Message);
+                Log.Info("did not found options configuration file: " + e.Message);
             }catch(Exception e) {
-                Log.Info("Load failed" + e);
+                Log.Error("Loading options configuration file failed: " + e);
             }
         }
 
         public void Save() {
-            loaded_always = string.Join(delemiter.ToString(), Always.ToArray());
             loaded_never = string.Join(delemiter.ToString(), Never.ToArray());
-            File.WriteAllLines(Path, new[] { loaded_always, loaded_never });
+            File.WriteAllLines(Path, new[] { loaded_never });
         }
 
         public Options(UIHelperBase helperBase) :this() {
@@ -60,9 +54,13 @@ namespace HideCrosswalks.Settings {
             UIComponent container = helper.self as UIComponent;
 
             _ui_never = container.AddUIComponent<UICheckboxDropDownExt>();
-            _ui_never.Title = "Never";
+            _ui_never.Title = "Except List";
+            _ui_never.tooltip = "TMPE cannot hide crosswalks from roads in this list.\nThis list does not affect NS2 junction markings.";
             _ui_never.selectedItems = Split(loaded_never);
 
+            void HandleAfterDropdownClose(UICheckboxDropDown _) => NetInfoExt.InitNetInfoExtArray();
+            _ui_never.eventAfterDropdownClose += HandleAfterDropdownClose;
+            NetInfoExt.InitNetInfoExtArray();
 
             helper.AddButton("Save", Save);
         }
@@ -104,7 +102,7 @@ namespace HideCrosswalks.Settings {
                 this.triggerButton = button;
                 //button.atlas = Utils.GetAtlas("Ingame");
                 button.text = Title;
-                button.textPadding = new RectOffset(14, 0, 7, 0);
+                button.textPadding = new RectOffset(14, 0, -7, 0);
                 button.size = this.size;
                 button.textVerticalAlignment = UIVerticalAlignment.Middle;
                 button.textHorizontalAlignment = UIHorizontalAlignment.Left;
@@ -128,7 +126,7 @@ namespace HideCrosswalks.Settings {
 
             public void GetSelections() {
                 selectedItems.Clear();
-                for (int i = 0; i < this.items.Length; ++i) {
+                for (int i = 0; i < items.Length; ++i) {
                     if (GetChecked(i)) {
                         selectedItems.Add(items[i]);
                     }

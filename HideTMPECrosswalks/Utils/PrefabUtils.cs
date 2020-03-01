@@ -42,20 +42,6 @@ namespace HideCrosswalks.Utils {
             TextureUtils.Clear();
         }
 
-        public static IEnumerable<NetInfo> Networks() {
-#if !DEBUG // exclude in asset editor
-            if (Extensions.currentMode == AppMode.AssetEditor)
-                yield return null;
-#endif
-            int count = PrefabCollection<NetInfo>.LoadedCount();
-            for (uint i = 0; i < count; ++i) {
-                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (info.CanHideMarkings()) {
-                    yield return info;
-                }
-            }
-        }
-
         public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
         public static bool isOneWay(this NetInfo info) => info.m_forwardVehicleLaneCount == 0 || info.m_backwardVehicleLaneCount == 0;
 
@@ -100,14 +86,6 @@ namespace HideCrosswalks.Utils {
                     return true;
             }
             return false;
-        }
-
-        public static bool CanHideCrossings(this NetInfo info) {
-            return NetInfoExt.NetInfoExtArray[info.m_prefabDataIndex]?.CanHideCrossings ?? false;
-        }
-
-        public static bool CanHideMarkings(this NetInfo  info) {
-            return NetInfoExt.NetInfoExtArray[info.m_prefabDataIndex] != null;
         }
     } // end class
 } // end namespace

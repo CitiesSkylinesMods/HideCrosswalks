@@ -37,10 +37,16 @@ namespace HideCrosswalks.Utils {
             return false;
         }
 
+        /// <summary>
+        /// Returns an array of roads for which TMPE can hide crossings.
+        /// </summary>
+        /// <returns></returns>
         public static string[] GetRoadNames() {
             List<string> ret = new List<string>();
-            foreach(NetInfo info in Networks()) { 
-                if (IsNormalGroundRoad(info)) {
+            int n = PrefabCollection<NetInfo>.LoadedCount();
+            for (uint i = 0; i < n; ++i) {
+                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                if (CalculateCanHideCrossingsRaw(info) && IsNormalGroundRoad(info)) {
                     string name = GetRoadTitle(info);
                     if (name != null && !ret.Contains(name))
                         ret.Add(name);
@@ -104,5 +110,26 @@ namespace HideCrosswalks.Utils {
             string name = GetRoadTitle(info);
             return Options.instance?.Never?.Contains(name) ?? false;
         }
+
+        private static List<string> exempts_ = new List<string>(new[]{
+            "AsymAvenueL2R4 Slope",
+            "Gravel Road",
+        });
+
+        internal static bool CalculateCanHideMarkingsRaw(NetInfo info) => info.m_netAI is RoadBaseAI;
+
+        internal static bool CalculateCanHideCrossingsRaw(NetInfo info) {
+            bool ret = CalculateCanHideMarkingsRaw(info);
+
+            // roads without pedesterian lanes (eg highways) have no crossings to hide to the best of my knowledege.
+            // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
+            ret &= info.m_hasPedestrianLanes && info.m_hasForwardVehicleLanes;
+
+            ret &= !exempts_.Contains(info?.name);
+            return ret;
+        }
+
+
+
     }
 }

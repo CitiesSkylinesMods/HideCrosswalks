@@ -2,6 +2,7 @@ using ICities;
 using JetBrains.Annotations;
 using HideCrosswalks.Utils;
 using HideCrosswalks.Patches;
+using HideCrosswalks.Settings;
 
 namespace HideCrosswalks {
     public class HideCrosswalksMod : IUserMod {
@@ -42,13 +43,13 @@ namespace HideCrosswalks {
             LoadingWrapperPatch.OnPostLevelLoaded -= TestOnLoad.Test;
 #endif
 
-            //Options.instance = null;
+            Options.instance = null;
         }
 
-        //[UsedImplicitly]
-        //public void OnSettingsUI(UIHelperBase helperBasae) {
-        //    new Options(helperBasae);
-        //}
+        [UsedImplicitly]
+        public void OnSettingsUI(UIHelperBase helperBasae) {
+            new Options(helperBasae);
+        }
     }
 
     public class LoadingExtension : LoadingExtensionBase {
