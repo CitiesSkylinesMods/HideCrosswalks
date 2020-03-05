@@ -1,4 +1,4 @@
-using Harmony;
+using HarmonyLib;
 
 namespace HideCrosswalks.Patches {
     [HarmonyPatch(typeof(LoadingWrapper), "OnLevelLoaded")]
