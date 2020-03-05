@@ -11,6 +11,8 @@ namespace HideCrosswalks.Utils {
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
 
         public static void CachePrefabs() {
+            TMPEUTILS.Init();
+            NS2Utils.Init();
 #if !DEBUG
             if (Extensions.InAssetEditor) {
                 Log.Info("skipped caching prefabs in asset editor release build");

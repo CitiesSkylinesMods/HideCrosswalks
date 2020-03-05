@@ -3,8 +3,9 @@ using System.IO;
 using UnityEngine;
 
 namespace HideCrosswalks.Utils {
-    public static class TMPEUTILS {
-        private static bool warned=false;
+    internal static class TMPEUTILS {
+        private static bool exists = true;
+        internal static void Init() => exists = true;
 
         public static bool HasCrossingBan(ushort segmentID, ushort nodeID) {
             bool bStartNode = nodeID == segmentID.ToSegment().m_startNode;
@@ -12,20 +13,22 @@ namespace HideCrosswalks.Utils {
         }
 
         public static bool HasCrossingBan(ushort segmentID, bool bStartNode) {
+            if (!exists)
+                return false;
             try {
                 return _HasCrossingBan(segmentID, bStartNode);
             }
-            catch (FileNotFoundException _) {
-                if (!warned) {
-                    Log.Info("WARNING ****** TMPE not found! *****");
-                    warned = true;
-                }
+            catch (TypeLoadException _) {
+                Log.Info("WARNING ****** TM:PE not found! *****");
+                exists = false;
+            }
+            catch (NullReferenceException _) {
+                Log.Info("WARNING ****** TM:PE is disabled! *****");
+                exists = false;
             }
             catch (Exception e) {
-                if (!warned) {
-                    Log.Error(e.ToString());
-                    warned = true;
-                }
+                Log.Error(e.ToString());
+                exists = false;
             }
             return false;
         }
