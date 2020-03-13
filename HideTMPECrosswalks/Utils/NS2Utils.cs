@@ -13,9 +13,12 @@ namespace HideCrosswalks.Utils {
                 return false;
             try {
                 return _HideJunction(segmentID);
+            }catch(FileNotFoundException _) {
+                Log.Info("WARNING ****** NS2 not found! *****");
+
             }
             catch (TypeLoadException _) {
-                Log.Info("WARNING ****** NS2 not found! *****");
+                Log.Info("WARNING ****** unsupported NS2 version! *****");
                 exists = false;
             }
             catch (NullReferenceException _) {

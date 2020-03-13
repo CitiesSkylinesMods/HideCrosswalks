@@ -26,14 +26,14 @@ namespace HideCrosswalks.Utils {
             }
             catch (Exception e) {
                 try {
-                    Log.Error("IsNormalRoad catched exception");
-                    Log.Error($"exception: info = {info}");
-                    Log.Error($"exception: info type = {info?.GetType()}");
-                    Log.Error($"Exception: name = {info?.name} ");
+                    Log.Info("IsNormalRoad catched exception");
+                    Log.Info($"exception: info = {info}");
+                    Log.Info($"exception: info type = {info?.GetType()}");
+                    Log.Info($"Exception: name = {info?.name} ");
                     Log.Error(e.Message);
                 }
                 catch (Exception e2) {
-                    Log.Error("Unable to print exception details.");
+                    Log.Info("error occured while trying to print error details!");
                     Log.Error(" " + e2);
                 }
             }
