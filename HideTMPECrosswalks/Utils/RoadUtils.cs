@@ -7,10 +7,16 @@ using System.Collections.Generic;
 using HideCrosswalks.Settings;
 
 namespace HideCrosswalks.Utils {
-    using static PrefabUtils;
+
+    /// <summary>
+    /// Road encapsulation:
+    /// A road can have several prefabs: elavated/slope/bridge/tunnel/ground
+    /// </summary>
     public static class RoadUtils {
         internal static bool IsNormalRoad(this NetInfo info) {
             try {
+                if (info == null)
+                    throw new ArgumentNullException("info");
                 bool ret = info?.m_netAI is RoadBaseAI;
                 string name = info.name;
                 ret &= name != null;
@@ -19,13 +25,19 @@ namespace HideCrosswalks.Utils {
                 return ret;
             }
             catch (Exception e) {
-                Log.Info(e.Message);
-                Log.Info("IsNormalRoad catched exception");
-                Log.Info($"exception: info = {info}");
-                Log.Info($"exception: info is {info.GetType()}");
-                Log.Info($"Exception: name = {info?.name} ");
-                return false;
+                try {
+                    Log.Error("IsNormalRoad catched exception");
+                    Log.Error($"exception: info = {info}");
+                    Log.Error($"exception: info type = {info?.GetType()}");
+                    Log.Error($"Exception: name = {info?.name} ");
+                    Log.Error(e.Message);
+                }
+                catch (Exception e2) {
+                    Log.Error("Unable to print exception details.");
+                    Log.Error(" " + e2);
+                }
             }
+            return false;
         }
 
         internal static bool IsNormalGroundRoad(this NetInfo info) {
