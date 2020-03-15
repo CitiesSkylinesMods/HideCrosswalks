@@ -58,7 +58,7 @@ namespace HideCrosswalks.Utils {
 
         public static void HideCrossings0(Material material, Material segMaterial, NetInfo info, bool lod = false) {
             if (material == null) throw new ArgumentNullException("material");
-            if (segMaterial == null) throw new ArgumentNullException("segMaterial");
+            //if (segMaterial == null) throw new ArgumentNullException("segMaterial");
             if (info == null) throw new ArgumentNullException("info");
 
             Texture2D tex, tex2;
@@ -88,7 +88,7 @@ namespace HideCrosswalks.Utils {
 
             tex = material.TryGetTexture2D(ID_APRMap);
             if(tex.name != "RoadSmallNode-default-apr" && tex.name != "BasicRoad2_Junction-apr") { 
-                tex2 = segMaterial.TryGetTexture2D(ID_APRMap);
+                tex2 = segMaterial?.TryGetTexture2D(ID_APRMap);
                 if (tex != null && tex2 != null) {
                     if (dump) DumpUtils.Dump(tex, info);
                     if (dump) DumpUtils.Dump(tex2, info);

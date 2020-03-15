@@ -17,7 +17,15 @@ namespace HideCrosswalks {
         internal bool CanHideCrossings { get; private set; }
 
         public NetInfo Info {
-            get => PrefabCollection<NetInfo>.GetPrefab(Index);
+            get {
+                try {
+                    return PrefabCollection<NetInfo>.GetPrefab(Index);
+                }catch(Exception e) {
+                    Log.Info($"Index={Index}, PrefabCount={PrefabCollection<NetInfo>.PrefabCount()}\n" + e);
+                    throw e;
+                }
+
+            }
             set => Index = (ushort)value.m_prefabDataIndex;
         }
 
@@ -30,9 +38,10 @@ namespace HideCrosswalks {
         internal static NetInfoExt[] NetInfoExtArray;
 
         internal static void InitNetInfoExtArray() {
-            int count = PrefabCollection<NetInfo>.PrefabCount();
+            int prefabCount = PrefabCollection<NetInfo>.PrefabCount();
             int loadedCount = PrefabCollection<NetInfo>.LoadedCount();
-            NetInfoExtArray = new NetInfoExt[count];
+            NetInfoExtArray = new NetInfoExt[prefabCount];
+            Log._Debug($"initializing NetInfoExtArray: prefabCount={prefabCount} LoadedCount={loadedCount}");
             for (uint i = 0; i < loadedCount; ++i) {
                 try {
                     NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
@@ -54,10 +63,20 @@ namespace HideCrosswalks {
         } // end method
 
         public static bool GetCanHideCrossings(NetInfo info) {
+            if(info.m_prefabDataIndex>= NetInfoExtArray.Length) {
+                Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
+                    $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
+                return false;
+            }
             return GetCanHideMarkings(info) && NetInfoExtArray[info.m_prefabDataIndex].CanHideCrossings;
         }
 
         public static bool GetCanHideMarkings(NetInfo info) {
+            if (info.m_prefabDataIndex >= NetInfoExtArray.Length) {
+                Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
+                    $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
+                return false;
+            }
             return HideCrosswalksMod.IsEnabled && Extensions.IsActive && NetInfoExtArray?[info.m_prefabDataIndex] != null;
         } // end method
         #endregion

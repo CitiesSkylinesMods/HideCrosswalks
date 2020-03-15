@@ -57,6 +57,11 @@ namespace HideCrosswalks.Settings {
 #if DEBUG
             active = true; // Fast test of options from main menu
 #endif
+            void RefreshPrefabs() {
+                if (PrefabUtils.PrefabsLoaded) {
+                    NetInfoExt.InitNetInfoExtArray();
+                }
+            }
 
             if (active) {
                 _ui_never = container.AddUIComponent<UICheckboxDropDownExt>();
@@ -64,9 +69,9 @@ namespace HideCrosswalks.Settings {
                 _ui_never.tooltip = "TMPE cannot hide crosswalks from roads in this list.\nThis list does not affect NS2 junction markings.";
                 _ui_never.selectedItems = Split(loaded_never);
 
-                void HandleAfterDropdownClose(UICheckboxDropDown _) => NetInfoExt.InitNetInfoExtArray();
+                void HandleAfterDropdownClose(UICheckboxDropDown _) => RefreshPrefabs();
                 _ui_never.eventAfterDropdownClose += HandleAfterDropdownClose;
-                NetInfoExt.InitNetInfoExtArray();
+                RefreshPrefabs();
 
                 helper.AddButton("Save", Save);
             } else {
@@ -75,7 +80,6 @@ namespace HideCrosswalks.Settings {
             }
 
         }
-
 
         public class UICheckboxDropDownExt : UICheckboxDropDown {
             public string Title = "Title";

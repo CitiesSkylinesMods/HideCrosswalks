@@ -7,7 +7,6 @@ namespace HideCrosswalks.Utils {
         private static bool exists = true;
         internal static void Init() => exists = true;
 
-
         public static bool HideJunctionMarkings(ushort segmentID) {
             if (!exists)
                 return false;
@@ -27,7 +26,6 @@ namespace HideCrosswalks.Utils {
             }
             exists = false;
             return false;
-
         }
 
         private static bool _HideJunction(ushort segmentID) {

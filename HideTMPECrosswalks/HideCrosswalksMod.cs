@@ -11,8 +11,6 @@ namespace HideCrosswalks {
         public string Description => "Hide Crosswalks when TMPE bans them or when NS2 removes them.";
         private static bool _isEnabled = false;
         internal static bool IsEnabled => _isEnabled;
-        //internal static bool IsEnabledInternal => _isEnabled;
-
 
 #if DEBUG
         public const string BRANCH = "DEBUG";
@@ -36,7 +34,7 @@ namespace HideCrosswalks {
             LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearCache;
 
             if (Extensions.InGame) {
-                PrefabUtils.CachePrefabs();
+                LoadingWrapperPatch.Postfix(); 
             }
         }
 

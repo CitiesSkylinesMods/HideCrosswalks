@@ -1,18 +1,27 @@
 #if DEBUG
 using ICities;
+using ColossalFramework;
 
 namespace HideCrosswalks {
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UnityEngine;
     using Utils;
     using static Utils.PrefabUtils;
     using static Utils.RoadUtils;
 
-    public class TestOnLoad : LoadingExtensionBase {
-        public override void OnCreated(ILoading loading) { base.OnCreated(loading); Test(); }
-        public override void OnLevelLoaded(LoadMode mode) => Test();
+    public class TestOnLoad  {
+        public void OnLevelLoaded(LoadMode mode) => Test();
 
         public static void Test() {
             if (!Extensions.IsActive)
                 return;
+
+            Log.Info("Benchmarking ...");
+            //Benchmarks.MaterialCache();
+            //Benchmarks.BannAllCrossings();
+            Log.Info("Benchmarking Done!");
 
             //Log.Info("Testing ...");
             ////DebugTests.NameTest();
@@ -24,7 +33,82 @@ namespace HideCrosswalks {
             //Log.Info("Testing Done!");
         }
 
+        public static class Benchmarks {
+            private static NetInfoExt[] NetInfoExtArray => NetInfoExt.NetInfoExtArray;
+            private static List<Material> materialList;
+
+            private static int CountCollisions(Material newMaterial) {
+                return materialList.
+                    Where(material => material.GetHashCode() == newMaterial.GetHashCode() && material != newMaterial).
+                    Count();
+            }
+
+            public static void MaterialCache() {
+                Log.Info("BENCHMARK> MaterialCache started ... ");
+                materialList = new List<Material>();
+                int count = PrefabCollection<NetInfo>.PrefabCount();
+                int loadedCount = PrefabCollection<NetInfo>.LoadedCount();
+                for (uint i = 0; i < loadedCount; ++i) {
+                    NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                    if (info?.m_netAI != null && NetInfoExt.GetCanHideCrossings(info)) {
+                        foreach(var nodeInfo in info.m_nodes) {
+                            if (nodeInfo?.m_nodeMaterial == null || nodeInfo.m_directConnect )
+                                continue;
+                            var nodeMaterial = nodeInfo.m_nodeMaterial;
+
+                            // processed and cache material
+                            var material2 = MaterialUtils.HideCrossings(nodeMaterial, null, info);
+
+                            // add to cached material list.
+                            materialList.Add(nodeMaterial);
+                        }
+                    }
+                } // end for
+
+                int totalCollisions = 0;
+                foreach (var material in materialList) {
+                    totalCollisions += CountCollisions(material);
+                }
+                float averageCollisions = totalCollisions / (float)materialList.Count;
+                Log.Info($"BENCHMARK> totalCollisions={totalCollisions} averageCollisions={averageCollisions}");
+
+                Log.Info($"BENCHMARK> peforming cache speed benchmark:");
+                for (int i = 0; i < 1000; ++i) {
+                    foreach (var material in materialList) {
+                        // its possible for some arguments to be null only if the material is cached already.
+                        var material2 = MaterialUtils.HideCrossings(material, null, null);
+                    }
+                }
+                Log.Info($"BENCHMARK> Done peforming cache speed benchmark {1000 * materialList.Count} times ");
+            }
+
+            public static void BannAllCrossings() {
+                Log.Info("BENCHMARK> BannAllCrossings started ... ");
+                for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
+                    foreach (bool bStartNode in new bool[] { false, true }) {
+                        if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
+                            NetSegment segment = segmentID.ToSegment();
+                            ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
+                            var flags = nodeID.ToNode().m_flags;
+                            if ((flags & NetNode.Flags.Created & NetNode.Flags.Junction & NetNode.Flags.Deleted) !=
+                                (NetNode.Flags.Created & NetNode.Flags.Junction))
+                                continue;
+                            Log.Info($"BENCHMARK> ban {segmentID} {nodeID} ");
+
+
+                            //Ban:
+                            TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.
+                                SetPedestrianCrossingAllowed(segmentID, bStartNode, false);
+                        }
+                    }
+                }
+                Log.Info("BENCHMARK> BannAllCrossings Done!");
+            }
+
+        }
+
         public static class DebugTests {
+
             public static string R6L => "Six-Lane Road";
             public static string R4L => "Four-Lane Road";
 
@@ -44,6 +128,7 @@ namespace HideCrosswalks {
                 string m = $"{info.name}> Made node material == seg material ";
                 Log.Info(Extensions.BIG(m));
             }
+
 
             public static void WierdNodeTest() {
                 for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {

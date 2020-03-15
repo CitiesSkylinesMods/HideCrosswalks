@@ -9,6 +9,7 @@ namespace HideCrosswalks.Utils {
 
     public static class PrefabUtils {
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
+        public static bool PrefabsLoaded = false;
 
         public static void CachePrefabs() {
             TMPEUTILS.Init();
@@ -28,6 +29,13 @@ namespace HideCrosswalks.Utils {
                         NetSegment segment = segmentID.ToSegment();
                         ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
                         foreach (var node in segment.Info.m_nodes) {
+                            if(node.m_directConnect)
+                                continue;
+                            var flags = nodeID.ToNode().m_flags;
+                            if ((flags & NetNode.Flags.Created & NetNode.Flags.Junction & NetNode.Flags.Deleted) !=
+                                (NetNode.Flags.Created & NetNode.Flags.Junction))
+                                continue;
+
                             //cache:
                             Log.Info("Caching " + segment.Info.name);
                             CalculateMaterialCommons.CalculateMaterial(node.m_nodeMaterial, nodeID, segmentID);
@@ -35,10 +43,12 @@ namespace HideCrosswalks.Utils {
                     }
                 }
             }
+            PrefabsLoaded = true;
             Log.Info("all prefabs cached");
         }
 
         public static void ClearCache() {
+            PrefabsLoaded = false;
             NetInfoExt.NetInfoExtArray = null;
             MaterialUtils.Clear();
             TextureUtils.Clear();
