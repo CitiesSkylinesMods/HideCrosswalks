@@ -20,7 +20,7 @@ namespace HideCrosswalks.Utils {
         internal static int[] texIDs => new int[] { ID_Defuse, ID_APRMap, ID_XYSMap };
 
         internal static Hashtable TextureCache = null;
-        public static void Init() => TextureCache = new Hashtable(500);
+        public static void Init() => TextureCache = new Hashtable(3000);
         public static void Clear() => TextureCache = null;
 
         public static UITextureAtlas GetAtlas(string name) {

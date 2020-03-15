@@ -10,7 +10,7 @@ namespace HideCrosswalks.Utils {
     using static PrefabUtils;
     public static class MaterialUtils {
         internal static Hashtable MaterialCache = null;
-        public static void Init() => MaterialCache = new Hashtable(500);
+        public static void Init() => MaterialCache = new Hashtable(3000);
         public static void Clear() => MaterialCache = null;
 
         public static Texture2D TryGetTexture2D(this Material material, int textureID) {
@@ -49,6 +49,7 @@ namespace HideCrosswalks.Utils {
                 return ret;
             }
             catch (Exception e) {
+                material.GetHashCode();
                 Log.Info(e.ToString());
                 MaterialCache[material] = material; // do not repeat the same mistake!
                 return material;
