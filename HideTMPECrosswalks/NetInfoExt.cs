@@ -1,4 +1,5 @@
 namespace HideCrosswalks {
+    using System;
     using System.Collections.Generic;
     using Utils;
 
@@ -27,15 +28,27 @@ namespace HideCrosswalks {
 
         #region static
         internal static NetInfoExt[] NetInfoExtArray;
+
         internal static void InitNetInfoExtArray() {
             int count = PrefabCollection<NetInfo>.PrefabCount();
             int loadedCount = PrefabCollection<NetInfo>.LoadedCount();
             NetInfoExtArray = new NetInfoExt[count];
             for (uint i = 0; i < loadedCount; ++i) {
-                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (RoadUtils.CalculateCanHideMarkingsRaw(info)) {
-                    ushort index = (ushort)info.m_prefabDataIndex;
-                    NetInfoExtArray[index] = new NetInfoExt(index);
+                try {
+                    NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                    if (info == null) {
+                        Log.Warning("Bad prefab with null info");
+                        continue;
+                    } else if (info.m_netAI == null) {
+                        Log.Warning("Bad prefab with null info.m_NetAI");
+                        continue;
+                    }
+                    if (RoadUtils.CalculateCanHideMarkingsRaw(info)) {
+                        ushort index = (ushort)info.m_prefabDataIndex;
+                        NetInfoExtArray[index] = new NetInfoExt(index);
+                    }
+                } catch(Exception e) {
+                    Log.Error(e.ToString());
                 }
             } // end for
         } // end method

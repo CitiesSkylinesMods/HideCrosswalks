@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq;
 using System.Collections;
-using System.Collections.Generic;
 using HideCrosswalks.Settings;
 
 namespace HideCrosswalks.Utils {
@@ -15,24 +13,24 @@ namespace HideCrosswalks.Utils {
     public static class RoadUtils {
         internal static bool IsNormalRoad(this NetInfo info) {
             try {
-                if (info == null)
+                if (info == null) {
                     throw new ArgumentNullException("info");
-                bool ret = info?.m_netAI is RoadBaseAI;
-                string name = info.name;
-                ret &= name != null;
-                ret &= name.Trim() != "";
-                ret &= !name.ToLower().Contains("toll");
-                return ret;
-            }
-            catch (Exception e) {
+                } else {
+                    string name = info.name;
+                    return
+                        info.m_netAI is RoadBaseAI &&
+                        name != null &&
+                        name.Trim() != "" &&
+                        !name.ToLower().Contains("toll");
+                }
+            } catch (Exception e) {
                 try {
                     Log.Info("IsNormalRoad catched exception");
                     Log.Info($"exception: info = {info}");
                     Log.Info($"exception: info type = {info?.GetType()}");
                     Log.Info($"Exception: name = {info?.name} ");
                     Log.Error(e.Message);
-                }
-                catch (Exception e2) {
+                } catch (Exception e2) {
                     Log.Info("error occured while trying to print error details!");
                     Log.Error(" " + e2);
                 }
@@ -128,7 +126,7 @@ namespace HideCrosswalks.Utils {
             "Gravel Road",
         });
 
-        internal static bool CalculateCanHideMarkingsRaw(NetInfo info) => info.m_netAI is RoadBaseAI;
+        internal static bool CalculateCanHideMarkingsRaw(NetInfo info) => info?.m_netAI is RoadBaseAI;
 
         internal static bool CalculateCanHideCrossingsRaw(NetInfo info) {
             bool ret = CalculateCanHideMarkingsRaw(info);

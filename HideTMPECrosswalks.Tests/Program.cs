@@ -17,47 +17,29 @@ namespace HideCrosswalks.Tests
 
         static void Main(string[] args)
         {
-            //Log("Test1 ...");
-            //TestColorUtils.Test1();
+            Log("Test1 ...");
+            Experiments.Test1();
 
             //Log("Test2 ...");
-            //TestColorUtils.Test2();
+            //Experiments.Test2();
 
-            Test();
 
             Log("End of tests");
             System.Console.ReadKey();
         }
 
-        static void Test() {
-            A a1 = new A { i = 5 };
-            A a2 = new A { i = 5 };
-            Assert(a1 == a2, "a1==a2");
-        }
 
-        class A {
-            public int i;
-        }
     }
 
     public static class Experiments {
+        class X { }
+        class Y : X { }
         public static void Test1() {
-            Color c1 = new Color(.1f, .2f, .3f, .4f);
-            Color c2 = Color.clear - c1;
-            Color expected = new Color(-.1f, -.2f, -.3f, -.4f);
-            string m = $"{Color.clear} - {c1} -> {c2} expected {expected}";
-            Assert(c2 == expected, m);
+            X y = null;
+            bool b = y is Y;
+            Log($"b={b}");
         }
 
-        public static void Test2() {
-            Color c1 = new Color(1f, 1f, 1f, 1f);
-            float w = 0.5f;
-            Color c2 = c1 * w;
-            Color expected = new Color(w,w,w,w);
-            string m = $" {c1} * {w} -> {c2} expected {expected}";
-            Assert(c2 == expected, m);
-
-        }
 
     }
 }
