@@ -19,20 +19,17 @@ namespace HideCrosswalks.Utils {
                 return _HasCrossingBan(segmentID, bStartNode);
             } catch(FileNotFoundException _) {
                 Log.Info("WARNING ****** TM:PE not found! *****");
-
             }
             catch (TypeLoadException _) {
                 Log.Info("WARNING ****** unsupported TM:PE version! *****");
-                exists = false;
             }
             catch (NullReferenceException _) {
                 Log.Info("WARNING ****** TM:PE is disabled! *****");
-                exists = false;
             }
             catch (Exception e) {
                 Log.Error(e.ToString());
-                exists = false;
             }
+            exists = false;
             return false;
         }
 

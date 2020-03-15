@@ -15,20 +15,17 @@ namespace HideCrosswalks.Utils {
                 return _HideJunction(segmentID);
             }catch(FileNotFoundException _) {
                 Log.Info("WARNING ****** NS2 not found! *****");
-
             }
             catch (TypeLoadException _) {
                 Log.Info("WARNING ****** unsupported NS2 version! *****");
-                exists = false;
             }
             catch (NullReferenceException _) {
                 Log.Info("WARNING ****** NS2 is disabled! *****");
-                exists = false;
             }
             catch (Exception e) {
                 Log.Error(e.ToString());
-                exists = false;
             }
+            exists = false;
             return false;
 
         }
