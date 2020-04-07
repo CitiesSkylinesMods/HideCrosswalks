@@ -110,9 +110,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)" mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
-xcopy "$(TargetDir)0Harmony.dll" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)" /y /e
-del "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetFileName)"
+    <PostBuildEvent>del "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetFileName)"
 xcopy "$(TargetPath)" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)" /y /e
 xcopy "$(TargetPath)" "$(SolutionDir)libs\" /y /e
 echo %25time%25</PostBuildEvent>
