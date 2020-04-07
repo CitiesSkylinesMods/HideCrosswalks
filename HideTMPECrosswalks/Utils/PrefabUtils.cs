@@ -32,9 +32,6 @@ namespace HideCrosswalks.Utils {
                             if(node.m_directConnect)
                                 continue;
                             var flags = nodeID.ToNode().m_flags;
-                            if ((flags & NetNode.Flags.Created & NetNode.Flags.Junction & NetNode.Flags.Deleted) !=
-                                (NetNode.Flags.Created & NetNode.Flags.Junction))
-                                continue;
 
                             //cache:
                             Log.Info("Caching " + segment.Info.name);

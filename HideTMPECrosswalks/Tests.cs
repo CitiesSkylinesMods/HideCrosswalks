@@ -18,10 +18,10 @@ namespace HideCrosswalks {
             if (!Extensions.IsActive)
                 return;
 
-            Log.Info("Benchmarking ...");
+            //Log.Info("Benchmarking ...");
             //Benchmarks.MaterialCache();
             //Benchmarks.BannAllCrossings();
-            Log.Info("Benchmarking Done!");
+            //Log.Info("Benchmarking Done!");
 
             //Log.Info("Testing ...");
             ////DebugTests.NameTest();
@@ -90,12 +90,6 @@ namespace HideCrosswalks {
                             NetSegment segment = segmentID.ToSegment();
                             ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
                             var flags = nodeID.ToNode().m_flags;
-                            if ((flags & NetNode.Flags.Created & NetNode.Flags.Junction & NetNode.Flags.Deleted) !=
-                                (NetNode.Flags.Created & NetNode.Flags.Junction))
-                                continue;
-                            Log.Info($"BENCHMARK> ban {segmentID} {nodeID} ");
-
-
                             //Ban:
                             TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.
                                 SetPedestrianCrossingAllowed(segmentID, bStartNode, false);

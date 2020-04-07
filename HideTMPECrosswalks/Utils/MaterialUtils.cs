@@ -10,7 +10,7 @@ namespace HideCrosswalks.Utils {
     using static PrefabUtils;
     public static class MaterialUtils {
         internal static Hashtable MaterialCache = null;
-        public static void Init() => MaterialCache = new Hashtable(3000);
+        public static void Init() => MaterialCache = new Hashtable(PrefabCollection<NetInfo>.PrefabCount() * 3);
         public static void Clear() => MaterialCache = null;
 
         public static Texture2D TryGetTexture2D(this Material material, int textureID) {
