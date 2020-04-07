@@ -1,11 +1,11 @@
-using Harmony;
+using HarmonyLib;
 using HideCrosswalks.Utils;
 
 namespace HideCrosswalks.Patches
 {
     public class HarmonyExtension
     {
-        HarmonyInstance harmony;
+        Harmony harmony;
         public const string HARMONY_ID = "CS.Kian.HideCrosswalks";
 
         public void InstallHarmony()
@@ -21,10 +21,9 @@ namespace HideCrosswalks.Patches
             {
                 Log.Info("HideCrosswalks Patching...");
 #if DEBUG
-                HarmonyInstance.DEBUG = true;
+                Harmony.DEBUG = true;
 #endif
-                HarmonyInstance.SELF_PATCHING = false;
-                harmony = HarmonyInstance.Create(HARMONY_ID);
+                harmony = new Harmony(HARMONY_ID);
                 harmony.PatchAll(GetType().Assembly);
             }
         }
