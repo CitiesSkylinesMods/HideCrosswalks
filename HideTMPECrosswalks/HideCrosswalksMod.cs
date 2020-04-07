@@ -36,6 +36,8 @@ namespace HideCrosswalks {
             if (Extensions.InGame) {
                 LoadingWrapperPatch.Postfix(); 
             }
+
+            CitiesHarmony.API.HarmonyHelper.EnsureHarmonyInstalled();
         }
 
         [UsedImplicitly]

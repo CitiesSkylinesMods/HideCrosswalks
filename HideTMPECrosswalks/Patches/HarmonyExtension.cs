@@ -5,7 +5,8 @@ namespace HideCrosswalks.Patches
 {
     public class HarmonyExtension
     {
-        Harmony harmony;
+        //Harmony harmony;
+        bool installed = false;
         public const string HARMONY_ID = "CS.Kian.HideCrosswalks";
 
         public void InstallHarmony()
@@ -17,21 +18,23 @@ namespace HideCrosswalks.Patches
                 return;
             }
 #endif
-            if (harmony == null)
+            if (!installed)
             {
                 Log.Info("HideCrosswalks Patching...");
 #if DEBUG
                 Harmony.DEBUG = true;
 #endif
-                harmony = new Harmony(HARMONY_ID);
+                Harmony harmony = new Harmony(HARMONY_ID);
                 harmony.PatchAll(GetType().Assembly);
+                installed = true;
             }
         }
 
         public void UninstallHarmony()
         {
-            if (harmony != null)
+            if (installed)
             {
+                Harmony harmony = new Harmony(HARMONY_ID);
                 harmony.UnpatchAll(HARMONY_ID);
                 harmony = null;
                 Log.Info("HideCrosswalks patches Reverted.");
