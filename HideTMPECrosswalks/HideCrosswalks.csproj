@@ -44,8 +44,8 @@
       <HintPath>..\packages\Lib.Harmony.2.0.0.9\lib\net35\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="CitiesHarmony.API, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitiesHarmony.API.1.0.3\lib\net35\CitiesHarmony.API.dll</HintPath>
+    <Reference Include="CitiesHarmony.API, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CitiesHarmony.API.1.0.4\lib\net35\CitiesHarmony.API.dll</HintPath>
     </Reference>
     <Reference Include="CSUtil.Commons">
       <HintPath>..\libs\CSUtil.Commons.dll</HintPath>
@@ -110,9 +110,18 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>del "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)\$(TargetFileName)"
-xcopy "$(TargetPath)" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)" /y /e
-xcopy "$(TargetPath)" "$(SolutionDir)libs\" /y /e
-echo %25time%25</PostBuildEvent>
+    <PostBuildEvent>set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
+
+if not exist "%25DEPLOYDIR%25" mkdir "%25DEPLOYDIR%25"
+
+echo "%25DEPLOYDIR%25"
+echo "$(TargetDir)CitiesHarmony.API.dll"
+xcopy "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25" /y /e
+
+del "%25DEPLOYDIR%25$(TargetFileName)"
+xcopy "$(TargetPath)" "%25DEPLOYDIR%25"  /y /e
+
+echo %25time%25
+set "DEPLOYDIR="</PostBuildEvent>
   </PropertyGroup>
 </Project>
