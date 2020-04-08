@@ -114,8 +114,6 @@
 
 if not exist "%25DEPLOYDIR%25" mkdir "%25DEPLOYDIR%25"
 
-echo "%25DEPLOYDIR%25"
-echo "$(TargetDir)CitiesHarmony.API.dll"
 xcopy "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25" /y /e
 
 del "%25DEPLOYDIR%25$(TargetFileName)"
