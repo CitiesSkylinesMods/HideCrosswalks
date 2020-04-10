@@ -20,8 +20,8 @@ namespace HideCrosswalks.Utils {
                     return
                         info.m_netAI is RoadBaseAI &&
                         name != null &&
-                        name.Trim() != "" &&
-                        !name.ToLower().Contains("toll");
+                        name.Trim() != ""
+                        &&!name.ToLower().Contains("toll");
                 }
             } catch (Exception e) {
                 try {
@@ -133,10 +133,8 @@ namespace HideCrosswalks.Utils {
             if (!ret)
                 return false;
 
-            // highways without pedesterian lanes have no crossings to hide to the best of my knowledege.
-            // not sure about custom highways. Processing texture for such roads may reduce smoothness of the transition.
             RoadBaseAI ai = info.m_netAI as RoadBaseAI;
-            ret &= info.m_hasPedestrianLanes || !ai.m_highwayRules;
+            ret &= info.m_hasPedestrianLanes || !ai.m_highwayRules || info.name.ToLower().Contains("toll");
 
             ret &= !exempts_.Contains(info?.name);
             return ret;

@@ -87,9 +87,11 @@ namespace HideCrosswalks.Utils {
             return ret;
         }
 
-        public static bool HasSameNodeAndSegmentTextures(NetInfo info, Material nodeMaterial, int texID) {
+        public static bool NodeTextureIsNotUsed(NetInfo info, Material nodeMaterial, int texID) {
+            Texture t1 = nodeMaterial.GetTexture(texID);
+            if (t1 == null || t1.width == t1.height)
+                return false;
             foreach (var seg in info.m_segments) {
-                Texture t1 = nodeMaterial.GetTexture(texID);
                 Texture t2 = seg.m_segmentMaterial.GetTexture(texID);
                 if (t1 == t2)
                     return true;

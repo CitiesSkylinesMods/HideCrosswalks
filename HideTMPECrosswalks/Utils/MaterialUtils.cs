@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 // TODO check out material.MainTextureScale
@@ -20,8 +21,19 @@ namespace HideCrosswalks.Utils {
                     return texture as Texture2D;
             }
             catch { }
-            Log.Info("Warning: failed to get texture from material :" + material.name);
+            Log.Info($"Warning: failed to get {getTexName(textureID)} texture from material :" + material.name);
             return null;
+        }
+
+        public static Material GetSegmentMaterial(NetInfo info, int textureID) {
+            NetInfo.Segment segmentInfo = null;
+            foreach (var segmentInfo2 in info.m_segments ?? Enumerable.Empty<NetInfo.Segment>()) {
+                if (segmentInfo2.m_segmentMaterial.TryGetTexture2D(textureID) != null) {
+                    segmentInfo = segmentInfo2;
+                    break;
+                }
+            }
+            return segmentInfo?.m_segmentMaterial;
         }
 
         public static Material HideCrossings(Material material, Material segMaterial, NetInfo info, bool lod = false) {
@@ -33,7 +45,7 @@ namespace HideCrosswalks.Utils {
                     return (Material)MaterialCache[material];
                 }
 
-                if (HasSameNodeAndSegmentTextures(info, material, ID_Defuse)) {
+                if (NodeTextureIsNotUsed(info, material, ID_Defuse)) {
                     // TODO why this works but the WierdNodeTest() fails.
                     string m = $"{info.name} is {info.category} is without proper node texture.";
                     Log.Info(m);
@@ -64,11 +76,12 @@ namespace HideCrosswalks.Utils {
             Texture2D tex, tex2;
             bool dump = false;
 #if DEBUG
-            //dump = lod;
+            dump = true;
 #endif
-            //if (dump) DumpUtils.Dump(info);
+            if (dump) DumpUtils.Dump(info);
 
             tex = material.TryGetTexture2D(ID_Defuse);
+            Log._Debug($"material={material} tex={tex} h={tex?.height} w={tex?.width}");
             if (tex != null) {
                 if (dump) DumpUtils.Dump(tex, info);
                 if (TextureCache.Contains(tex)) {
@@ -83,11 +96,14 @@ namespace HideCrosswalks.Utils {
                 }
                 if (dump) DumpUtils.Dump(tex, info);
                 material.SetTexture(ID_Defuse, tex);
+                //Log.Info($"material={material} tex={tex} h={tex.height} w={tex.width}");
                 if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_Defuse, "node-processed", info));
             }
 
             tex = material.TryGetTexture2D(ID_APRMap);
-            if(tex.name != "RoadSmallNode-default-apr" && tex.name != "BasicRoad2_Junction-apr") { 
+
+            if (tex != null && tex.name != "RoadSmallNode-default-apr" && tex.name != "BasicRoad2_Junction-apr") {
+                segMaterial = segMaterial ?? GetSegmentMaterial(info, ID_APRMap);
                 tex2 = segMaterial?.TryGetTexture2D(ID_APRMap);
                 if (tex != null && tex2 != null) {
                     if (dump) DumpUtils.Dump(tex, info);
@@ -100,6 +116,10 @@ namespace HideCrosswalks.Utils {
                         bool linear = lod && !info.IsNExt();
                         tex = tex.GetReadableCopy(linear: linear);
                         tex2 = tex2.GetReadableCopy(linear: linear);
+                        if (tex2.width == tex.width * 2) {
+                            tex2 = TextureUtils.CutToSize(tex2, tex.width, tex.height);
+                            if(dump) DumpUtils.Dump(tex2, info);
+                        }
 
                         tex.CropAndStrech(); if (dump) DumpUtils.Dump(tex, info);
                         if (info.m_netAI is RoadAI) {
