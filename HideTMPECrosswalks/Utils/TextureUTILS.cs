@@ -173,7 +173,15 @@ namespace HideCrosswalks.Utils {
             ret.SetPixels(tex.GetPixels());
             ret.Apply();
             return ret;
+        }
 
+        public static Texture2D CutToSize(this Texture2D texture, int w, int h) {
+            Texture2D ret = new Texture2D(w, h, texture.format, false);
+            ret.SetPixels(texture.GetPixels(0,0,w,h));
+            ret.Apply();
+            ret.name = texture.name + $".CutToSize(w={w}, h={h})";
+
+            return ret;
         }
 
         /// <summary>

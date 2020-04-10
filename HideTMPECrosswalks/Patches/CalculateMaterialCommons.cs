@@ -3,6 +3,8 @@ using Harmony;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection;
+using System.Linq;
+
 using ColossalFramework;
 /* Notes
 
@@ -30,7 +32,7 @@ namespace HideCrosswalks.Patches {
             bool ret1 = TMPEUTILS.HasCrossingBan(segmentID, nodeID) & NetInfoExt.GetCanHideCrossings(info);
             bool ret2 = ret0 & NS2Utils.HideJunctionMarkings(segmentID);
             bool ret =  ret1 | ret2;
-            //Log._Debug($"ShouldHideCrossing ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
+            // Log._Debug($"ShouldHideCrossing segmentID={segmentID} nodeID={nodeID} ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
             return ret;
         }
 
@@ -38,8 +40,7 @@ namespace HideCrosswalks.Patches {
         public static Material CalculateMaterial(Material material, ushort nodeID, ushort segmentID) {
             if (ShouldHideCrossing(nodeID, segmentID)) {
                 NetInfo netInfo = segmentID.ToSegment().Info;
-                var segmentInfo = netInfo.m_segments[0];
-                material = MaterialUtils.HideCrossings(material, segmentInfo.m_segmentMaterial, netInfo, lod:false);
+                material = MaterialUtils.HideCrossings(material, null, netInfo, lod:false);
             }
             return material;
         }

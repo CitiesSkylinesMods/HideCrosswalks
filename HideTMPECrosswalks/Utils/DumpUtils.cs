@@ -35,8 +35,6 @@ namespace HideCrosswalks.Utils {
         }
 
         public static void Dump(NetInfo info) {
-            // not intersted in multi-thread processing. I just wan it to be outside of simulation thread.
-            string roadName = info.GetUncheckedLocalizedTitle();
             for (int i = 0; i < info.m_segments.Length; ++i) {
                 var seg = info.m_segments[i];
                 Material material = seg.m_segmentMaterial;
@@ -67,10 +65,11 @@ namespace HideCrosswalks.Utils {
             if (material == null) throw new ArgumentNullException("material");
             Texture2D texture = material.TryGetTexture2D(texID);
             string path = GetFilePath(texID, baseName ?? material.name, info);
-            Dump(texture, path);
+            if(texture!=null)Dump(texture, path);
         }
 
         public static void Dump(Texture tex, string path) {
+            if (tex == null) throw new ArgumentNullException("tex");
             Texture2D texture = tex is Texture2D ? tex as Texture2D : throw new Exception($"texture:{tex} is not texture2D");
             Log.Info($"Dumping texture:<{tex.name}> size:<{tex.width}x{tex.height}>");
             texture = texture.TryMakeReadable();
