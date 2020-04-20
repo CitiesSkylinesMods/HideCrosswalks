@@ -27,6 +27,7 @@ namespace HideCrosswalks.Patches
                 harmony = HarmonyInstance.Create(HARMONY_ID);
                 harmony.PatchAll(GetType().Assembly);
             }
+            Log.Info("HideCrosswalks: All patches were successfull.");
         }
 
         public void UninstallHarmony()

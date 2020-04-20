@@ -25,6 +25,7 @@ namespace HideCrosswalks {
 
         [UsedImplicitly]
         public void OnEnabled() {
+            Log.Info("OnEnabled() called Name:" + Name);
             _isEnabled = true;
 
             LoadingWrapperPatch.OnPostLevelLoaded += PrefabUtils.CachePrefabs;
@@ -40,6 +41,8 @@ namespace HideCrosswalks {
 
         [UsedImplicitly]
         public void OnDisabled() {
+            Log.Info("OnDisabled() called Name:" + Name);
+
             _isEnabled = false;
 
             if(Extensions.InGame | Extensions.InAssetEditor) {

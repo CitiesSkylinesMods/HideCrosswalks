@@ -24,7 +24,6 @@ namespace HideCrosswalks {
                     Log.Info($"Index={Index}, PrefabCount={PrefabCollection<NetInfo>.PrefabCount()}\n" + e);
                     throw e;
                 }
-
             }
             set => Index = (ushort)value.m_prefabDataIndex;
         }
@@ -41,7 +40,7 @@ namespace HideCrosswalks {
             int prefabCount = PrefabCollection<NetInfo>.PrefabCount();
             int loadedCount = PrefabCollection<NetInfo>.LoadedCount();
             NetInfoExtArray = new NetInfoExt[prefabCount];
-            Log._Debug($"initializing NetInfoExtArray: prefabCount={prefabCount} LoadedCount={loadedCount}");
+            Log.Info($"initializing NetInfoExtArray: prefabCount={prefabCount} LoadedCount={loadedCount}");
             for (uint i = 0; i < loadedCount; ++i) {
                 try {
                     NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
