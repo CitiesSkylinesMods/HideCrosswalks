@@ -71,12 +71,15 @@ namespace HideCrosswalks {
         }
 
         public static bool GetCanHideMarkings(NetInfo info) {
+            if (!HideCrosswalksMod.IsEnabled)
+                return false;
+            Extensions.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
             if (info.m_prefabDataIndex >= NetInfoExtArray.Length) {
                 Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
                     $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
                 return false;
             }
-            return HideCrosswalksMod.IsEnabled && Extensions.IsActive && NetInfoExtArray?[info.m_prefabDataIndex] != null;
+            return Extensions.IsActive && NetInfoExtArray?[info.m_prefabDataIndex] != null;
         } // end method
         #endregion
     } // end class
