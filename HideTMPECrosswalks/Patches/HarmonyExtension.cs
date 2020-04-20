@@ -28,6 +28,7 @@ namespace HideCrosswalks.Patches
                 harmony.PatchAll(GetType().Assembly);
                 installed = true;
             }
+            Log.Info("HideCrosswalks: All patches were successfull.");
         }
 
         public void UninstallHarmony()

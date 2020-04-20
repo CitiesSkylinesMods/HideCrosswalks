@@ -12,6 +12,7 @@ namespace HideCrosswalks.Utils {
         public static bool PrefabsLoaded = false;
 
         public static void CachePrefabs() {
+            Log.Info("CachePrefabs() called ...");
             TMPEUTILS.Init();
             NS2Utils.Init();
 #if !DEBUG
