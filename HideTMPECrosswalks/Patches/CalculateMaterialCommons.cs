@@ -54,20 +54,26 @@ namespace HideCrosswalks.Patches {
                 typeof(Camera),
                 typeof(int),
                 typeof(MaterialPropertyBlock) };
-        static MethodInfo mDrawMesh => typeof(Graphics).GetMethod("DrawMesh", args);
-        static FieldInfo fNodeMaterial => typeof(NetInfo.Node).GetField("m_nodeMaterial");
-        static MethodInfo mCalculateMaterial => typeof(CalculateMaterialCommons).GetMethod("CalculateMaterial");
-        static MethodInfo mCheckRenderDistance => typeof(RenderManager.CameraInfo).GetMethod("CheckRenderDistance");
-        static MethodInfo mShouldHideCrossing => typeof(CalculateMaterialCommons).GetMethod("ShouldHideCrossing");
-        static MethodInfo mGetSegment => typeof(NetNode).GetMethod("GetSegment");
+        static MethodInfo mDrawMesh =
+            typeof(Graphics).GetMethod("DrawMesh", args) ?? throw new Exception("mDrawMesh is null");
+        static FieldInfo fNodeMaterial =
+            typeof(NetInfo.Node).GetField("m_nodeMaterial") ?? throw new Exception("fNodeMaterial is null");
+        static MethodInfo mCalculateMaterial =
+            typeof(CalculateMaterialCommons).GetMethod("CalculateMaterial") ?? throw new Exception("mCalculateMaterial is null");
+        static MethodInfo mCheckRenderDistance =
+            typeof(RenderManager.CameraInfo).GetMethod("CheckRenderDistance") ?? throw new Exception("mCheckRenderDistance is null");
+        static MethodInfo mShouldHideCrossing =
+            typeof(CalculateMaterialCommons).GetMethod("ShouldHideCrossing") ?? throw new Exception("mShouldHideCrossing is null");
+        static MethodInfo mGetSegment =
+            typeof(NetNode).GetMethod("GetSegment") ?? throw new Exception("mGetSegment is null");
 
         // returns the position of First DrawMesh after index.
         public static void PatchCheckFlags(List<CodeInstruction> codes, int occurance, MethodInfo method) {
-            Extensions.Assert(mDrawMesh != null, "mDrawMesh!=null failed");
-            Extensions.Assert(fNodeMaterial != null, "fNodeMaterial!=null failed"); 
-            Extensions.Assert(mCalculateMaterial != null, "mCalculateMaterial!=null failed"); 
-            Extensions.Assert(mCheckRenderDistance != null, "mCheckRenderDistance!=null failed"); 
-            Extensions.Assert(mShouldHideCrossing != null, "mShouldHideCrossing!=null failed");
+            //Extensions.Assert(mDrawMesh != null, "mDrawMesh!=null failed");
+            //Extensions.Assert(fNodeMaterial != null, "fNodeMaterial!=null failed"); 
+            //Extensions.Assert(mCalculateMaterial != null, "mCalculateMaterial!=null failed"); 
+            //Extensions.Assert(mCheckRenderDistance != null, "mCheckRenderDistance!=null failed"); 
+            //Extensions.Assert(mShouldHideCrossing != null, "mShouldHideCrossing!=null failed");
 
             int index = 0;
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Call, mDrawMesh), index, counter: occurance);

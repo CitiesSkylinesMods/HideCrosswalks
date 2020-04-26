@@ -22,9 +22,10 @@ namespace HideCrosswalks.Patches
             {
                 Log.Info("HideCrosswalks Patching...");
 #if DEBUG
-                Harmony.DEBUG = true;
+                //Harmony.DEBUG = true;
 #endif
                 Harmony harmony = new Harmony(HARMONY_ID);
+                Log.Info("Created new harmony instance");
                 harmony.PatchAll(GetType().Assembly);
                 installed = true;
             }
