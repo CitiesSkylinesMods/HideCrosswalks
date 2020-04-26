@@ -136,7 +136,8 @@ namespace HideCrosswalks.Utils {
             RoadBaseAI ai = info.m_netAI as RoadBaseAI;
             ret &= info.m_hasPedestrianLanes || !ai.m_highwayRules || info.name.ToLower().Contains("toll");
 
-            ret &= !exempts_.Contains(info?.name);
+            ret = ret && !exempts_.Contains(info?.name);
+            ret = ret && !info.IsExemptedNExt();
             return ret;
         }
 

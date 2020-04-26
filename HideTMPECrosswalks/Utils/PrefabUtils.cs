@@ -89,16 +89,14 @@ namespace HideCrosswalks.Utils {
             return ret;
         }
 
-        public static bool NodeTextureIsNotUsed(NetInfo info, Material nodeMaterial, int texID) {
-            Texture t1 = nodeMaterial.GetTexture(texID);
-            if (t1 == null || t1.width == t1.height)
+        /// <summary>
+        /// This method is very slow
+        /// </summary>
+        public static bool IsExemptedNExt(this NetInfo info) {
+            if (!info.IsNExt() || info.IsNormalGroundRoad())
                 return false;
-            foreach (var seg in info.m_segments) {
-                Texture t2 = seg.m_segmentMaterial.GetTexture(texID);
-                if (t1 == t2)
-                    return true;
-            }
-            return false;
+            Log._Debug("info.GetGroundInfo()?.category=" + info.GetGroundInfo()?.category);
+            return info.GetGroundInfo()?.category?.StartsWith("RoadsSmall") ?? false; //small and small heavy
         }
     } // end class
 } // end namespace

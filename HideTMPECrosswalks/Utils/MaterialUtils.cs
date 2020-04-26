@@ -45,14 +45,6 @@ namespace HideCrosswalks.Utils {
                     return (Material)MaterialCache[material];
                 }
 
-                if (NodeTextureIsNotUsed(info, material, ID_Defuse)) {
-                    // TODO why this works but the WierdNodeTest() fails.
-                    string m = $"{info.name} is {info.category} is without proper node texture.";
-                    Log.Info(m);
-                    MaterialCache[material] = material;
-                    return material;
-                }
-
                 var ticks = System.Diagnostics.Stopwatch.StartNew();
                 Material ret = new Material(material);
                 HideCrossings0(ret, segMaterial, info, lod);
