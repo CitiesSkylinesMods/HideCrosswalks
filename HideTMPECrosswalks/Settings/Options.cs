@@ -19,7 +19,8 @@ namespace HideCrosswalks.Settings {
         public List<string> Never => _ui_never.selectedItems;
 
         public void Load() {
-            try{
+            Log.Info("Called Options.Load()");
+            try {
                 string[] s = File.ReadAllLines(Path);
                 loaded_never = s[0];
             }catch(FileNotFoundException e) {
@@ -53,6 +54,7 @@ namespace HideCrosswalks.Settings {
             UIHelper helper = helperBase as UIHelper;
             UIComponent container = helper.self as UIComponent;
 
+            Extensions.Init();
             bool active = Extensions.IsActive;
 #if DEBUG
             active = true; // Fast test of options from main menu
@@ -78,7 +80,6 @@ namespace HideCrosswalks.Settings {
                 var label = container.AddUIComponent<UILabel>();
                 label.text = "Options are only available in game";
             }
-
         }
 
         public class UICheckboxDropDownExt : UICheckboxDropDown {

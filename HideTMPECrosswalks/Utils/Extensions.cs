@@ -5,9 +5,21 @@ using System.Reflection;
 namespace HideCrosswalks.Utils {
 
     public static class Extensions {
+        internal static NetNode[] NodeBuffer { get; private set; }
+        internal static NetSegment[] SegmentBuffer { get; private set; }
+        internal static NetLane[] LaneBuffer { get; private set; }
+        private static bool InGameFast { get; set; }
+
+        public static void Init() {
+            NodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            SegmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            LaneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+            InGameFast = InGame;
+        }
+
         internal static ref NetNode ToNode(this ushort id) => ref Singleton<NetManager>.instance.m_nodes.m_buffer[id];
         internal static ref NetSegment ToSegment(this ushort id) => ref Singleton<NetManager>.instance.m_segments.m_buffer[id];
-        //internal static NetLane ToLane(this int id) => Singleton<NetManager>.instance.m_lanes.m_buffer[id];
+        internal static NetLane ToLane(this uint id) => Singleton<NetManager>.instance.m_lanes.m_buffer[id];
 
         internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
         internal static bool CheckGameMode(AppMode mode) {
@@ -25,6 +37,15 @@ namespace HideCrosswalks.Utils {
 #else
             InGame;
 #endif
+
+        internal static bool IsActiveFast =>
+#if DEBUG
+            InGameFast || InAssetEditor;
+#else
+            InGameFast;
+#endif
+
+
 
         internal static void Assert(bool con, string m="") {
             if (!con) {

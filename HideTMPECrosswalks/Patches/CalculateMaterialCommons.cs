@@ -17,6 +17,12 @@ namespace HideCrosswalks.Patches {
     using static TranspilerUtils;
     public static class CalculateMaterialCommons {
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
+#if !DEBUG
+            if (!Extensions.IsActiveFast) {
+                // do not hide crossings in asset editor.
+                return false;
+            }
+#endif
             // TODO move to netnode.updateflags
             NetInfo info = segmentID.ToSegment().Info;
             bool isJunction = nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction);
@@ -35,7 +41,6 @@ namespace HideCrosswalks.Patches {
             // Log._Debug($"ShouldHideCrossing segmentID={segmentID} nodeID={nodeID} ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
             return ret;
         }
-
 
         public static Material CalculateMaterial(Material material, ushort nodeID, ushort segmentID) {
             if (ShouldHideCrossing(nodeID, segmentID)) {

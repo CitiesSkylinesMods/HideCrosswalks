@@ -11,19 +11,19 @@ namespace HideCrosswalks.Patches
 
         public void InstallHarmony()
         {
-#if !DEBUG
-            // TODO: this does not work because Before OnCreate we don't know if we are in asset editor.
-            if (Extensions.InAssetEditor) {
-                Log.Info("skipped InstallHarmony in asset editor release build");
-                return;
-            }
-#endif
+//#if !DEBUG
+//            // TODO: this does not work because Before OnCreate we don't know if we are in asset editor.
+//            if (Extensions.InAssetEditor) {
+//                Log.Info("skipped InstallHarmony in asset editor release build");
+//                return;
+//            }
+//#else
+//            Harmony.DEBUG = true;
+//#endif
             if (!installed)
             {
                 Log.Info("HideCrosswalks Patching...");
-#if DEBUG
-                //Harmony.DEBUG = true;
-#endif
+
                 Harmony harmony = new Harmony(HARMONY_ID);
                 Log.Info("Created new harmony instance");
                 harmony.PatchAll(GetType().Assembly);

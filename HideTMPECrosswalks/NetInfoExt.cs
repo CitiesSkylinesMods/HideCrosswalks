@@ -37,6 +37,7 @@ namespace HideCrosswalks {
         internal static NetInfoExt[] NetInfoExtArray;
 
         internal static void InitNetInfoExtArray() {
+            Extensions.Init();
             int prefabCount = PrefabCollection<NetInfo>.PrefabCount();
             int loadedCount = PrefabCollection<NetInfo>.LoadedCount();
             NetInfoExtArray = new NetInfoExt[prefabCount];
@@ -79,7 +80,7 @@ namespace HideCrosswalks {
                     $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
                 return false;
             }
-            return Extensions.IsActive && NetInfoExtArray?[info.m_prefabDataIndex] != null;
+            return Extensions.IsActiveFast && NetInfoExtArray?[info.m_prefabDataIndex] != null;
         } // end method
         #endregion
     } // end class

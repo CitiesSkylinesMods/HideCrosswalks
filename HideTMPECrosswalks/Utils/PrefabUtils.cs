@@ -13,11 +13,12 @@ namespace HideCrosswalks.Utils {
 
         public static void CachePrefabs() {
             Log.Info("CachePrefabs() called ...");
+            Extensions.Init();
             TMPEUTILS.Init();
             NS2Utils.Init();
 #if !DEBUG
-            if (Extensions.InAssetEditor) {
-                Log.Info("skipped caching prefabs in asset editor release build");
+            if (!Extensions.IsActive) {
+                Log.Info("skipped caching prefabs in asset editor/map/scenario/... release build");
                 return;
             }
 #endif

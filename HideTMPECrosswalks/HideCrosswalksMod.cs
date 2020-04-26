@@ -35,7 +35,7 @@ namespace HideCrosswalks {
             LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearCache;
 
             if (Extensions.InGame) {
-                LoadingWrapperPatch.Postfix(); 
+                LoadingWrapperPatch.Postfix();
             }
 
             CitiesHarmony.API.HarmonyHelper.EnsureHarmonyInstalled();
@@ -69,15 +69,20 @@ namespace HideCrosswalks {
     }
 
     public class LoadingExtension : LoadingExtensionBase {
-        internal static LoadingExtension Instance;
+        public static LoadingExtension Instance { get; private set;}
+
         HarmonyExtension harmonyExt;
         public override void OnCreated(ILoading loading) {
             base.OnCreated(loading);
             Instance = this;
             harmonyExt = new HarmonyExtension();
             harmonyExt.InstallHarmony();
+            Extensions.Init();
         }
+
+
         public override void OnReleased() {
+            Extensions.Init(); // to update game mode.
             harmonyExt?.UninstallHarmony();
             harmonyExt = null;
             base.OnReleased();
