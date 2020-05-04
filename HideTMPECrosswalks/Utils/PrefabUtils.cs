@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace HideCrosswalks.Utils {
+    using ColossalFramework;
     using Patches;
     using Settings;
 
@@ -13,6 +14,8 @@ namespace HideCrosswalks.Utils {
 
         public static void CachePrefabs() {
             Log.Info("CachePrefabs() called ...");
+            Log.Info("Assembly is " + typeof(PrefabUtils).Assembly);
+
             Extensions.Init();
             TMPEUTILS.Init();
             NS2Utils.Init();
@@ -36,8 +39,9 @@ namespace HideCrosswalks.Utils {
                             var flags = nodeID.ToNode().m_flags;
 
                             //cache:
-                            Log.Info("Caching " + segment.Info.name);
-                            CalculateMaterialCommons.CalculateMaterial(node.m_nodeMaterial, nodeID, segmentID);
+                            //Log.Info("Caching " + segment.Info.name);
+                            if(nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction))
+                                CalculateMaterialCommons.CalculateMaterial(node.m_nodeMaterial, nodeID, segmentID);
                         }
                     }
                 }
@@ -47,6 +51,7 @@ namespace HideCrosswalks.Utils {
         }
 
         public static void ClearCache() {
+            Log.Info("PrefabUtils.ClearCache() called");
             PrefabsLoaded = false;
             NetInfoExt.NetInfoExtArray = null;
             MaterialUtils.Clear();

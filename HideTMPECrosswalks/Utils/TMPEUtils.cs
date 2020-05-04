@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace HideCrosswalks.Utils {
@@ -33,9 +34,10 @@ namespace HideCrosswalks.Utils {
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool _HasCrossingBan(ushort segmentID, bool bStartNode) {
-            CSUtil.Commons.TernaryBool b = TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.GetPedestrianCrossingAllowed(segmentID, bStartNode);
-            return b == CSUtil.Commons.TernaryBool.False;
+            return !TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.
+                IsPedestrianCrossingAllowed(segmentID, bStartNode);
         }
     }
 }

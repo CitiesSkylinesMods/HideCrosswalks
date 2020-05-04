@@ -1,6 +1,5 @@
 namespace HideCrosswalks {
     using System;
-    using System.Collections.Generic;
     using Utils;
 
     public class NetInfoExt {
@@ -60,6 +59,9 @@ namespace HideCrosswalks {
                     Log.Error(e.ToString());
                 }
             } // end for
+            Extensions.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
+            Log.Info($"NetInfoExtArray initialized");
+
         } // end method
 
         public static bool GetCanHideCrossings(NetInfo info) {
