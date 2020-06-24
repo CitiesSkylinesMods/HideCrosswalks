@@ -28,9 +28,14 @@ namespace HideCrosswalks.Utils {
                 foreach (bool bStartNode in new bool[] { false, true }) {
                     if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
                         NetSegment segment = segmentID.ToSegment();
+
+                        if (!segment.Info)
+                            continue;
+
                         ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
+
                         foreach (var node in segment.Info.m_nodes) {
-                            if(node == null || node.m_directConnect)
+                            if(node.m_directConnect)
                                 continue;
                             var flags = nodeID.ToNode().m_flags;
 
