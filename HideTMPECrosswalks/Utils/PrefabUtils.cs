@@ -30,7 +30,7 @@ namespace HideCrosswalks.Utils {
                         NetSegment segment = segmentID.ToSegment();
                         ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
                         foreach (var node in segment.Info.m_nodes) {
-                            if(node.m_directConnect)
+                            if(node == null || node.m_directConnect)
                                 continue;
                             var flags = nodeID.ToNode().m_flags;
 
