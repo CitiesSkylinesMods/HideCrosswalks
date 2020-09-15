@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using ColossalFramework.UI;
 using System.IO;
-using HideCrosswalks.Utils;
+using HideCrosswalks.Utils; using KianCommons;
 using ICities;
 using UnityEngine;
 
@@ -54,8 +54,7 @@ namespace HideCrosswalks.Settings {
             UIHelper helper = helperBase as UIHelper;
             UIComponent container = helper.self as UIComponent;
 
-            Extensions.Init();
-            bool active = Extensions.IsActive;
+            bool active = HelpersExtensions.InGameOrEditor;
 #if DEBUG
             active = true; // Fast test of options from main menu
 #endif

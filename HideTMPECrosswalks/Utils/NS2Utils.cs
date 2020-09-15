@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using UnityEngine;
+using KianCommons;
 
 namespace HideCrosswalks.Utils {
     internal static class NS2Utils {
@@ -12,13 +13,13 @@ namespace HideCrosswalks.Utils {
                 return false;
             try {
                 return _HideJunction(segmentID);
-            }catch(FileNotFoundException _) {
+            }catch(FileNotFoundException) {
                 Log.Info("WARNING ****** NS2 not found! *****");
             }
-            catch (TypeLoadException _) {
+            catch (TypeLoadException) {
                 Log.Info("WARNING ****** unsupported NS2 version! *****");
             }
-            catch (NullReferenceException _) {
+            catch (NullReferenceException) {
                 Log.Info("WARNING ****** NS2 is disabled! *****");
             }
             catch (Exception e) {

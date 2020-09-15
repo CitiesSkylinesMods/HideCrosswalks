@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using KianCommons;
 
 namespace HideCrosswalks.Utils {
     internal static class TMPEUTILS {
@@ -18,13 +19,13 @@ namespace HideCrosswalks.Utils {
                 return false;
             try {
                 return _HasCrossingBan(segmentID, bStartNode);
-            } catch(FileNotFoundException _) {
+            } catch(FileNotFoundException) {
                 Log.Info("WARNING ****** TM:PE not found! *****");
             }
-            catch (TypeLoadException _) {
+            catch (TypeLoadException) {
                 Log.Info("WARNING ****** unsupported TM:PE version! *****");
             }
-            catch (NullReferenceException _) {
+            catch (NullReferenceException) {
                 Log.Info("WARNING ****** TM:PE is disabled! *****");
             }
             catch (Exception e) {

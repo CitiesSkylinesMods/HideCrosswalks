@@ -13,37 +13,31 @@ using ColossalFramework;
 namespace HideCrosswalks.Patches {
     using System;
     using UnityEngine;
-    using Utils;
+    using Utils; using KianCommons;
     using static TranspilerUtils;
     public static class CalculateMaterialCommons {
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
-#if !DEBUG
-            if (!Extensions.IsActiveFast) {
-                // do not hide crossings in asset editor.
-                return false;
-            }
-#endif
-            // TODO move to netnode.updateflags
+            // TODO move to netnode.updateflags or something
             NetInfo info = segmentID.ToSegment().Info;
 
             // this assertion can fail due to race condition (when node controller post chanes node).
             // therefore i am commenting this out.
             // it would be nice to move as much of this code in simulation thread (eg netnode.updateflags)
             //bool isJunction = nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction);
-            //Extensions.Assert(isJunction, $"isJunction | segmentID:{segmentID} nodeID:{nodeID}");
+            //Assertion.Assert(isJunction, $"isJunction | segmentID:{segmentID} nodeID:{nodeID}");
 
             bool ret0 = NetInfoExt.GetCanHideMarkings(info);
 
 #if DEBUG
             if (Extensions.InAssetEditor ) {
-                //Log._Debug($"Should hide crossings: {ret0} | stack:\n" + System.Environment.StackTrace);
+                //Log.Debug($"Should hide crossings: {ret0} | stack:\n" + System.Environment.StackTrace);
                 return ret0; // always hide crossings in asset editor for quick testing.
             }
 #endif
             bool ret1 = TMPEUTILS.HasCrossingBan(segmentID, nodeID) & NetInfoExt.GetCanHideCrossings(info);
             bool ret2 = ret0 & NS2Utils.HideJunctionMarkings(segmentID);
             bool ret =  ret1 | ret2;
-            // Log._Debug($"ShouldHideCrossing segmentID={segmentID} nodeID={nodeID} ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
+            // Log.Debug($"ShouldHideCrossing segmentID={segmentID} nodeID={nodeID} ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
             return ret;
         }
 
@@ -79,15 +73,15 @@ namespace HideCrosswalks.Patches {
 
         // returns the position of First DrawMesh after index.
         public static void PatchCheckFlags(List<CodeInstruction> codes, int occurance, MethodInfo method) {
-            //Extensions.Assert(mDrawMesh != null, "mDrawMesh!=null failed");
-            //Extensions.Assert(fNodeMaterial != null, "fNodeMaterial!=null failed"); 
-            //Extensions.Assert(mCalculateMaterial != null, "mCalculateMaterial!=null failed"); 
-            //Extensions.Assert(mCheckRenderDistance != null, "mCheckRenderDistance!=null failed"); 
-            //Extensions.Assert(mShouldHideCrossing != null, "mShouldHideCrossing!=null failed");
+            //Assertion.Assert(mDrawMesh != null, "mDrawMesh!=null failed");
+            //Assertion.Assert(fNodeMaterial != null, "fNodeMaterial!=null failed"); 
+            //Assertion.Assert(mCalculateMaterial != null, "mCalculateMaterial!=null failed"); 
+            //Assertion.Assert(mCheckRenderDistance != null, "mCheckRenderDistance!=null failed"); 
+            //Assertion.Assert(mShouldHideCrossing != null, "mShouldHideCrossing!=null failed");
 
             int index = 0;
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Call, mDrawMesh), index, counter: occurance);
-            Extensions.Assert(index != 0, "index!=0");
+            Assertion.Assert(index != 0, "index!=0");
 
 
             // find ldfld node.m_material
@@ -125,11 +119,11 @@ namespace HideCrosswalks.Patches {
         } // end method
 
         public static CodeInstruction BuildSegnentLDLocFromPrevSTLoc(List<CodeInstruction> codes, int index, int counter=1) {
-            Extensions.Assert(mGetSegment != null, "mGetSegment!=null");
+            Assertion.Assert(mGetSegment != null, "mGetSegment!=null");
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Call, mGetSegment), index, counter: counter, dir: -1);
 
             var code = codes[index + 1];
-            Extensions.Assert(IsStLoc(code), $"IsStLoc(code) | code={code}");
+            Assertion.Assert(IsStLoc(code), $"IsStLoc(code) | code={code}");
 
             return BuildLdLocFromStLoc(code);
         }

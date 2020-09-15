@@ -1,6 +1,6 @@
 using ICities;
 using JetBrains.Annotations;
-using HideCrosswalks.Utils;
+using HideCrosswalks.Utils; using KianCommons;
 using HideCrosswalks.Patches;
 using HideCrosswalks.Settings;
 using System;
@@ -34,7 +34,7 @@ namespace HideCrosswalks {
 #endif
             LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearCache;
 
-            if (Extensions.InGame) {
+            if (HelpersExtensions.InGameOrEditor) {
                 LoadingWrapperPatch.Postfix();
             }
 
@@ -47,8 +47,8 @@ namespace HideCrosswalks {
 
             _isEnabled = false;
 
-            if(Extensions.InGame | Extensions.InAssetEditor) {
-                LoadingExtension.Instance.OnReleased();
+            if(HelpersExtensions.InGameOrEditor) {
+                HarmonyUtil.UninstallHarmony(LoadingExtension.HARMONY_ID);
             }
 
             PrefabUtils.ClearCache();
@@ -69,24 +69,13 @@ namespace HideCrosswalks {
     }
 
     public class LoadingExtension : LoadingExtensionBase {
-        public static LoadingExtension Instance { get; private set;}
+        public const string HARMONY_ID = "CS.Kian.HideCrosswalks";
 
-        HarmonyExtension harmonyExt;
-        public override void OnCreated(ILoading loading) {
-            base.OnCreated(loading);
-            Instance = this;
-            harmonyExt = new HarmonyExtension();
-            harmonyExt.InstallHarmony();
-            Extensions.Init();
-        }
+        public override void OnCreated(ILoading loading) =>
+            HarmonyUtil.InstallHarmony(HARMONY_ID);
 
-
-        public override void OnReleased() {
-            Extensions.Init(); // to update game mode.
-            harmonyExt?.UninstallHarmony();
-            harmonyExt = null;
-            base.OnReleased();
-        }
+        public override void OnReleased() =>
+            HarmonyUtil.UninstallHarmony(HARMONY_ID);
     }
 }
 

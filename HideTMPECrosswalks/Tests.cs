@@ -7,7 +7,7 @@ namespace HideCrosswalks {
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
-    using Utils;
+    using Utils; using KianCommons;
     using static Utils.PrefabUtils;
     using static Utils.RoadUtils;
 
