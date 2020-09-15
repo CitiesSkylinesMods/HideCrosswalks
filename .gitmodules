@@ -1,0 +1,3 @@
+[submodule "HideTMPECrosswalks/KianCommons"]
+	path = HideTMPECrosswalks/KianCommons
+	url = https://github.com/kianzarrin/KianCommons/

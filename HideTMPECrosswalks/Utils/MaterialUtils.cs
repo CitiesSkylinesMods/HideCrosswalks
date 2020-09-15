@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using KianCommons;
 
 // TODO check out material.MainTextureScale
 // regarding weird nodes, what if we return a copy of the material?
@@ -73,7 +74,7 @@ namespace HideCrosswalks.Utils {
             if (dump) DumpUtils.Dump(info);
 
             tex = material.TryGetTexture2D(ID_Defuse);
-            Log._Debug($"material={material} tex={tex} h={tex?.height} w={tex?.width}");
+            Log.Debug($"material={material} tex={tex} h={tex?.height} w={tex?.width}");
             if (tex != null) {
                 if (dump) DumpUtils.Dump(tex, info);
                 if (TextureCache.Contains(tex)) {

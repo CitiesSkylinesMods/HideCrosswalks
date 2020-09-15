@@ -1,5 +1,5 @@
 using HarmonyLib;
-using HideCrosswalks.Utils;
+using HideCrosswalks.Utils; using KianCommons;
 
 namespace HideCrosswalks.Patches
 {

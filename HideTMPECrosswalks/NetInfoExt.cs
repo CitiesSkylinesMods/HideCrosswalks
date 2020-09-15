@@ -1,6 +1,7 @@
 namespace HideCrosswalks {
     using System;
     using Utils;
+    using KianCommons;
 
     public class NetInfoExt {
         public NetInfoExt(ushort index) {
@@ -36,7 +37,6 @@ namespace HideCrosswalks {
         internal static NetInfoExt[] NetInfoExtArray;
 
         internal static void InitNetInfoExtArray() {
-            Extensions.Init();
             int prefabCount = PrefabCollection<NetInfo>.PrefabCount();
             int loadedCount = PrefabCollection<NetInfo>.LoadedCount();
             NetInfoExtArray = new NetInfoExt[prefabCount];
@@ -59,7 +59,7 @@ namespace HideCrosswalks {
                     Log.Error(e.ToString());
                 }
             } // end for
-            Extensions.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
+            Assertion.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
             Log.Info($"NetInfoExtArray initialized");
 
         } // end method
@@ -76,13 +76,13 @@ namespace HideCrosswalks {
         public static bool GetCanHideMarkings(NetInfo info) {
             if (!HideCrosswalksMod.IsEnabled)
                 return false;
-            Extensions.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
+            Assertion.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
             if (info.m_prefabDataIndex >= NetInfoExtArray.Length) {
                 Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
                     $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
                 return false;
             }
-            return Extensions.IsActiveFast && NetInfoExtArray?[info.m_prefabDataIndex] != null;
+            return NetInfoExtArray?[info.m_prefabDataIndex] != null;
         } // end method
         #endregion
     } // end class

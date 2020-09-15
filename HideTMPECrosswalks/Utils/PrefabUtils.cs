@@ -7,6 +7,7 @@ namespace HideCrosswalks.Utils {
     using ColossalFramework;
     using Patches;
     using Settings;
+    using KianCommons;
 
     public static class PrefabUtils {
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
@@ -16,15 +17,8 @@ namespace HideCrosswalks.Utils {
             Log.Info("CachePrefabs() called ...");
             Log.Info("Assembly is " + typeof(PrefabUtils).Assembly);
 
-            Extensions.Init();
             TMPEUTILS.Init();
             NS2Utils.Init();
-#if !DEBUG
-            if (!Extensions.IsActive) {
-                Log.Info("skipped caching prefabs in asset editor/map/scenario/... release build");
-                return;
-            }
-#endif
             NetInfoExt.InitNetInfoExtArray();
             TextureUtils.Init();
             MaterialUtils.Init();
@@ -105,7 +99,7 @@ namespace HideCrosswalks.Utils {
         public static bool IsExemptedNExt(this NetInfo info) {
             if (!info.IsNExt() || info.IsNormalGroundRoad())
                 return false;
-            Log._Debug("info.GetGroundInfo()?.category=" + info.GetGroundInfo()?.category);
+            Log.Debug("info.GetGroundInfo()?.category=" + info.GetGroundInfo()?.category);
             return info.GetGroundInfo()?.category?.StartsWith("RoadsSmall") ?? false; //small and small heavy
         }
     } // end class

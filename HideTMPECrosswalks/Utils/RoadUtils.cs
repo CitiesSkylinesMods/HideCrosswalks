@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 using HideCrosswalks.Settings;
+using KianCommons;
 
 namespace HideCrosswalks.Utils {
 
@@ -88,7 +89,7 @@ namespace HideCrosswalks.Utils {
         }
 
         private static string GetRoadTitle(NetInfo info) {
-            Extensions.Assert(info.IsNormalGroundRoad(), $"IsNormalGroundRoad(info={info.name})");
+            Assertion.Assert(info.IsNormalGroundRoad(), $"IsNormalGroundRoad(info={info.name})");
 
             //TODO: use Regular expressions instead of to lower.
             string name = info.GetUncheckedLocalizedTitle().ToLower();
@@ -108,9 +109,9 @@ namespace HideCrosswalks.Utils {
         }
 
         public static bool IsExempt(NetInfo info) {
-            Extensions.Assert(info != null, "info!=null");
+            Assertion.Assert(info != null, "info!=null");
             NetAI ai = info.m_netAI;
-            Extensions.Assert(ai is RoadBaseAI,"ai is RoadBaseAI");
+            Assertion.Assert(ai is RoadBaseAI,"ai is RoadBaseAI");
             if (!(ai is RoadAI)) {
                 info = GetGroundInfo(info);
             }
