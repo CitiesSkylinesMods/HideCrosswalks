@@ -25,8 +25,13 @@ namespace HideCrosswalks.Patches {
 #endif
             // TODO move to netnode.updateflags
             NetInfo info = segmentID.ToSegment().Info;
-            bool isJunction = nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction);
-            Extensions.Assert(isJunction, $"isJunction | segmentID:{segmentID} nodeID:{nodeID}");
+
+            // this assertion can fail due to race condition (when node controller post chanes node).
+            // therefore i am commenting this out.
+            // it would be nice to move as much of this code in simulation thread (eg netnode.updateflags)
+            //bool isJunction = nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction);
+            //Extensions.Assert(isJunction, $"isJunction | segmentID:{segmentID} nodeID:{nodeID}");
+
             bool ret0 = NetInfoExt.GetCanHideMarkings(info);
 
 #if DEBUG
