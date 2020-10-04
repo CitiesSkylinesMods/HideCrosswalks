@@ -85,58 +85,80 @@ namespace HideCrosswalks.Settings {
             public string Title = "Title";
             public List<string> selectedItems = new List<string>();
 
-
-            public override void Start() {
-                base.Start();
-                atlas = TextureUtils.GetAtlas("InMapEditor");
-                size = new Vector2(120f, 30);
-                listBackground = "GenericPanelLight";
-                itemHeight = 10;
-                itemHover = "ListItemHover";
-                itemHighlight = "ListItemHighlight";
-                normalBgSprite = "ButtonMenu";
-                disabledBgSprite = "ButtonMenuDisabled";
-                hoveredBgSprite = "ButtonMenuHovered";
-                focusedBgSprite = "ButtonMenu";
-                listWidth = 500;
-                listHeight = 1000;
-                foregroundSpriteMode = UIForegroundSpriteMode.Stretch;
-                popupColor = new Color32(45, 52, 61, 255);
-                popupTextColor = new Color32(170, 170, 170, 255);
-                zOrder = 1;
-                textScale = 0.65f;
+            public override void Awake() {
+                base.Awake();
+                size = new Vector2(150f, 30);
                 verticalAlignment = UIVerticalAlignment.Middle;
                 horizontalAlignment = UIHorizontalAlignment.Left;
-                textFieldPadding = new RectOffset(8, 0, 0, 0);
-                itemPadding = new RectOffset(3, 3, 3, 3);
-                listPadding = new RectOffset(5, 5, 5, 5);
+                builtinKeyNavigation = true;
+
+                popupColor = new Color32(45, 52, 61, 255);
+                popupTextColor = new Color32(170, 170, 170, 255);
+                atlas = TextureUtils.GetAtlas("InMapEditor");
                 uncheckedSprite = "check-unchecked";
                 checkedSprite = "check-checked";
 
+                textFieldPadding = new RectOffset(12, 0, 5, 0);
+                itemHeight = 25;
+                itemHover = "ListItemHover";
+                itemHighlight = "ListItemHighlight";
+                foregroundSpriteMode = UIForegroundSpriteMode.Stretch;
+                itemPadding = new RectOffset(3, 3, 3, 3);
+
+                listBackground = "GenericPanelLight";
+                listWidth = 500;
+                listHeight = 800;
+                clampListToScreen = true;
+                listPadding = new RectOffset(5, 5, 5, 5);
+                listPosition = UICheckboxDropDown.PopupListPosition.Automatic;
+
                 UIButton button = AddUIComponent<UIButton>();
-                this.triggerButton = button;
-                //button.atlas = // TODO uncomment this to change button atlas
-                button.text = Title;
-                button.textPadding = new RectOffset(14, 0, -7, 0);
-                button.size = this.size;
+                triggerButton = button;
+                button.textPadding = new RectOffset(2, 21, 0, 0);
+                button.size = size;
                 button.textVerticalAlignment = UIVerticalAlignment.Middle;
-                button.textHorizontalAlignment = UIHorizontalAlignment.Left;
-                button.normalBgSprite = "ButtonMenu";
-                button.disabledBgSprite = "ButtonMenuDisabled";
-                button.hoveredBgSprite = "ButtonMenuHovered";
-                button.focusedBgSprite = "ButtonMenuFocused";
-                button.pressedBgSprite = "ButtonMenuPressed";
-                button.foregroundSpriteMode = UIForegroundSpriteMode.Fill;
+                button.textHorizontalAlignment = UIHorizontalAlignment.Center;
+                button.normalFgSprite = "IconDownArrow";
+                button.hoveredFgSprite = "IconDownArrowHovered";
+                button.pressedFgSprite = "IconDownArrowPressed";
+                button.normalBgSprite = "TextFieldPanel";
+                button.foregroundSpriteMode = UIForegroundSpriteMode.Scale;
                 button.horizontalAlignment = UIHorizontalAlignment.Right;
                 button.verticalAlignment = UIVerticalAlignment.Middle;
-                button.zOrder = 0;
-                button.textScale = 0.8f;
                 button.relativePosition = new Vector3(0, 0);
+
+                // Scrollbar
+                listScrollbar = AddUIComponent<UIScrollbar>();
+                listScrollbar.height = listHeight;
+                listScrollbar.orientation = UIOrientation.Vertical;
+                listScrollbar.pivot = UIPivotPoint.TopRight;
+                listScrollbar.thumbPadding = new RectOffset(5, 5, 5, 5);
+                listScrollbar.minValue = 0;
+                listScrollbar.value = 0;
+                listScrollbar.incrementAmount = 60;
+                listScrollbar.AlignTo(this, UIAlignAnchor.TopRight);
+                listScrollbar.autoHide = true;
+                listScrollbar.isVisible = false;
+
+                //UISlicedSprite thumbSprite = listScrollbar.AddUIComponent<UISlicedSprite>();
+                //thumbSprite.fillDirection = UIFillDirection.Vertical;
+                //thumbSprite.autoSize = true;
+                //listScrollbar.width = thumbSprite.width = thumbSprite.parent.width = 20;
+                //thumbSprite.atlas = TextureUtils.GetAtlas("Ingame");
+                //thumbSprite.spriteName = "ScrollbarThumb";
+                //listScrollbar.thumbObject = thumbSprite;
+            }
+
+            public override void Start() {
+                base.Start();
+                (triggerButton as UIButton).text = Title;
 
                 eventVisibilityChanged += (UIComponent component, bool bVisble) => { if (bVisble) Populate(); };
                 eventDropdownClose +=
                     (UICheckboxDropDown checkboxdropdown, UIScrollablePanel popup, ref bool overridden) =>
                         GetSelections();
+
+                Populate();
             } // end Start()
 
             public void GetSelections() {
