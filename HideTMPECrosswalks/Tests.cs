@@ -15,7 +15,7 @@ namespace HideCrosswalks {
         public void OnLevelLoaded(LoadMode mode) => Test();
 
         public static void Test() {
-            if (!Extensions.IsActive)
+            if (!HelpersExtensions.IsActive)
                 return;
 
             //Log.Info("Benchmarking ...");
@@ -120,7 +120,7 @@ namespace HideCrosswalks {
                 //}
                 node.m_material = node.m_nodeMaterial = seg.m_material;
                 string m = $"{info.name}> Made node material == seg material ";
-                Log.Info(Extensions.BIG(m));
+                Log.Info(StringExtensions.BIG(m));
             }
 
 
@@ -157,7 +157,7 @@ namespace HideCrosswalks {
                         }
                     }
                 }
-                Log.Info(Extensions.BIG("DONE PRITING NAMES!"));
+                Log.Info(StringExtensions.BIG("DONE PRITING NAMES!"));
             }
             public static bool RoadNameEqual(string n1, string n2) => n1.Trim().ToLower() == n2.Trim().ToLower();
 

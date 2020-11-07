@@ -45,10 +45,10 @@ namespace HideCrosswalks {
                 try {
                     NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                     if (info == null) {
-                        Log.Warning("Bad prefab with null info");
+                        Log.Info("Warning: Bad prefab with null info");
                         continue;
                     } else if (info.m_netAI == null) {
-                        Log.Warning("Bad prefab with null info.m_NetAI");
+                        Log.Info("Warning: Bad prefab with null info.m_NetAI");
                         continue;
                     }
                     if (RoadUtils.CalculateCanHideMarkingsRaw(info)) {
