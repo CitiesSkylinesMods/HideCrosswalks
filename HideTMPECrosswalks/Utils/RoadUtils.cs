@@ -40,7 +40,8 @@ namespace HideCrosswalks.Utils {
             if (info == null) return false;
             bool ret = info.IsNormalRoad();
             if (ret && info?.m_netAI is RoadAI ai) {
-                return ai.m_elevatedInfo != null && ai.m_slopeInfo != null;
+                //return ai.m_elevatedInfo != null && ai.m_slopeInfo != null;
+                return true; // for backward compatiblity we don't ban roads with no elevation.
             }
             return false;
         }
