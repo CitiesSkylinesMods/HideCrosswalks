@@ -66,9 +66,10 @@ namespace HideCrosswalks {
 
         public static bool GetCanHideCrossings(NetInfo info) {
             if(info.m_prefabDataIndex>= NetInfoExtArray.Length) {
-                Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
-                    $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
-                return false;
+                //Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
+                //    $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
+                //return false;
+                InitNetInfoExtArray();
             }
             return GetCanHideMarkings(info) && NetInfoExtArray[info.m_prefabDataIndex].CanHideCrossings;
         }
@@ -78,8 +79,9 @@ namespace HideCrosswalks {
                 return false;
             Assertion.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
             if (info.m_prefabDataIndex >= NetInfoExtArray.Length) {
-                Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
-                    $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
+                //Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
+                //    $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
+                InitNetInfoExtArray();
                 return false;
             }
             return NetInfoExtArray?[info.m_prefabDataIndex] != null;

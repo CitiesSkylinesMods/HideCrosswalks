@@ -105,7 +105,7 @@ namespace HideCrosswalks.Utils {
                 dir = dir.Replace(c.ToString(), "");
             }
 
-            string path = Path.Combine("mod debug dumps", dir);
+            string path = Path.Combine("HTC dumps", dir);
             Directory.CreateDirectory(path);
             path = Path.Combine(path, filename);
             return path;

@@ -15,7 +15,7 @@ namespace HideCrosswalks {
         public void OnLevelLoaded(LoadMode mode) => Test();
 
         public static void Test() {
-            if (!HelpersExtensions.IsActive)
+            if (Helpers.InStartupMenu)
                 return;
 
             //Log.Info("Benchmarking ...");
