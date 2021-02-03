@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections;
+using ColossalFramework;
 using HideCrosswalks.Settings;
 using KianCommons;
+using System;
+using System.Collections.Generic;
 
 namespace HideCrosswalks.Utils {
 
@@ -14,16 +13,14 @@ namespace HideCrosswalks.Utils {
     public static class RoadUtils {
         internal static bool IsNormalRoad(this NetInfo info) {
             try {
-                if (info == null) {
-                    throw new ArgumentNullException("info");
-                } else {
-                    string name = info.name;
-                    return
-                        info.m_netAI is RoadBaseAI &&
-                        name != null &&
-                        name.Trim() != ""
-                        &&!name.ToLower().Contains("toll");
-                }
+                if (info == null)
+                    return false;
+                string name = info.name;
+                return
+                    info.m_netAI is RoadBaseAI &&
+                    !name.IsNullOrWhiteSpace()
+                    && !name.ToLower().Contains("toll");
+
             } catch (Exception e) {
                 try {
                     Log.Info("IsNormalRoad catched exception");
@@ -40,9 +37,9 @@ namespace HideCrosswalks.Utils {
         }
 
         internal static bool IsNormalGroundRoad(this NetInfo info) {
+            if (info == null) return false;
             bool ret = info.IsNormalRoad();
-            if (ret && info?.m_netAI is RoadAI) {
-                var ai = info.m_netAI as RoadAI;
+            if (ret && info?.m_netAI is RoadAI ai) {
                 return ai.m_elevatedInfo != null && ai.m_slopeInfo != null;
             }
             return false;
@@ -111,13 +108,13 @@ namespace HideCrosswalks.Utils {
         public static bool IsExempt(NetInfo info) {
             Assertion.Assert(info != null, "info!=null");
             NetAI ai = info.m_netAI;
-            Assertion.Assert(ai is RoadBaseAI,"ai is RoadBaseAI");
-            if (!(ai is RoadAI)) {
+            Assertion.Assert(ai is RoadBaseAI, "ai is RoadBaseAI");
+            if (!(ai is RoadAI))
                 info = GetGroundInfo(info);
-            }
-            if (info == null || !IsNormalGroundRoad(info)) {
-                return false;
-            }
+
+            if (!IsNormalGroundRoad(info))
+                return true;
+
             string name = GetRoadTitle(info);
             return Options.instance?.Never?.Contains(name) ?? false;
         }
