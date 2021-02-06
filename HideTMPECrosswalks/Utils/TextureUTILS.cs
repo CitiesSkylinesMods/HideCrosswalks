@@ -84,9 +84,11 @@ namespace HideCrosswalks.Utils {
         public static bool IsElevated(this Texture tex) => tex.name.ToLower().Contains("elevated");
 
         public static int Offset(this Texture2D tex) {
+            // TODO, check if the texture is lod instead.
             switch (tex.width) {
                 case 2048:
                 case 1024:
+                case 512:
                     return 0;
                 case 128:
                     return 16;
@@ -95,9 +97,6 @@ namespace HideCrosswalks.Utils {
                 default:
                     string m = $"unxpected texture width:{tex.width}. texture:{tex.name}";
                     Log.Info(m);
-#if DEBUG
-                    throw new Exception(m);
-#endif
                     return 0;
             }
         }

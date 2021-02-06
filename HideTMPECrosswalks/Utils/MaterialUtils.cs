@@ -69,7 +69,7 @@ namespace HideCrosswalks.Utils {
             Texture2D tex, tex2;
             bool dump = false;
 #if DEBUG
-            dump = true;
+            dump = false;
 #endif
             if (dump) DumpUtils.Dump(info);
 

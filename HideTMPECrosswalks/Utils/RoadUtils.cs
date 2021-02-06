@@ -13,8 +13,7 @@ namespace HideCrosswalks.Utils {
     public static class RoadUtils {
         internal static bool IsNormalRoad(this NetInfo info) {
             try {
-                if (info == null)
-                    return false;
+                if (info == null) return false;
                 string name = info.name;
                 return
                     info.m_netAI is RoadBaseAI &&
@@ -27,23 +26,16 @@ namespace HideCrosswalks.Utils {
                     Log.Info($"exception: info = {info}");
                     Log.Info($"exception: info type = {info?.GetType()}");
                     Log.Info($"Exception: name = {info?.name} ");
-                    Log.Error(e.Message);
+                    Log.Exception(e);
                 } catch (Exception e2) {
-                    Log.Info("error occured while trying to print error details!");
-                    Log.Error(" " + e2);
+                    Log.Exception(e2, "error occured while trying to print error details!");
                 }
             }
             return false;
         }
 
         internal static bool IsNormalGroundRoad(this NetInfo info) {
-            if (info == null) return false;
-            bool ret = info.IsNormalRoad();
-            if (ret && info?.m_netAI is RoadAI ai) {
-                //return ai.m_elevatedInfo != null && ai.m_slopeInfo != null;
-                return true; // for backward compatiblity we don't ban roads with no elevation.
-            }
-            return false;
+            return info?.m_netAI is RoadAI ai && info.IsNormalRoad();
         }
 
         /// <summary>
@@ -107,17 +99,16 @@ namespace HideCrosswalks.Utils {
         }
 
         public static bool IsExempt(NetInfo info) {
-            Assertion.Assert(info != null, "info!=null");
-            NetAI ai = info.m_netAI;
-            Assertion.Assert(ai is RoadBaseAI, "ai is RoadBaseAI");
-            if (!(ai is RoadAI))
+            if (info?.m_netAI is not RoadBaseAI ai)
+                return true;
+            if (ai is not RoadAI)
                 info = GetGroundInfo(info);
-
             if (!IsNormalGroundRoad(info))
                 return true;
 
             string name = GetRoadTitle(info);
-            return Options.instance?.Never?.Contains(name) ?? false;
+            bool never = Options.instance?.Never?.Contains(name) ?? false;
+            return never;
         }
 
         private static List<string> exempts_ = new List<string>(new[]{
