@@ -111,7 +111,6 @@
     <Compile Include="KianCommons\KianCommons\Util\StringExtensions.cs" />
     <Compile Include="Legacy.cs" />
     <Compile Include="NetInfoExt.cs" />
-    <Compile Include="Patches\LoadingWrapperPatch.cs" />
     <Compile Include="Patches\CalculateMaterialCommons.cs" />
     <Compile Include="Patches\NetNodePatches\RenderInstance.cs" />
     <Compile Include="Patches\TranspilerUtils.cs" />

@@ -65,7 +65,8 @@ namespace HideCrosswalks {
         } // end method
 
         public static bool GetCanHideCrossings(NetInfo info) {
-            if(info.m_prefabDataIndex>= NetInfoExtArray.Length) {
+            Assertion.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
+            if (info.m_prefabDataIndex >= NetInfoExtArray.Length) {
                 //Log.Error($"bad prefab index: {info.m_prefabDataIndex} >= {NetInfoExtArray.Length}\n" +
                 //    $"prefabCount={PrefabCollection<NetInfo>.PrefabCount()} LoadedCount={PrefabCollection<NetInfo>.LoadedCount()}");
                 //return false;

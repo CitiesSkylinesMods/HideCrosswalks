@@ -6,7 +6,7 @@ using HideCrosswalks.Settings;
 using System;
 
 namespace HideCrosswalks {
-    public class HideCrosswalksMod : IUserMod {
+    public class HideCrosswalksMod : IUserMod  {
         public string Name => "RM Crossings " + VersionString + " " + BRANCH;
         public string Description => "Hide Crosswalks when TMPE bans them or when NS2 removes them.";
         private static bool _isEnabled = false;
@@ -28,14 +28,9 @@ namespace HideCrosswalks {
             Log.Info("OnEnabled() called Name:" + Name);
             _isEnabled = true;
 
-            LoadingWrapperPatch.OnPostLevelLoaded += PrefabUtils.CachePrefabs;
-#if DEBUG
-            LoadingWrapperPatch.OnPostLevelLoaded += TestOnLoad.Test;
-#endif
-            LoadingManager.instance.m_levelUnloaded += PrefabUtils.ClearCache;
-
+            
             if (HelpersExtensions.InGameOrEditor) {
-                LoadingWrapperPatch.Postfix();
+                LoadingExtension.Load();
             }
 
             CitiesHarmony.API.HarmonyHelper.EnsureHarmonyInstalled();
@@ -48,16 +43,8 @@ namespace HideCrosswalks {
             _isEnabled = false;
 
             if(HelpersExtensions.InGameOrEditor) {
-                HarmonyUtil.UninstallHarmony(LoadingExtension.HARMONY_ID);
+                LoadingExtension.Unload();
             }
-
-            PrefabUtils.ClearCache();
-            LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.CachePrefabs;
-            LoadingManager.instance.m_levelUnloaded -= PrefabUtils.ClearCache;
-
-#if DEBUG
-            LoadingWrapperPatch.OnPostLevelLoaded -= TestOnLoad.Test;
-#endif
 
             Options.instance = null;
         }
@@ -71,11 +58,24 @@ namespace HideCrosswalks {
     public class LoadingExtension : LoadingExtensionBase {
         public const string HARMONY_ID = "CS.Kian.HideCrosswalks";
 
-        public override void OnCreated(ILoading loading) =>
-            HarmonyUtil.InstallHarmony(HARMONY_ID);
+        public override void OnLevelLoaded(LoadMode mode) => Load();
+        public override void OnLevelUnloading() {
+            base.OnLevelUnloading();
+        }
 
-        public override void OnReleased() =>
+
+        public static void Load() {
+            
+            PrefabUtils.CachePrefabs();
+#if DEBUG
+            TestOnLoad.Test();
+#endif
+        }
+        
+        public static void Unload() {
             HarmonyUtil.UninstallHarmony(HARMONY_ID);
+            PrefabUtils.ClearCache();
+        }
     }
 }
 
