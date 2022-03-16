@@ -65,7 +65,7 @@ namespace HideCrosswalks {
 
 
         public static void Load() {
-            
+            HarmonyUtil.InstallHarmony(HARMONY_ID, null, null);
             PrefabUtils.CachePrefabs();
 #if DEBUG
             TestOnLoad.Test();
