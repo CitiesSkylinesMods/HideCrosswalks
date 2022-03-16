@@ -15,6 +15,21 @@
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <Configurations>Debug;Release;WorkshopLabs;WorkshopStable</Configurations>
+
+    <PathMap>$(MSBuildProjectDirectory)/=$(ProjectName)/</PathMap>
+    <ManagedDLLPath>../dependencies</ManagedDLLPath>
+    <SteamPath>~/Library/Application Support/Steam/</SteamPath>
+    <SteamPath Condition="! Exists ('$(SteamPath)')">$(ProgramFiles)/Steam</SteamPath>
+    <SteamPath Condition="! Exists ('$(SteamPath)')">$(Registry:HKEY_CURRENT_USER\Software\Valve\Steam@SteamPath)</SteamPath>
+    <CSPath>$(SteamPath)/steamapps/common/Cities_Skylines</CSPath>
+    <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)</ContentPath>
+    <ManagedDLLPath Condition="!  Exists ('$(ManagedDLLPath)')">$(CSPath)/Cities_Data/Managed</ManagedDLLPath>
+    <AssemblySearchPaths>
+      $(AssemblySearchPaths);
+      $(ManagedDLLPath);
+      $(CitiesSkylinesBinaries);
+      ../libs/
+    </AssemblySearchPaths>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -27,15 +42,6 @@
     <ContentID>1939169189</ContentID>
     <DefineConstants></DefineConstants>
   </PropertyGroup>
-  <PropertyGroup>
-    <SteamPath>~/Library/Application Support/Steam/</SteamPath>
-    <SteamPath Condition="! Exists ('$(SteamPath)')">$(ProgramFiles)\Steam</SteamPath>
-    <SteamPath Condition="! Exists ('$(SteamPath)')">$(Registry:HKEY_CURRENT_USER\Software\Valve\Steam@SteamPath)</SteamPath>
-    <CSPath>$(SteamPath)\steamapps\common\Cities_Skylines</CSPath>
-    <ContentPath>$(SteamPath)\steamapps\workshop\content\255710\$(ContentID)</ContentPath>
-    <ManagedDLLPath>$(CSPath)\Cities_Data\Managed</ManagedDLLPath>
-    <ManagedDLLPath Condition="!  Exists ('$(ManagedDLLPath)')">..\dependencies</ManagedDLLPath>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CitiesHarmony.API" Version="2.0.0" />
     <PackageReference Include="GitInfo" Version="2.1.2">
@@ -43,40 +49,21 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+  <ItemDefinitionGroup>
+    <Reference>
+      <Private>False</Private>
+    </Reference>
+  </ItemDefinitionGroup>
   <ItemGroup>
-    <Reference Include="CSUtil.Commons">
-      <HintPath>..\libs\CSUtil.Commons.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(ManagedDLLPath)\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ColossalManaged">
-      <HintPath>$(ManagedDLLPath)\ColossalManaged.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ICities">
-      <HintPath>$(ManagedDLLPath)\ICities.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(ManagedDLLPath)\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="TrafficManager">
-      <HintPath>..\libs\TrafficManager.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="NetworkSkins">
-      <HintPath>..\libs\NetworkSkins.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="CSURToolBox">
-      <HintPath>..\libs\CSURToolBox.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="Assembly-CSharp" />
+    <Reference Include="ColossalManaged" />
+    <Reference Include="UnityEngine" />
+    <Reference Include="ICities" />
+    <Reference Condition="$(Configuration)==Debug" Include="CSUtil.Commons" />
+    <Reference Include="TMPE.API" />
+    <Reference Include="TrafficManager" />
+    <Reference Include="NetworkSkins" />
+    <Reference Include="CSURToolBox" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="KianCommons\KianCommons\LifeCycleBase.cs" />

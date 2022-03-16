@@ -3,11 +3,17 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using KianCommons;
+using KianCommons.Plugins;
 
 namespace HideCrosswalks.Utils {
     internal static class TMPEUTILS {
-        private static bool exists = true;
-        internal static void Init() => exists = true;
+        private static bool exists;
+        internal static void Init() {
+            exists = PluginUtil.GetTrafficManager().IsActive();
+            if (!exists) {
+                Log.Error("****** TM:PE not found! *****");
+            }
+        }
 
         public static bool HasCrossingBan(ushort segmentID, ushort nodeID) {
             bool bStartNode = nodeID == segmentID.ToSegment().m_startNode;

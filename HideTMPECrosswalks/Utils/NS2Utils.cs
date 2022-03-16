@@ -2,11 +2,18 @@ using System;
 using System.IO;
 using UnityEngine;
 using KianCommons;
+using KianCommons.Plugins;
 
 namespace HideCrosswalks.Utils {
     internal static class NS2Utils {
         private static bool exists = true;
-        internal static void Init() => exists = true;
+        internal static void Init() {
+            exists = PluginUtil.GetNetworkSkins().IsActive();
+            if (!exists) {
+                Log.Info("NOTE: ****** NS2 not found! *****");
+
+            }
+        }
 
         public static bool HideJunctionMarkings(ushort segmentID) {
             if (!exists)
