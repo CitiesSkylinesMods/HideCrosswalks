@@ -19,7 +19,7 @@ namespace HideCrosswalks.Patches {
             //bool isJunction = nodeID.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction);
             //Assertion.Assert(isJunction, $"isJunction | segmentID:{segmentID} nodeID:{nodeID}");
 
-            bool hideMarkings = NetInfoExt.GetCanHideMarkings(info) & NS2Utils.HideJunctionMarkings(segmentID);
+            bool hideMarkings = NS2Utils.HideJunctionMarkings(segmentID) & NetInfoExt.GetCanHideMarkings(info);
             bool hideCrossings = TMPEUTILS.HasCrossingBan(segmentID, nodeID) & NetInfoExt.GetCanHideCrossings(info);
             bool ret =  hideMarkings | hideCrossings;
             // Log.Debug($"ShouldHideCrossing segmentID={segmentID} nodeID={nodeID} ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
