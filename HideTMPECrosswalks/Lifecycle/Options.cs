@@ -1,14 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ColossalFramework.UI;
-using System.IO;
-using HideCrosswalks.Utils; using KianCommons;
-using ICities;
-using UnityEngine;
+namespace HideCrosswalks.Lifecycle {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using ColossalFramework.UI;
+    using System.IO;
+    using HideCrosswalks.Utils;
+    using KianCommons;
+    using ICities;
+    using UnityEngine;
 
-namespace HideCrosswalks.Settings {
     public class Options {
         public static Options instance = null;
         public static readonly char delemiter = '|';
@@ -59,7 +60,7 @@ namespace HideCrosswalks.Settings {
             active = true; // Fast test of options from main menu
 #endif
             void RefreshPrefabs() {
-                if (PrefabUtils.PrefabsLoaded) {
+                if (LoadingExtension.Loaded) {
                     NetInfoExt.InitNetInfoExtArray();
                 }
             }

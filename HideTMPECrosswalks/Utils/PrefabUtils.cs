@@ -6,20 +6,16 @@ using UnityEngine;
 namespace HideCrosswalks.Utils {
     using ColossalFramework;
     using Patches;
-    using Settings;
+    using HideCrosswalks.Lifecycle;
     using KianCommons;
 
     public static class PrefabUtils {
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
-        public static bool PrefabsLoaded = false;
 
         public static void CachePrefabs() {
             Log.Info("CachePrefabs() called ...");
             Log.Info("Assembly is " + typeof(PrefabUtils).Assembly);
 
-            TMPEUTILS.Init();
-            NS2Utils.Init();
-            NetInfoExt.InitNetInfoExtArray();
             TextureUtils.Init();
             MaterialUtils.Init();
             for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
@@ -45,14 +41,11 @@ namespace HideCrosswalks.Utils {
                     }
                 }
             }
-            PrefabsLoaded = true;
             Log.Info("all prefabs cached");
         }
 
         public static void ClearCache() {
             Log.Info("PrefabUtils.ClearCache() called");
-            PrefabsLoaded = false;
-            NetInfoExt.NetInfoExtArray = null;
             MaterialUtils.Clear();
             TextureUtils.Clear();
         }

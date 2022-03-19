@@ -1,5 +1,5 @@
 using ColossalFramework;
-using HideCrosswalks.Settings;
+using HideCrosswalks.Lifecycle;
 using KianCommons;
 using System;
 using System.Collections.Generic;

@@ -2,6 +2,7 @@ namespace HideCrosswalks {
     using System;
     using Utils;
     using KianCommons;
+    using HideCrosswalks.Lifecycle;
 
     public class NetInfoExt {
         public NetInfoExt(ushort index) {
@@ -76,7 +77,7 @@ namespace HideCrosswalks {
         }
 
         public static bool GetCanHideMarkings(NetInfo info) {
-            if (!HideCrosswalksMod.IsEnabled)
+            if (!LoadingExtension.Loaded)
                 return false;
             Assertion.Assert(NetInfoExtArray != null, "NetInfoExtArray!=null");
             if (info.m_prefabDataIndex >= NetInfoExtArray.Length) {
