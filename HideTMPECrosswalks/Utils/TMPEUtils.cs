@@ -43,7 +43,7 @@ namespace HideCrosswalks.Utils {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static bool _HasCrossingBan(ushort segmentID, bool bStartNode) {
-            return !TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.
+            return !TrafficManager.API.Implementations.ManagerFactory.JunctionRestrictionsManager.
                 IsPedestrianCrossingAllowed(segmentID, bStartNode);
         }
     }

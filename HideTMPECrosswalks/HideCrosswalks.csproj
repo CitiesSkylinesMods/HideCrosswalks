@@ -60,9 +60,7 @@
     <Reference Include="ColossalManaged" />
     <Reference Include="UnityEngine" />
     <Reference Include="ICities" />
-    <Reference Condition="$(Configuration)==Debug" Include="CSUtil.Commons" />
     <Reference Include="TMPE.API" />
-    <Reference Include="TrafficManager" />
     <Reference Include="NetworkSkins" />
     <Reference Include="CSURToolBox" />
   </ItemGroup>
