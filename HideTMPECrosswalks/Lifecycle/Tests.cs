@@ -82,23 +82,22 @@ namespace HideCrosswalks {
                 Log.Info($"BENCHMARK> Done peforming cache speed benchmark {1000 * materialList.Count} times ");
             }
 
-            public static void BannAllCrossings() {
-                Log.Info("BENCHMARK> BannAllCrossings started ... ");
-                for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
-                    foreach (bool bStartNode in new bool[] { false, true }) {
-                        if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
-                            NetSegment segment = segmentID.ToSegment();
-                            ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
-                            var flags = nodeID.ToNode().m_flags;
-                            //Ban:
-                            TrafficManager.Manager.Impl.JunctionRestrictionsManager.Instance.
-                                SetPedestrianCrossingAllowed(segmentID, bStartNode, false);
-                        }
-                    }
-                }
-                Log.Info("BENCHMARK> BannAllCrossings Done!");
-            }
-
+            //public static void BannAllCrossings() {
+            //    Log.Info("BENCHMARK> BannAllCrossings started ... ");
+            //    for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
+            //        foreach (bool bStartNode in new bool[] { false, true }) {
+            //            if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
+            //                NetSegment segment = segmentID.ToSegment();
+            //                ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
+            //                var flags = nodeID.ToNode().m_flags;
+            //                //Ban:
+            //                TrafficManager.API.Implementations.ManagerFactory.JunctionRestrictionsManager.
+            //                    SetPedestrianCrossingAllowed(segmentID, bStartNode, false);
+            //            }
+            //        }
+            //    }
+            //    Log.Info("BENCHMARK> BannAllCrossings Done!");
+            //}
         }
 
         public static class DebugTests {
