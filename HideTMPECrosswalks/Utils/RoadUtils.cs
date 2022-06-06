@@ -1,6 +1,7 @@
 using ColossalFramework;
 using HideCrosswalks.Lifecycle;
 using KianCommons;
+using KianCommons.Plugins;
 using System;
 using System.Collections.Generic;
 
@@ -116,7 +117,8 @@ namespace HideCrosswalks.Utils {
             "Gravel Road",
         });
 
-        internal static bool CalculateCanHideMarkingsRaw(NetInfo info) => info?.m_netAI is RoadBaseAI;
+        internal static bool CalculateCanHideMarkingsRaw(NetInfo info) =>
+            info?.m_netAI is RoadBaseAI && !info.GetIsAdaptive();
 
         internal static bool CalculateCanHideCrossingsRaw(NetInfo info) {
             bool ret = CalculateCanHideMarkingsRaw(info);
