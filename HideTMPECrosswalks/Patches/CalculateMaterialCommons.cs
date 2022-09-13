@@ -72,7 +72,7 @@ namespace HideCrosswalks.Patches {
 
 
             CodeInstruction LDArg_NodeID = TranspilerUtils.GetLDArg(method, "nodeID"); // push nodeID into stack
-            CodeInstruction LDLoc_segmentID = BuildSegnentLDLocFromPrevSTLoc(codes, index, counter: 1); // push segmentID into stack
+            CodeInstruction LDLoc_segmentID = BuildSegnentLDLocFromPrevSTLoc(codes, index, counter: 2); // push segmentID into stack
 
             { // Insert material = CalculateMaterial(material, nodeID, segmentID)
                 var newInstructions = new[] {
@@ -93,7 +93,7 @@ namespace HideCrosswalks.Patches {
             } // end block
         } // end method
 
-        public static CodeInstruction BuildSegnentLDLocFromPrevSTLoc(List<CodeInstruction> codes, int index, int counter=1) {
+        public static CodeInstruction BuildSegnentLDLocFromPrevSTLoc(List<CodeInstruction> codes, int index, int counter) {
             Assertion.Assert(mGetSegment != null, "mGetSegment!=null");
             index = codes.Search(c => c.Calls(mGetSegment), startIndex: index, count: -counter);
 
