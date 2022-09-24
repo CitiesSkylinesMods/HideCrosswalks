@@ -145,6 +145,8 @@
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ContentPath)" />
+    <Copy condition="'$(Configuration)'=='WorkshopStable'" SourceFiles="Resources\PreviewImage.dll" DestinationFolder="$(DeployDir)" />
+    <Copy condition="'$(Configuration)'=='WorkshopLabs'" SourceFiles="Resources\PreviewImage_Experimental.dll" DestinationFiles="$(DeployDir)PreviewImage.dll" />
     <RemoveDir Directories="$(DeployDir)" />
     <Message Importance="high" Text="Moved to $(ContentPath)" />
   </Target>
