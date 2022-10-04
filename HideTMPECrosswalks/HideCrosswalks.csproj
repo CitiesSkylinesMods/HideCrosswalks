@@ -35,12 +35,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WorkshopStable|AnyCPU'">
     <ContentID>1934023593</ContentID>
-    <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)</ContentPath>
+    <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)/</ContentPath>
     <DefineConstants></DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='WorkshopLabs|AnyCPU'">
     <ContentID>1939169189</ContentID>
-    <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)</ContentPath>
+    <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)/</ContentPath>
     <DefineConstants></DefineConstants>
   </PropertyGroup>
   <ItemGroup>
