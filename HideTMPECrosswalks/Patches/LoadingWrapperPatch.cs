@@ -8,8 +8,9 @@ namespace HideCrosswalks.Patches {
         public static event Action OnPostLevelLoaded;
         public static void Finalizer(Exception __exception) {
             // use finalizer instead of postfix to ensure failure of other mods does not prevent this mod from loading.
+            Log.Called();
             __exception?.Log();
-            OnPostLevelLoaded();
+            OnPostLevelLoaded?.Invoke();
         }
     }
 }
